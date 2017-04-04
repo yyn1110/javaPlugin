@@ -83,6 +83,9 @@ func main() {
 	g_packageName = (*packageName) + "." + (*dbName)
 	g_packageNamePath = strings.Replace(g_packageName, ".", string(filepath.Separator), -1)
 
+
+	os.RemoveAll(filepath.Join(*outputPath,"src"))
+
 	var err error
 	g_modelPath = filepath.Join(*outputPath, "src", "main", "java", g_packageNamePath, "persistence", "model")
 	if err = os.MkdirAll(g_modelPath, 0777); err != nil {
@@ -552,8 +555,8 @@ func composeTestException(){
 	defer file.Close()
 	bw := bufio.NewWriter(file)
 
-
-	bw.WriteString("package "+g_testExceptionPath+";")
+	header:=*packageName+"."+*dbName+".exception"
+	bw.WriteString("package "+header+";")
 	bw.WriteString(`
 	public class UnitTestException extends Exception {
 	private static final long serialVersionUID = -6233799140764822106L;
@@ -579,6 +582,7 @@ func composeDataSourceFiles() {
 	var file *os.File
 	var dynamicFile *os.File
 	var dynamicAspectFile *os.File
+	var dynamicAspectHolderFile *os.File
 	if file, err = os.Create(filepath.Join( g_dataSourcePath,"DataSource.java")); err != nil {
 		fmt.Println("Create file", filepath.Join( g_dataSourcePath+"DataSource.java"), ", error:", err.Error())
 		return
@@ -603,8 +607,18 @@ func composeDataSourceFiles() {
 	defer dynamicAspectFile.Close()
 
 
+
+	if dynamicAspectHolderFile, err = os.Create(filepath.Join( g_dataSourcePath,"DynamicDataSourceHolder.java")); err != nil {
+		fmt.Println("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSourceHolder.java"), ", error:", err.Error())
+		return
+	}
+
+	defer dynamicAspectHolderFile.Close()
+
+
 	dybw := bufio.NewWriter(dynamicFile)
 	dyAsbw := bufio.NewWriter(dynamicAspectFile)
+	holder:=bufio.NewWriter(dynamicAspectHolderFile)
 	bw := bufio.NewWriter(file)
 
 	header:=*packageName+"."+*dbName+".dataSource"
@@ -678,11 +692,28 @@ public class DynamicDataSourceAspect {
 	`)
 
 
+	holder.WriteString("package "+header+";")
+	holder.WriteString(`
+public class DynamicDataSourceHolder {
+
+    public static final ThreadLocal<String> holder = new ThreadLocal<String>();
+
+    public static String getDataSource() {
+        return holder.get();
+    }
+
+    public static void setDataSource(String dataSourceName) {
+        holder.set(dataSourceName);
+    }
+}
+`)
+
 
 
 	bw.Flush()
 	dyAsbw.Flush()
 	dybw.Flush()
+	holder.Flush()
 }
 func composeDaoFiles(class *classDefine) {
 	var err error
@@ -1227,7 +1258,8 @@ func writeTestHeader(bw *bufio.Writer, class *classDefine) {
 	bw.WriteString(".persistence.dao.")
 	bw.WriteString(class.ClassName)
 	bw.WriteString("Dao;\n")
-	bw.WriteString("import "+g_testExceptionPath+".UnitTestException;\n")
+	header:=*packageName+"."+*dbName+".exception"
+	bw.WriteString("import "+header+".UnitTestException;\n")
 	bw.WriteString("import org.apache.log4j.Logger;\n")
 	bw.WriteString("import org.junit.Test;\n")
 	bw.WriteString("import org.springframework.beans.factory.annotation.Autowired;\n\n")

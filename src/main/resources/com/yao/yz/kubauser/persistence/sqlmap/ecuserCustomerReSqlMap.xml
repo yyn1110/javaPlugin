@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserCustomerReDao">
+
+	<!--属性-->
+	<parameterMap id="ecuserCustomerReParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerRe">
+		<parameter property="ecuserid"/>
+		<parameter property="password"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserCustomerReResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerRe">
+		<result property="ecuserid" column="ecuserid"/>
+		<result property="password" column="password"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserCustomerReParameterMap" keyProperty="ecuserid" useGeneratedKeys="true">
+		insert into ecuser_customer_re(`ecuserid`,`password`) values(?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserCustomerReParameterMap">
+		update ecuser_customer_re set
+		<trim suffixOverrides=",">
+			<if test="password != null">
+				`password`=#{password},
+			</if>
+		</trim>
+		where `ecuserid`=#{ecuserid}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ecuser_customer_re where `ecuserid`=#{ecuserid}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcuserCustomerReByKey" resultMap="ecuserCustomerReResultMap" parameterType="java.lang.Integer">
+		select `ecuserid`,`password` from ecuser_customer_re where `ecuserid`=#{ecuserid}
+	</select>
+
+</mapper>

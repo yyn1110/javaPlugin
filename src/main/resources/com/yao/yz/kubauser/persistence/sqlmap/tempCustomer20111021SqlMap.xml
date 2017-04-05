@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.TempCustomer20111021Dao">
+
+	<!--属性-->
+	<parameterMap id="tempCustomer20111021ParameterMap" type="com.yao.yz.kubauser.persistence.model.TempCustomer20111021">
+		<parameter property="ecUserId"/>
+		<parameter property="id"/>
+		<parameter property="registerIP"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="tempCustomer20111021ResultMap" type="com.yao.yz.kubauser.persistence.model.TempCustomer20111021">
+		<result property="ecUserId" column="EcUserId"/>
+		<result property="id" column="Id"/>
+		<result property="registerIP" column="RegisterIP"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="tempCustomer20111021ParameterMap">
+		insert into temp_customer_20111021(`EcUserId`,`Id`,`RegisterIP`) values(?,?,?)
+		<!--没有主键-->
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="tempCustomer20111021ParameterMap">
+		update temp_customer_20111021 set
+		<trim suffixOverrides=",">
+			<if test="ecUserId != null">
+				`EcUserId`=#{ecUserId},
+			</if>
+			<if test="id != null">
+				`Id`=#{id},
+			</if>
+			<if test="registerIP != null">
+				`RegisterIP`=#{registerIP},
+			</if>
+		</trim>
+		<!--没有主键-->
+	</update>
+
+	<!--删除-->
+	<!--没有主键-->
+
+	<!--查询-->
+	<!--没有主键-->
+
+</mapper>

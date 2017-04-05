@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.WeixinShopTemplateDao">
+
+	<!--属性-->
+	<parameterMap id="weixinShopTemplateParameterMap" type="com.yao.yz.kubauser.persistence.model.WeixinShopTemplate">
+		<parameter property="id"/>
+		<parameter property="shopId"/>
+		<parameter property="templateId"/>
+		<parameter property="expire"/>
+		<parameter property="templateStatus"/>
+		<parameter property="ifFillTemplate"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="weixinShopTemplateResultMap" type="com.yao.yz.kubauser.persistence.model.WeixinShopTemplate">
+		<result property="id" column="id"/>
+		<result property="shopId" column="shop_id"/>
+		<result property="templateId" column="template_id"/>
+		<result property="expire" column="expire"/>
+		<result property="templateStatus" column="template_status"/>
+		<result property="ifFillTemplate" column="if_fill_template"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="weixinShopTemplateParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into weixin_shop_template(`id`,`shop_id`,`template_id`,`expire`,`template_status`,`if_fill_template`) values(?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="weixinShopTemplateParameterMap">
+		update weixin_shop_template set
+		<trim suffixOverrides=",">
+			<if test="shopId != null">
+				`shop_id`=#{shopId},
+			</if>
+			<if test="templateId != null">
+				`template_id`=#{templateId},
+			</if>
+			<if test="expire != null">
+				`expire`=#{expire},
+			</if>
+			<if test="templateStatus != null">
+				`template_status`=#{templateStatus},
+			</if>
+			<if test="ifFillTemplate != null">
+				`if_fill_template`=#{ifFillTemplate},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from weixin_shop_template where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getWeixinShopTemplateByKey" resultMap="weixinShopTemplateResultMap" parameterType="java.lang.Integer">
+		select `id`,`shop_id`,`template_id`,`expire`,`template_status`,`if_fill_template` from weixin_shop_template where `id`=#{id}
+	</select>
+
+</mapper>

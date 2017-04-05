@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.AaUseMarkDao">
+
+	<!--属性-->
+	<parameterMap id="aaUseMarkParameterMap" type="com.yao.yz.kubauser.persistence.model.AaUseMark">
+		<parameter property="userid"/>
+		<parameter property="web"/>
+		<parameter property="app"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="aaUseMarkResultMap" type="com.yao.yz.kubauser.persistence.model.AaUseMark">
+		<result property="userid" column="userid"/>
+		<result property="web" column="web"/>
+		<result property="app" column="app"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="aaUseMarkParameterMap" keyProperty="userid" useGeneratedKeys="true">
+		insert into aa_use_mark(`userid`,`web`,`app`) values(?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="aaUseMarkParameterMap">
+		update aa_use_mark set
+		<trim suffixOverrides=",">
+			<if test="web != null">
+				`web`=#{web},
+			</if>
+			<if test="app != null">
+				`app`=#{app},
+			</if>
+		</trim>
+		where `userid`=#{userid}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from aa_use_mark where `userid`=#{userid}
+	</delete>
+
+	<!--查询-->
+	<select id="getAaUseMarkByKey" resultMap="aaUseMarkResultMap" parameterType="java.lang.Integer">
+		select `userid`,`web`,`app` from aa_use_mark where `userid`=#{userid}
+	</select>
+
+</mapper>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcquyiPatientDao">
+
+	<!--属性-->
+	<parameterMap id="ecquyiPatientParameterMap" type="com.yao.yz.kubauser.persistence.model.EcquyiPatient">
+		<parameter property="id"/>
+		<parameter property="userId"/>
+		<parameter property="registerId"/>
+		<parameter property="hospitalId"/>
+		<parameter property="hospitalName"/>
+		<parameter property="doctorId"/>
+		<parameter property="prescriptionNo"/>
+		<parameter property="prescriptionDate"/>
+		<parameter property="departmentName"/>
+		<parameter property="patientId"/>
+		<parameter property="patientName"/>
+		<parameter property="gender"/>
+		<parameter property="age"/>
+		<parameter property="phoneNumber"/>
+		<parameter property="address"/>
+		<parameter property="diagnosis"/>
+		<parameter property="prescriptionType"/>
+		<parameter property="prescriptionSource"/>
+		<parameter property="comment"/>
+		<parameter property="status"/>
+		<parameter property="cardNo"/>
+		<parameter property="verify"/>
+		<parameter property="checks"/>
+		<parameter property="deploy"/>
+		<parameter property="assign"/>
+		<parameter property="createDate"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecquyiPatientResultMap" type="com.yao.yz.kubauser.persistence.model.EcquyiPatient">
+		<result property="id" column="id"/>
+		<result property="userId" column="userId"/>
+		<result property="registerId" column="registerId"/>
+		<result property="hospitalId" column="hospitalId"/>
+		<result property="hospitalName" column="hospitalName"/>
+		<result property="doctorId" column="doctorId"/>
+		<result property="prescriptionNo" column="prescriptionNo"/>
+		<result property="prescriptionDate" column="prescriptionDate"/>
+		<result property="departmentName" column="departmentName"/>
+		<result property="patientId" column="patientId"/>
+		<result property="patientName" column="patientName"/>
+		<result property="gender" column="gender"/>
+		<result property="age" column="age"/>
+		<result property="phoneNumber" column="phoneNumber"/>
+		<result property="address" column="address"/>
+		<result property="diagnosis" column="diagnosis"/>
+		<result property="prescriptionType" column="prescriptionType"/>
+		<result property="prescriptionSource" column="prescriptionSource"/>
+		<result property="comment" column="comment"/>
+		<result property="status" column="status"/>
+		<result property="cardNo" column="cardNo"/>
+		<result property="verify" column="verify"/>
+		<result property="checks" column="checks"/>
+		<result property="deploy" column="deploy"/>
+		<result property="assign" column="assign"/>
+		<result property="createDate" column="createDate"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecquyiPatientParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into ecquyi_patient(`id`,`userId`,`registerId`,`hospitalId`,`hospitalName`,`doctorId`,`prescriptionNo`,`prescriptionDate`,`departmentName`,`patientId`,`patientName`,`gender`,`age`,`phoneNumber`,`address`,`diagnosis`,`prescriptionType`,`prescriptionSource`,`comment`,`status`,`cardNo`,`verify`,`checks`,`deploy`,`assign`,`createDate`) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecquyiPatientParameterMap">
+		update ecquyi_patient set
+		<trim suffixOverrides=",">
+			<if test="userId != null">
+				`userId`=#{userId},
+			</if>
+			<if test="registerId != null">
+				`registerId`=#{registerId},
+			</if>
+			<if test="hospitalId != null">
+				`hospitalId`=#{hospitalId},
+			</if>
+			<if test="hospitalName != null">
+				`hospitalName`=#{hospitalName},
+			</if>
+			<if test="doctorId != null">
+				`doctorId`=#{doctorId},
+			</if>
+			<if test="prescriptionNo != null">
+				`prescriptionNo`=#{prescriptionNo},
+			</if>
+			<if test="prescriptionDate != null">
+				`prescriptionDate`=#{prescriptionDate},
+			</if>
+			<if test="departmentName != null">
+				`departmentName`=#{departmentName},
+			</if>
+			<if test="patientId != null">
+				`patientId`=#{patientId},
+			</if>
+			<if test="patientName != null">
+				`patientName`=#{patientName},
+			</if>
+			<if test="gender != null">
+				`gender`=#{gender},
+			</if>
+			<if test="age != null">
+				`age`=#{age},
+			</if>
+			<if test="phoneNumber != null">
+				`phoneNumber`=#{phoneNumber},
+			</if>
+			<if test="address != null">
+				`address`=#{address},
+			</if>
+			<if test="diagnosis != null">
+				`diagnosis`=#{diagnosis},
+			</if>
+			<if test="prescriptionType != null">
+				`prescriptionType`=#{prescriptionType},
+			</if>
+			<if test="prescriptionSource != null">
+				`prescriptionSource`=#{prescriptionSource},
+			</if>
+			<if test="comment != null">
+				`comment`=#{comment},
+			</if>
+			<if test="status != null">
+				`status`=#{status},
+			</if>
+			<if test="cardNo != null">
+				`cardNo`=#{cardNo},
+			</if>
+			<if test="verify != null">
+				`verify`=#{verify},
+			</if>
+			<if test="checks != null">
+				`checks`=#{checks},
+			</if>
+			<if test="deploy != null">
+				`deploy`=#{deploy},
+			</if>
+			<if test="assign != null">
+				`assign`=#{assign},
+			</if>
+			<if test="createDate != null">
+				`createDate`=#{createDate},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ecquyi_patient where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcquyiPatientByKey" resultMap="ecquyiPatientResultMap" parameterType="java.lang.Integer">
+		select `id`,`userId`,`registerId`,`hospitalId`,`hospitalName`,`doctorId`,`prescriptionNo`,`prescriptionDate`,`departmentName`,`patientId`,`patientName`,`gender`,`age`,`phoneNumber`,`address`,`diagnosis`,`prescriptionType`,`prescriptionSource`,`comment`,`status`,`cardNo`,`verify`,`checks`,`deploy`,`assign`,`createDate` from ecquyi_patient where `id`=#{id}
+	</select>
+
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.BadipDao">
+
+	<!--属性-->
+	<parameterMap id="badipParameterMap" type="com.yao.yz.kubauser.persistence.model.Badip">
+		<parameter property="登录ip"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="badipResultMap" type="com.yao.yz.kubauser.persistence.model.Badip">
+		<result property="登录ip" column="登录ip"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="badipParameterMap" keyProperty="登录ip" useGeneratedKeys="true">
+		insert into badip(`登录ip`) values(?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="badipParameterMap">
+		update badip set
+		<trim suffixOverrides=",">
+		</trim>
+		where `登录ip`=#{登录ip}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from badip where `登录ip`=#{登录ip}
+	</delete>
+
+	<!--查询-->
+	<select id="getBadipByKey" resultMap="badipResultMap" parameterType="string">
+		select `登录ip` from badip where `登录ip`=#{登录ip}
+	</select>
+
+</mapper>

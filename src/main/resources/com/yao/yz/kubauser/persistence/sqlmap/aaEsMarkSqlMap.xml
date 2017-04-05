@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.AaEsMarkDao">
+
+	<!--属性-->
+	<parameterMap id="aaEsMarkParameterMap" type="com.yao.yz.kubauser.persistence.model.AaEsMark">
+		<parameter property="userid"/>
+		<parameter property="edm"/>
+		<parameter property="sms"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="aaEsMarkResultMap" type="com.yao.yz.kubauser.persistence.model.AaEsMark">
+		<result property="userid" column="userid"/>
+		<result property="edm" column="edm"/>
+		<result property="sms" column="sms"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="aaEsMarkParameterMap" keyProperty="userid" useGeneratedKeys="true">
+		insert into aa_es_mark(`userid`,`edm`,`sms`) values(?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="aaEsMarkParameterMap">
+		update aa_es_mark set
+		<trim suffixOverrides=",">
+			<if test="edm != null">
+				`edm`=#{edm},
+			</if>
+			<if test="sms != null">
+				`sms`=#{sms},
+			</if>
+		</trim>
+		where `userid`=#{userid}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from aa_es_mark where `userid`=#{userid}
+	</delete>
+
+	<!--查询-->
+	<select id="getAaEsMarkByKey" resultMap="aaEsMarkResultMap" parameterType="java.lang.Integer">
+		select `userid`,`edm`,`sms` from aa_es_mark where `userid`=#{userid}
+	</select>
+
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.TempusersDao">
+
+	<!--属性-->
+	<parameterMap id="tempusersParameterMap" type="com.yao.yz.kubauser.persistence.model.Tempusers">
+		<parameter property="username"/>
+		<parameter property="email"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="tempusersResultMap" type="com.yao.yz.kubauser.persistence.model.Tempusers">
+		<result property="username" column="username"/>
+		<result property="email" column="email"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="tempusersParameterMap" keyProperty="username" useGeneratedKeys="true">
+		insert into tempusers(`username`,`email`) values(?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="tempusersParameterMap">
+		update tempusers set
+		<trim suffixOverrides=",">
+			<if test="email != null">
+				`email`=#{email},
+			</if>
+		</trim>
+		where `username`=#{username}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from tempusers where `username`=#{username}
+	</delete>
+
+	<!--查询-->
+	<select id="getTempusersByKey" resultMap="tempusersResultMap" parameterType="string">
+		select `username`,`email` from tempusers where `username`=#{username}
+	</select>
+
+</mapper>

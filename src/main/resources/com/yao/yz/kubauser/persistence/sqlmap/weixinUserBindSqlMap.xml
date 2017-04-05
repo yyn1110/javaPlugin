@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.WeixinUserBindDao">
+
+	<!--属性-->
+	<parameterMap id="weixinUserBindParameterMap" type="com.yao.yz.kubauser.persistence.model.WeixinUserBind">
+		<parameter property="id"/>
+		<parameter property="openId"/>
+		<parameter property="userId"/>
+		<parameter property="bindDate"/>
+		<parameter property="status"/>
+		<parameter property="unbindDate"/>
+		<parameter property="recOpenId"/>
+		<parameter property="taobaoAccount"/>
+		<parameter property="forwardLevel"/>
+		<parameter property="weixinAccount"/>
+		<parameter property="shopId"/>
+		<parameter property="venderId"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="weixinUserBindResultMap" type="com.yao.yz.kubauser.persistence.model.WeixinUserBind">
+		<result property="id" column="id"/>
+		<result property="openId" column="open_id"/>
+		<result property="userId" column="user_id"/>
+		<result property="bindDate" column="bind_date"/>
+		<result property="status" column="status"/>
+		<result property="unbindDate" column="unbind_date"/>
+		<result property="recOpenId" column="rec_open_id"/>
+		<result property="taobaoAccount" column="taobao_account"/>
+		<result property="forwardLevel" column="forward_level"/>
+		<result property="weixinAccount" column="weixin_account"/>
+		<result property="shopId" column="shop_id"/>
+		<result property="venderId" column="vender_id"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="weixinUserBindParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into weixin_user_bind(`id`,`open_id`,`user_id`,`bind_date`,`status`,`unbind_date`,`rec_open_id`,`taobao_account`,`forward_level`,`weixin_account`,`shop_id`,`vender_id`) values(?,?,?,?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="weixinUserBindParameterMap">
+		update weixin_user_bind set
+		<trim suffixOverrides=",">
+			<if test="openId != null">
+				`open_id`=#{openId},
+			</if>
+			<if test="userId != null">
+				`user_id`=#{userId},
+			</if>
+			<if test="bindDate != null">
+				`bind_date`=#{bindDate},
+			</if>
+			<if test="status != null">
+				`status`=#{status},
+			</if>
+			<if test="unbindDate != null">
+				`unbind_date`=#{unbindDate},
+			</if>
+			<if test="recOpenId != null">
+				`rec_open_id`=#{recOpenId},
+			</if>
+			<if test="taobaoAccount != null">
+				`taobao_account`=#{taobaoAccount},
+			</if>
+			<if test="forwardLevel != null">
+				`forward_level`=#{forwardLevel},
+			</if>
+			<if test="weixinAccount != null">
+				`weixin_account`=#{weixinAccount},
+			</if>
+			<if test="shopId != null">
+				`shop_id`=#{shopId},
+			</if>
+			<if test="venderId != null">
+				`vender_id`=#{venderId},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from weixin_user_bind where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getWeixinUserBindByKey" resultMap="weixinUserBindResultMap" parameterType="java.lang.Integer">
+		select `id`,`open_id`,`user_id`,`bind_date`,`status`,`unbind_date`,`rec_open_id`,`taobao_account`,`forward_level`,`weixin_account`,`shop_id`,`vender_id` from weixin_user_bind where `id`=#{id}
+	</select>
+
+</mapper>

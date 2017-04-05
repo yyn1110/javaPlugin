@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserCustomerTempDao">
+
+	<!--属性-->
+	<parameterMap id="ecuserCustomerTempParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerTemp">
+		<parameter property="ecuserid"/>
+		<parameter property="id"/>
+		<parameter property="email"/>
+		<parameter property="count"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserCustomerTempResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerTemp">
+		<result property="ecuserid" column="ecuserid"/>
+		<result property="id" column="id"/>
+		<result property="email" column="email"/>
+		<result property="count" column="count"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserCustomerTempParameterMap" keyProperty="ecuserid" useGeneratedKeys="true">
+		insert into ecuser_customer_temp(`ecuserid`,`id`,`email`,`count`) values(?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserCustomerTempParameterMap">
+		update ecuser_customer_temp set
+		<trim suffixOverrides=",">
+			<if test="id != null">
+				`id`=#{id},
+			</if>
+			<if test="email != null">
+				`email`=#{email},
+			</if>
+			<if test="count != null">
+				`count`=#{count},
+			</if>
+		</trim>
+		where `ecuserid`=#{ecuserid}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ecuser_customer_temp where `ecuserid`=#{ecuserid}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcuserCustomerTempByKey" resultMap="ecuserCustomerTempResultMap" parameterType="java.lang.Integer">
+		select `ecuserid`,`id`,`email`,`count` from ecuser_customer_temp where `ecuserid`=#{ecuserid}
+	</select>
+
+</mapper>

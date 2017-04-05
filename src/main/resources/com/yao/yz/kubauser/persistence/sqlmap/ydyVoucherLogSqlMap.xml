@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.YdyVoucherLogDao">
+
+	<!--属性-->
+	<parameterMap id="ydyVoucherLogParameterMap" type="com.yao.yz.kubauser.persistence.model.YdyVoucherLog">
+		<parameter property="id"/>
+		<parameter property="customerId"/>
+		<parameter property="voucherId"/>
+		<parameter property="status"/>
+		<parameter property="recipeCode"/>
+		<parameter property="recipeUrl"/>
+		<parameter property="createtime"/>
+		<parameter property="activitytime"/>
+		<parameter property="closetime"/>
+		<parameter property="operaterId"/>
+		<parameter property="operaterName"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ydyVoucherLogResultMap" type="com.yao.yz.kubauser.persistence.model.YdyVoucherLog">
+		<result property="id" column="id"/>
+		<result property="customerId" column="customer_id"/>
+		<result property="voucherId" column="voucher_id"/>
+		<result property="status" column="status"/>
+		<result property="recipeCode" column="recipe_code"/>
+		<result property="recipeUrl" column="recipe_url"/>
+		<result property="createtime" column="createtime"/>
+		<result property="activitytime" column="activitytime"/>
+		<result property="closetime" column="closetime"/>
+		<result property="operaterId" column="operaterId"/>
+		<result property="operaterName" column="operaterName"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ydyVoucherLogParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into ydy_voucher_log(`id`,`customer_id`,`voucher_id`,`status`,`recipe_code`,`recipe_url`,`createtime`,`activitytime`,`closetime`,`operaterId`,`operaterName`) values(?,?,?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ydyVoucherLogParameterMap">
+		update ydy_voucher_log set
+		<trim suffixOverrides=",">
+			<if test="customerId != null">
+				`customer_id`=#{customerId},
+			</if>
+			<if test="voucherId != null">
+				`voucher_id`=#{voucherId},
+			</if>
+			<if test="status != null">
+				`status`=#{status},
+			</if>
+			<if test="recipeCode != null">
+				`recipe_code`=#{recipeCode},
+			</if>
+			<if test="recipeUrl != null">
+				`recipe_url`=#{recipeUrl},
+			</if>
+			<if test="createtime != null">
+				`createtime`=#{createtime},
+			</if>
+			<if test="activitytime != null">
+				`activitytime`=#{activitytime},
+			</if>
+			<if test="closetime != null">
+				`closetime`=#{closetime},
+			</if>
+			<if test="operaterId != null">
+				`operaterId`=#{operaterId},
+			</if>
+			<if test="operaterName != null">
+				`operaterName`=#{operaterName},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ydy_voucher_log where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getYdyVoucherLogByKey" resultMap="ydyVoucherLogResultMap" parameterType="java.lang.Integer">
+		select `id`,`customer_id`,`voucher_id`,`status`,`recipe_code`,`recipe_url`,`createtime`,`activitytime`,`closetime`,`operaterId`,`operaterName` from ydy_voucher_log where `id`=#{id}
+	</select>
+
+</mapper>

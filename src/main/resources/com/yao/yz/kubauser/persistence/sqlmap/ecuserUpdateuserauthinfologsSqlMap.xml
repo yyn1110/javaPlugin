@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserUpdateuserauthinfologsDao">
+
+	<!--属性-->
+	<parameterMap id="ecuserUpdateuserauthinfologsParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserUpdateuserauthinfologs">
+		<parameter property="id"/>
+		<parameter property="operator"/>
+		<parameter property="userId"/>
+		<parameter property="userName"/>
+		<parameter property="type"/>
+		<parameter property="date"/>
+		<parameter property="content"/>
+		<parameter property="userLoginEmail"/>
+		<parameter property="userLoginMobile"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserUpdateuserauthinfologsResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserUpdateuserauthinfologs">
+		<result property="id" column="id"/>
+		<result property="operator" column="operator"/>
+		<result property="userId" column="userId"/>
+		<result property="userName" column="userName"/>
+		<result property="type" column="type"/>
+		<result property="date" column="date"/>
+		<result property="content" column="content"/>
+		<result property="userLoginEmail" column="userLoginEmail"/>
+		<result property="userLoginMobile" column="userLoginMobile"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserUpdateuserauthinfologsParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into ecuser_updateuserauthinfologs(`id`,`operator`,`userId`,`userName`,`type`,`date`,`content`,`userLoginEmail`,`userLoginMobile`) values(?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserUpdateuserauthinfologsParameterMap">
+		update ecuser_updateuserauthinfologs set
+		<trim suffixOverrides=",">
+			<if test="operator != null">
+				`operator`=#{operator},
+			</if>
+			<if test="userId != null">
+				`userId`=#{userId},
+			</if>
+			<if test="userName != null">
+				`userName`=#{userName},
+			</if>
+			<if test="type != null">
+				`type`=#{type},
+			</if>
+			<if test="date != null">
+				`date`=#{date},
+			</if>
+			<if test="content != null">
+				`content`=#{content},
+			</if>
+			<if test="userLoginEmail != null">
+				`userLoginEmail`=#{userLoginEmail},
+			</if>
+			<if test="userLoginMobile != null">
+				`userLoginMobile`=#{userLoginMobile},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ecuser_updateuserauthinfologs where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcuserUpdateuserauthinfologsByKey" resultMap="ecuserUpdateuserauthinfologsResultMap" parameterType="java.lang.Integer">
+		select `id`,`operator`,`userId`,`userName`,`type`,`date`,`content`,`userLoginEmail`,`userLoginMobile` from ecuser_updateuserauthinfologs where `id`=#{id}
+	</select>
+
+</mapper>

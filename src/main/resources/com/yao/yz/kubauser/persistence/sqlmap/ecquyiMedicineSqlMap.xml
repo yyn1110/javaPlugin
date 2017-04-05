@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcquyiMedicineDao">
+
+	<!--属性-->
+	<parameterMap id="ecquyiMedicineParameterMap" type="com.yao.yz.kubauser.persistence.model.EcquyiMedicine">
+		<parameter property="id"/>
+		<parameter property="userId"/>
+		<parameter property="itemNo"/>
+		<parameter property="drugSpec"/>
+		<parameter property="drugName"/>
+		<parameter property="firm"/>
+		<parameter property="packageSpec"/>
+		<parameter property="quantity"/>
+		<parameter property="packageUnits"/>
+		<parameter property="dosage"/>
+		<parameter property="dosageUnits"/>
+		<parameter property="frequency"/>
+		<parameter property="frequencyCounter"/>
+		<parameter property="frequencyInterval"/>
+		<parameter property="frequencyIntervalUnit"/>
+		<parameter property="frequencyDetailDescription"/>
+		<parameter property="administration"/>
+		<parameter property="duration"/>
+		<parameter property="durationUnits"/>
+		<parameter property="createDate"/>
+		<parameter property="remark"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecquyiMedicineResultMap" type="com.yao.yz.kubauser.persistence.model.EcquyiMedicine">
+		<result property="id" column="id"/>
+		<result property="userId" column="userId"/>
+		<result property="itemNo" column="itemNo"/>
+		<result property="drugSpec" column="drugSpec"/>
+		<result property="drugName" column="drugName"/>
+		<result property="firm" column="firm"/>
+		<result property="packageSpec" column="packageSpec"/>
+		<result property="quantity" column="quantity"/>
+		<result property="packageUnits" column="packageUnits"/>
+		<result property="dosage" column="dosage"/>
+		<result property="dosageUnits" column="dosageUnits"/>
+		<result property="frequency" column="frequency"/>
+		<result property="frequencyCounter" column="frequencyCounter"/>
+		<result property="frequencyInterval" column="frequencyInterval"/>
+		<result property="frequencyIntervalUnit" column="frequencyIntervalUnit"/>
+		<result property="frequencyDetailDescription" column="frequencyDetailDescription"/>
+		<result property="administration" column="administration"/>
+		<result property="duration" column="duration"/>
+		<result property="durationUnits" column="durationUnits"/>
+		<result property="createDate" column="createDate"/>
+		<result property="remark" column="remark"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecquyiMedicineParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into ecquyi_medicine(`id`,`userId`,`itemNo`,`drugSpec`,`drugName`,`firm`,`packageSpec`,`quantity`,`packageUnits`,`dosage`,`dosageUnits`,`frequency`,`frequencyCounter`,`frequencyInterval`,`frequencyIntervalUnit`,`frequencyDetailDescription`,`administration`,`duration`,`durationUnits`,`createDate`,`remark`) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecquyiMedicineParameterMap">
+		update ecquyi_medicine set
+		<trim suffixOverrides=",">
+			<if test="userId != null">
+				`userId`=#{userId},
+			</if>
+			<if test="itemNo != null">
+				`itemNo`=#{itemNo},
+			</if>
+			<if test="drugSpec != null">
+				`drugSpec`=#{drugSpec},
+			</if>
+			<if test="drugName != null">
+				`drugName`=#{drugName},
+			</if>
+			<if test="firm != null">
+				`firm`=#{firm},
+			</if>
+			<if test="packageSpec != null">
+				`packageSpec`=#{packageSpec},
+			</if>
+			<if test="quantity != null">
+				`quantity`=#{quantity},
+			</if>
+			<if test="packageUnits != null">
+				`packageUnits`=#{packageUnits},
+			</if>
+			<if test="dosage != null">
+				`dosage`=#{dosage},
+			</if>
+			<if test="dosageUnits != null">
+				`dosageUnits`=#{dosageUnits},
+			</if>
+			<if test="frequency != null">
+				`frequency`=#{frequency},
+			</if>
+			<if test="frequencyCounter != null">
+				`frequencyCounter`=#{frequencyCounter},
+			</if>
+			<if test="frequencyInterval != null">
+				`frequencyInterval`=#{frequencyInterval},
+			</if>
+			<if test="frequencyIntervalUnit != null">
+				`frequencyIntervalUnit`=#{frequencyIntervalUnit},
+			</if>
+			<if test="frequencyDetailDescription != null">
+				`frequencyDetailDescription`=#{frequencyDetailDescription},
+			</if>
+			<if test="administration != null">
+				`administration`=#{administration},
+			</if>
+			<if test="duration != null">
+				`duration`=#{duration},
+			</if>
+			<if test="durationUnits != null">
+				`durationUnits`=#{durationUnits},
+			</if>
+			<if test="createDate != null">
+				`createDate`=#{createDate},
+			</if>
+			<if test="remark != null">
+				`remark`=#{remark},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ecquyi_medicine where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcquyiMedicineByKey" resultMap="ecquyiMedicineResultMap" parameterType="java.lang.Integer">
+		select `id`,`userId`,`itemNo`,`drugSpec`,`drugName`,`firm`,`packageSpec`,`quantity`,`packageUnits`,`dosage`,`dosageUnits`,`frequency`,`frequencyCounter`,`frequencyInterval`,`frequencyIntervalUnit`,`frequencyDetailDescription`,`administration`,`duration`,`durationUnits`,`createDate`,`remark` from ecquyi_medicine where `id`=#{id}
+	</select>
+
+</mapper>

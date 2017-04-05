@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserIdentityuserDao">
+
+	<!--属性-->
+	<parameterMap id="ecuserIdentityuserParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserIdentityuser">
+		<parameter property="userId"/>
+		<parameter property="uId"/>
+		<parameter property="userName"/>
+		<parameter property="currentRole"/>
+		<parameter property="userLevelId"/>
+		<parameter property="userLevelName"/>
+		<parameter property="userScore"/>
+		<parameter property="accountFee"/>
+		<parameter property="orderFinishCount"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserIdentityuserResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserIdentityuser">
+		<result property="userId" column="UserId"/>
+		<result property="uId" column="UId"/>
+		<result property="userName" column="UserName"/>
+		<result property="currentRole" column="CurrentRole"/>
+		<result property="userLevelId" column="UserLevelId"/>
+		<result property="userLevelName" column="UserLevelName"/>
+		<result property="userScore" column="UserScore"/>
+		<result property="accountFee" column="AccountFee"/>
+		<result property="orderFinishCount" column="OrderFinishCount"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserIdentityuserParameterMap" keyProperty="userId" useGeneratedKeys="true">
+		insert into ecuser_identityuser(`UserId`,`UId`,`UserName`,`CurrentRole`,`UserLevelId`,`UserLevelName`,`UserScore`,`AccountFee`,`OrderFinishCount`) values(?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserIdentityuserParameterMap">
+		update ecuser_identityuser set
+		<trim suffixOverrides=",">
+			<if test="uId != null">
+				`UId`=#{uId},
+			</if>
+			<if test="userName != null">
+				`UserName`=#{userName},
+			</if>
+			<if test="currentRole != null">
+				`CurrentRole`=#{currentRole},
+			</if>
+			<if test="userLevelId != null">
+				`UserLevelId`=#{userLevelId},
+			</if>
+			<if test="userLevelName != null">
+				`UserLevelName`=#{userLevelName},
+			</if>
+			<if test="userScore != null">
+				`UserScore`=#{userScore},
+			</if>
+			<if test="accountFee != null">
+				`AccountFee`=#{accountFee},
+			</if>
+			<if test="orderFinishCount != null">
+				`OrderFinishCount`=#{orderFinishCount},
+			</if>
+		</trim>
+		where `UserId`=#{userId}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ecuser_identityuser where `UserId`=#{userId}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcuserIdentityuserByKey" resultMap="ecuserIdentityuserResultMap" parameterType="java.lang.Integer">
+		select `UserId`,`UId`,`UserName`,`CurrentRole`,`UserLevelId`,`UserLevelName`,`UserScore`,`AccountFee`,`OrderFinishCount` from ecuser_identityuser where `UserId`=#{userId}
+	</select>
+
+</mapper>

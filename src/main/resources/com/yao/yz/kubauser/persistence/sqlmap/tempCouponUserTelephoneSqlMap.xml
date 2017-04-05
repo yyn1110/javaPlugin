@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.TempCouponUserTelephoneDao">
+
+	<!--属性-->
+	<parameterMap id="tempCouponUserTelephoneParameterMap" type="com.yao.yz.kubauser.persistence.model.TempCouponUserTelephone">
+		<parameter property="telephone"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="tempCouponUserTelephoneResultMap" type="com.yao.yz.kubauser.persistence.model.TempCouponUserTelephone">
+		<result property="telephone" column="telephone"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="tempCouponUserTelephoneParameterMap" keyProperty="telephone" useGeneratedKeys="true">
+		insert into temp_coupon_user_telephone(`telephone`) values(?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="tempCouponUserTelephoneParameterMap">
+		update temp_coupon_user_telephone set
+		<trim suffixOverrides=",">
+		</trim>
+		where `telephone`=#{telephone}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from temp_coupon_user_telephone where `telephone`=#{telephone}
+	</delete>
+
+	<!--查询-->
+	<select id="getTempCouponUserTelephoneByKey" resultMap="tempCouponUserTelephoneResultMap" parameterType="string">
+		select `telephone` from temp_coupon_user_telephone where `telephone`=#{telephone}
+	</select>
+
+</mapper>

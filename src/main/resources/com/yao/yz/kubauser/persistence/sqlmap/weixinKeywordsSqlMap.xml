@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.WeixinKeywordsDao">
+
+	<!--属性-->
+	<parameterMap id="weixinKeywordsParameterMap" type="com.yao.yz.kubauser.persistence.model.WeixinKeywords">
+		<parameter property="id"/>
+		<parameter property="showName"/>
+		<parameter property="content"/>
+		<parameter property="type"/>
+		<parameter property="category"/>
+		<parameter property="shopId"/>
+		<parameter property="replyType"/>
+		<parameter property="replyMethod"/>
+		<parameter property="status"/>
+		<parameter property="inputeDate"/>
+		<parameter property="inputer"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="weixinKeywordsResultMap" type="com.yao.yz.kubauser.persistence.model.WeixinKeywords">
+		<result property="id" column="id"/>
+		<result property="showName" column="show_name"/>
+		<result property="content" column="content"/>
+		<result property="type" column="type"/>
+		<result property="category" column="category"/>
+		<result property="shopId" column="shop_id"/>
+		<result property="replyType" column="reply_type"/>
+		<result property="replyMethod" column="reply_method"/>
+		<result property="status" column="status"/>
+		<result property="inputeDate" column="inpute_date"/>
+		<result property="inputer" column="inputer"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="weixinKeywordsParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into weixin_keywords(`id`,`show_name`,`content`,`type`,`category`,`shop_id`,`reply_type`,`reply_method`,`status`,`inpute_date`,`inputer`) values(?,?,?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="weixinKeywordsParameterMap">
+		update weixin_keywords set
+		<trim suffixOverrides=",">
+			<if test="showName != null">
+				`show_name`=#{showName},
+			</if>
+			<if test="content != null">
+				`content`=#{content},
+			</if>
+			<if test="type != null">
+				`type`=#{type},
+			</if>
+			<if test="category != null">
+				`category`=#{category},
+			</if>
+			<if test="shopId != null">
+				`shop_id`=#{shopId},
+			</if>
+			<if test="replyType != null">
+				`reply_type`=#{replyType},
+			</if>
+			<if test="replyMethod != null">
+				`reply_method`=#{replyMethod},
+			</if>
+			<if test="status != null">
+				`status`=#{status},
+			</if>
+			<if test="inputeDate != null">
+				`inpute_date`=#{inputeDate},
+			</if>
+			<if test="inputer != null">
+				`inputer`=#{inputer},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from weixin_keywords where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getWeixinKeywordsByKey" resultMap="weixinKeywordsResultMap" parameterType="java.lang.Integer">
+		select `id`,`show_name`,`content`,`type`,`category`,`shop_id`,`reply_type`,`reply_method`,`status`,`inpute_date`,`inputer` from weixin_keywords where `id`=#{id}
+	</select>
+
+</mapper>

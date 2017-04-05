@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.WczMobileDao">
+
+	<!--属性-->
+	<parameterMap id="wczMobileParameterMap" type="com.yao.yz.kubauser.persistence.model.WczMobile">
+		<parameter property="username"/>
+		<parameter property="sendContactmobile"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="wczMobileResultMap" type="com.yao.yz.kubauser.persistence.model.WczMobile">
+		<result property="username" column="username"/>
+		<result property="sendContactmobile" column="send_contactmobile"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="wczMobileParameterMap">
+		insert into wcz_mobile(`username`,`send_contactmobile`) values(?,?)
+		<!--没有主键-->
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="wczMobileParameterMap">
+		update wcz_mobile set
+		<trim suffixOverrides=",">
+			<if test="username != null">
+				`username`=#{username},
+			</if>
+			<if test="sendContactmobile != null">
+				`send_contactmobile`=#{sendContactmobile},
+			</if>
+		</trim>
+		<!--没有主键-->
+	</update>
+
+	<!--删除-->
+	<!--没有主键-->
+
+	<!--查询-->
+	<!--没有主键-->
+
+</mapper>

@@ -1,0 +1,21 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "W7OFi8RC+99JY3lVFkqL8dVhUT0=",
+			"path": "github.com/go-sql-driver/mysql",
+			"revision": "665b83488b90b902ce0a305ef6652e599771cdf9",
+			"revisionTime": "2016-11-16T07:07:42Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "wFqsgtKaWAc2/bZRHQyMVVNoLNE=",
+			"path": "github.com/yyn1110/logs",
+			"revision": "d18de1c7bc84de77134e54cec9820ee91b76e485",
+			"revisionTime": "2017-04-05T07:13:52Z",
+			"tree": true
+		}
+	],
+	"rootPath": "table2class"
+}

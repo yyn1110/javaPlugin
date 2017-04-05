@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserTmallTempDao">
+
+	<!--属性-->
+	<parameterMap id="ecuserTmallTempParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserTmallTemp">
+		<parameter property="ecuserid"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserTmallTempResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserTmallTemp">
+		<result property="ecuserid" column="ecuserid"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserTmallTempParameterMap" keyProperty="ecuserid" useGeneratedKeys="true">
+		insert into ecuser_tmall_temp(`ecuserid`) values(?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserTmallTempParameterMap">
+		update ecuser_tmall_temp set
+		<trim suffixOverrides=",">
+		</trim>
+		where `ecuserid`=#{ecuserid}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ecuser_tmall_temp where `ecuserid`=#{ecuserid}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcuserTmallTempByKey" resultMap="ecuserTmallTempResultMap" parameterType="java.lang.Integer">
+		select `ecuserid` from ecuser_tmall_temp where `ecuserid`=#{ecuserid}
+	</select>
+
+</mapper>

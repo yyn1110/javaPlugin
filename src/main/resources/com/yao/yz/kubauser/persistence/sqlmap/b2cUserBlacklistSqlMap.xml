@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.B2cUserBlacklistDao">
+
+	<!--属性-->
+	<parameterMap id="b2cUserBlacklistParameterMap" type="com.yao.yz.kubauser.persistence.model.B2cUserBlacklist">
+		<parameter property="id"/>
+		<parameter property="ecUserId"/>
+		<parameter property="userName"/>
+		<parameter property="userMobile"/>
+		<parameter property="userEmail"/>
+		<parameter property="blacklistType"/>
+		<parameter property="blacklistStatus"/>
+		<parameter property="createUserId"/>
+		<parameter property="createDate"/>
+		<parameter property="updateUserId"/>
+		<parameter property="updateDate"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="b2cUserBlacklistResultMap" type="com.yao.yz.kubauser.persistence.model.B2cUserBlacklist">
+		<result property="id" column="id"/>
+		<result property="ecUserId" column="ec_user_id"/>
+		<result property="userName" column="user_name"/>
+		<result property="userMobile" column="user_mobile"/>
+		<result property="userEmail" column="user_email"/>
+		<result property="blacklistType" column="blacklist_type"/>
+		<result property="blacklistStatus" column="blacklist_status"/>
+		<result property="createUserId" column="create_user_id"/>
+		<result property="createDate" column="create_date"/>
+		<result property="updateUserId" column="update_user_id"/>
+		<result property="updateDate" column="update_date"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="b2cUserBlacklistParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into b2c_user_blacklist(`id`,`ec_user_id`,`user_name`,`user_mobile`,`user_email`,`blacklist_type`,`blacklist_status`,`create_user_id`,`create_date`,`update_user_id`,`update_date`) values(?,?,?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="b2cUserBlacklistParameterMap">
+		update b2c_user_blacklist set
+		<trim suffixOverrides=",">
+			<if test="ecUserId != null">
+				`ec_user_id`=#{ecUserId},
+			</if>
+			<if test="userName != null">
+				`user_name`=#{userName},
+			</if>
+			<if test="userMobile != null">
+				`user_mobile`=#{userMobile},
+			</if>
+			<if test="userEmail != null">
+				`user_email`=#{userEmail},
+			</if>
+			<if test="blacklistType != null">
+				`blacklist_type`=#{blacklistType},
+			</if>
+			<if test="blacklistStatus != null">
+				`blacklist_status`=#{blacklistStatus},
+			</if>
+			<if test="createUserId != null">
+				`create_user_id`=#{createUserId},
+			</if>
+			<if test="createDate != null">
+				`create_date`=#{createDate},
+			</if>
+			<if test="updateUserId != null">
+				`update_user_id`=#{updateUserId},
+			</if>
+			<if test="updateDate != null">
+				`update_date`=#{updateDate},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from b2c_user_blacklist where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getB2cUserBlacklistByKey" resultMap="b2cUserBlacklistResultMap" parameterType="java.lang.Integer">
+		select `id`,`ec_user_id`,`user_name`,`user_mobile`,`user_email`,`blacklist_type`,`blacklist_status`,`create_user_id`,`create_date`,`update_user_id`,`update_date` from b2c_user_blacklist where `id`=#{id}
+	</select>
+
+</mapper>

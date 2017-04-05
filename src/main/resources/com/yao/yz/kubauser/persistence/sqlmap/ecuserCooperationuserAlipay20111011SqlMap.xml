@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserCooperationuserAlipay20111011Dao">
+
+	<!--属性-->
+	<parameterMap id="ecuserCooperationuserAlipay20111011ParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserCooperationuserAlipay20111011">
+		<parameter property="ecuserid"/>
+		<parameter property="id"/>
+		<parameter property="partnerType"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserCooperationuserAlipay20111011ResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserCooperationuserAlipay20111011">
+		<result property="ecuserid" column="ecuserid"/>
+		<result property="id" column="id"/>
+		<result property="partnerType" column="PartnerType"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserCooperationuserAlipay20111011ParameterMap">
+		insert into ecuser_cooperationuser_alipay_20111011(`ecuserid`,`id`,`PartnerType`) values(?,?,?)
+		<!--没有主键-->
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserCooperationuserAlipay20111011ParameterMap">
+		update ecuser_cooperationuser_alipay_20111011 set
+		<trim suffixOverrides=",">
+			<if test="ecuserid != null">
+				`ecuserid`=#{ecuserid},
+			</if>
+			<if test="id != null">
+				`id`=#{id},
+			</if>
+			<if test="partnerType != null">
+				`PartnerType`=#{partnerType},
+			</if>
+		</trim>
+		<!--没有主键-->
+	</update>
+
+	<!--删除-->
+	<!--没有主键-->
+
+	<!--查询-->
+	<!--没有主键-->
+
+</mapper>

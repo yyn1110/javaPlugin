@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserLoginuserDao">
+
+	<!--属性-->
+	<parameterMap id="ecuserLoginuserParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserLoginuser">
+		<parameter property="token"/>
+		<parameter property="userId"/>
+		<parameter property="userName"/>
+		<parameter property="loginTime"/>
+		<parameter property="expiredTime"/>
+		<parameter property="userIp"/>
+		<parameter property="logoutTime"/>
+		<parameter property="isUse"/>
+		<parameter property="sessionId"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserLoginuserResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserLoginuser">
+		<result property="token" column="Token"/>
+		<result property="userId" column="UserId"/>
+		<result property="userName" column="UserName"/>
+		<result property="loginTime" column="LoginTime"/>
+		<result property="expiredTime" column="ExpiredTime"/>
+		<result property="userIp" column="UserIp"/>
+		<result property="logoutTime" column="LogoutTime"/>
+		<result property="isUse" column="IsUse"/>
+		<result property="sessionId" column="SessionId"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserLoginuserParameterMap" keyProperty="token" useGeneratedKeys="true">
+		insert into ecuser_loginuser(`Token`,`UserId`,`UserName`,`LoginTime`,`ExpiredTime`,`UserIp`,`LogoutTime`,`IsUse`,`SessionId`) values(?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserLoginuserParameterMap">
+		update ecuser_loginuser set
+		<trim suffixOverrides=",">
+			<if test="userId != null">
+				`UserId`=#{userId},
+			</if>
+			<if test="userName != null">
+				`UserName`=#{userName},
+			</if>
+			<if test="loginTime != null">
+				`LoginTime`=#{loginTime},
+			</if>
+			<if test="expiredTime != null">
+				`ExpiredTime`=#{expiredTime},
+			</if>
+			<if test="userIp != null">
+				`UserIp`=#{userIp},
+			</if>
+			<if test="logoutTime != null">
+				`LogoutTime`=#{logoutTime},
+			</if>
+			<if test="isUse != null">
+				`IsUse`=#{isUse},
+			</if>
+			<if test="sessionId != null">
+				`SessionId`=#{sessionId},
+			</if>
+		</trim>
+		where `Token`=#{token}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from ecuser_loginuser where `Token`=#{token}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcuserLoginuserByKey" resultMap="ecuserLoginuserResultMap" parameterType="string">
+		select `Token`,`UserId`,`UserName`,`LoginTime`,`ExpiredTime`,`UserIp`,`LogoutTime`,`IsUse`,`SessionId` from ecuser_loginuser where `Token`=#{token}
+	</select>
+
+</mapper>

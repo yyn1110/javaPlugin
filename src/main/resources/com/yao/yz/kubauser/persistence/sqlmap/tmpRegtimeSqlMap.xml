@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.TmpRegtimeDao">
+
+	<!--属性-->
+	<parameterMap id="tmpRegtimeParameterMap" type="com.yao.yz.kubauser.persistence.model.TmpRegtime">
+		<parameter property="id"/>
+		<parameter property="name"/>
+		<parameter property="time"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="tmpRegtimeResultMap" type="com.yao.yz.kubauser.persistence.model.TmpRegtime">
+		<result property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="time" column="time"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="tmpRegtimeParameterMap" keyProperty="name" useGeneratedKeys="true">
+		insert into tmp_regtime(`id`,`name`,`time`) values(?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="tmpRegtimeParameterMap">
+		update tmp_regtime set
+		<trim suffixOverrides=",">
+			<if test="id != null">
+				`id`=#{id},
+			</if>
+			<if test="time != null">
+				`time`=#{time},
+			</if>
+		</trim>
+		where `name`=#{name}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from tmp_regtime where `name`=#{name}
+	</delete>
+
+	<!--查询-->
+	<select id="getTmpRegtimeByKey" resultMap="tmpRegtimeResultMap" parameterType="string">
+		select `id`,`name`,`time` from tmp_regtime where `name`=#{name}
+	</select>
+
+</mapper>

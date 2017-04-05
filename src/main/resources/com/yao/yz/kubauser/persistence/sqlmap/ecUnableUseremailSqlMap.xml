@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcUnableUseremailDao">
+
+	<!--属性-->
+	<parameterMap id="ecUnableUseremailParameterMap" type="com.yao.yz.kubauser.persistence.model.EcUnableUseremail">
+		<parameter property="email"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecUnableUseremailResultMap" type="com.yao.yz.kubauser.persistence.model.EcUnableUseremail">
+		<result property="email" column="email"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecUnableUseremailParameterMap" keyProperty="email" useGeneratedKeys="true">
+		insert into ec_unable_useremail(`email`) values(?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecUnableUseremailParameterMap">
+		update ec_unable_useremail set
+		<trim suffixOverrides=",">
+		</trim>
+		where `email`=#{email}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from ec_unable_useremail where `email`=#{email}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcUnableUseremailByKey" resultMap="ecUnableUseremailResultMap" parameterType="string">
+		select `email` from ec_unable_useremail where `email`=#{email}
+	</select>
+
+</mapper>

@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserCustomerLevel1Dao">
+
+	<!--属性-->
+	<parameterMap id="ecuserCustomerLevel1ParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerLevel1">
+		<parameter property="ecUserId"/>
+		<parameter property="ecUId"/>
+		<parameter property="loginEmail"/>
+		<parameter property="loginMobile"/>
+		<parameter property="id"/>
+		<parameter property="status"/>
+		<parameter property="createDate"/>
+		<parameter property="modifyDate"/>
+		<parameter property="name"/>
+		<parameter property="gender"/>
+		<parameter property="cellphone"/>
+		<parameter property="telephone"/>
+		<parameter property="otherTel"/>
+		<parameter property="fax"/>
+		<parameter property="msn"/>
+		<parameter property="qq"/>
+		<parameter property="aliww"/>
+		<parameter property="otherIm"/>
+		<parameter property="email"/>
+		<parameter property="memo"/>
+		<parameter property="state"/>
+		<parameter property="city"/>
+		<parameter property="district"/>
+		<parameter property="postcode"/>
+		<parameter property="address"/>
+		<parameter property="income"/>
+		<parameter property="isDeleted"/>
+		<parameter property="userId"/>
+		<parameter property="source"/>
+		<parameter property="password"/>
+		<parameter property="salt"/>
+		<parameter property="userscore"/>
+		<parameter property="enterCount"/>
+		<parameter property="lastLoginTime"/>
+		<parameter property="registerIP"/>
+		<parameter property="ipaddress"/>
+		<parameter property="type"/>
+		<parameter property="websiteSource"/>
+		<parameter property="tuanflags"/>
+		<parameter property="userLevelId"/>
+		<parameter property="userLevelStartTime"/>
+		<parameter property="userLevelEndTime"/>
+		<parameter property="birthDay"/>
+		<parameter property="nickName"/>
+		<parameter property="imgUrl"/>
+		<parameter property="yearOrderFee"/>
+		<parameter property="totalFinishOrderFee"/>
+		<parameter property="totalFinishOrderCount"/>
+		<parameter property="userLevelValidOrderFee"/>
+		<parameter property="userLevelValidBuyCount"/>
+		<parameter property="userLevelLastModifyTime"/>
+		<parameter property="userLevelIsHandProtect"/>
+		<parameter property="partnerType"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserCustomerLevel1ResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerLevel1">
+		<result property="ecUserId" column="EcUserId"/>
+		<result property="ecUId" column="EcUId"/>
+		<result property="loginEmail" column="LoginEmail"/>
+		<result property="loginMobile" column="LoginMobile"/>
+		<result property="id" column="Id"/>
+		<result property="status" column="Status"/>
+		<result property="createDate" column="CreateDate"/>
+		<result property="modifyDate" column="ModifyDate"/>
+		<result property="name" column="Name"/>
+		<result property="gender" column="Gender"/>
+		<result property="cellphone" column="Cellphone"/>
+		<result property="telephone" column="Telephone"/>
+		<result property="otherTel" column="OtherTel"/>
+		<result property="fax" column="Fax"/>
+		<result property="msn" column="Msn"/>
+		<result property="qq" column="Qq"/>
+		<result property="aliww" column="Aliww"/>
+		<result property="otherIm" column="OtherIm"/>
+		<result property="email" column="Email"/>
+		<result property="memo" column="Memo"/>
+		<result property="state" column="State"/>
+		<result property="city" column="City"/>
+		<result property="district" column="District"/>
+		<result property="postcode" column="Postcode"/>
+		<result property="address" column="Address"/>
+		<result property="income" column="Income"/>
+		<result property="isDeleted" column="IsDeleted"/>
+		<result property="userId" column="UserId"/>
+		<result property="source" column="Source"/>
+		<result property="password" column="Password"/>
+		<result property="salt" column="Salt"/>
+		<result property="userscore" column="Userscore"/>
+		<result property="enterCount" column="EnterCount"/>
+		<result property="lastLoginTime" column="LastLoginTime"/>
+		<result property="registerIP" column="RegisterIP"/>
+		<result property="ipaddress" column="Ipaddress"/>
+		<result property="type" column="Type"/>
+		<result property="websiteSource" column="WebsiteSource"/>
+		<result property="tuanflags" column="Tuanflags"/>
+		<result property="userLevelId" column="UserLevelId"/>
+		<result property="userLevelStartTime" column="UserLevelStartTime"/>
+		<result property="userLevelEndTime" column="UserLevelEndTime"/>
+		<result property="birthDay" column="BirthDay"/>
+		<result property="nickName" column="NickName"/>
+		<result property="imgUrl" column="ImgUrl"/>
+		<result property="yearOrderFee" column="YearOrderFee"/>
+		<result property="totalFinishOrderFee" column="TotalFinishOrderFee"/>
+		<result property="totalFinishOrderCount" column="TotalFinishOrderCount"/>
+		<result property="userLevelValidOrderFee" column="UserLevel_ValidOrderFee"/>
+		<result property="userLevelValidBuyCount" column="UserLevel_ValidBuyCount"/>
+		<result property="userLevelLastModifyTime" column="UserLevel_LastModifyTime"/>
+		<result property="userLevelIsHandProtect" column="UserLevel_IsHandProtect"/>
+		<result property="partnerType" column="PartnerType"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserCustomerLevel1ParameterMap">
+		insert into ecuser_customer_level1(`EcUserId`,`EcUId`,`LoginEmail`,`LoginMobile`,`Id`,`Status`,`CreateDate`,`ModifyDate`,`Name`,`Gender`,`Cellphone`,`Telephone`,`OtherTel`,`Fax`,`Msn`,`Qq`,`Aliww`,`OtherIm`,`Email`,`Memo`,`State`,`City`,`District`,`Postcode`,`Address`,`Income`,`IsDeleted`,`UserId`,`Source`,`Password`,`Salt`,`Userscore`,`EnterCount`,`LastLoginTime`,`RegisterIP`,`Ipaddress`,`Type`,`WebsiteSource`,`Tuanflags`,`UserLevelId`,`UserLevelStartTime`,`UserLevelEndTime`,`BirthDay`,`NickName`,`ImgUrl`,`YearOrderFee`,`TotalFinishOrderFee`,`TotalFinishOrderCount`,`UserLevel_ValidOrderFee`,`UserLevel_ValidBuyCount`,`UserLevel_LastModifyTime`,`UserLevel_IsHandProtect`,`PartnerType`) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+		<!--没有主键-->
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserCustomerLevel1ParameterMap">
+		update ecuser_customer_level1 set
+		<trim suffixOverrides=",">
+			<if test="ecUserId != null">
+				`EcUserId`=#{ecUserId},
+			</if>
+			<if test="ecUId != null">
+				`EcUId`=#{ecUId},
+			</if>
+			<if test="loginEmail != null">
+				`LoginEmail`=#{loginEmail},
+			</if>
+			<if test="loginMobile != null">
+				`LoginMobile`=#{loginMobile},
+			</if>
+			<if test="id != null">
+				`Id`=#{id},
+			</if>
+			<if test="status != null">
+				`Status`=#{status},
+			</if>
+			<if test="createDate != null">
+				`CreateDate`=#{createDate},
+			</if>
+			<if test="modifyDate != null">
+				`ModifyDate`=#{modifyDate},
+			</if>
+			<if test="name != null">
+				`Name`=#{name},
+			</if>
+			<if test="gender != null">
+				`Gender`=#{gender},
+			</if>
+			<if test="cellphone != null">
+				`Cellphone`=#{cellphone},
+			</if>
+			<if test="telephone != null">
+				`Telephone`=#{telephone},
+			</if>
+			<if test="otherTel != null">
+				`OtherTel`=#{otherTel},
+			</if>
+			<if test="fax != null">
+				`Fax`=#{fax},
+			</if>
+			<if test="msn != null">
+				`Msn`=#{msn},
+			</if>
+			<if test="qq != null">
+				`Qq`=#{qq},
+			</if>
+			<if test="aliww != null">
+				`Aliww`=#{aliww},
+			</if>
+			<if test="otherIm != null">
+				`OtherIm`=#{otherIm},
+			</if>
+			<if test="email != null">
+				`Email`=#{email},
+			</if>
+			<if test="memo != null">
+				`Memo`=#{memo},
+			</if>
+			<if test="state != null">
+				`State`=#{state},
+			</if>
+			<if test="city != null">
+				`City`=#{city},
+			</if>
+			<if test="district != null">
+				`District`=#{district},
+			</if>
+			<if test="postcode != null">
+				`Postcode`=#{postcode},
+			</if>
+			<if test="address != null">
+				`Address`=#{address},
+			</if>
+			<if test="income != null">
+				`Income`=#{income},
+			</if>
+			<if test="isDeleted != null">
+				`IsDeleted`=#{isDeleted},
+			</if>
+			<if test="userId != null">
+				`UserId`=#{userId},
+			</if>
+			<if test="source != null">
+				`Source`=#{source},
+			</if>
+			<if test="password != null">
+				`Password`=#{password},
+			</if>
+			<if test="salt != null">
+				`Salt`=#{salt},
+			</if>
+			<if test="userscore != null">
+				`Userscore`=#{userscore},
+			</if>
+			<if test="enterCount != null">
+				`EnterCount`=#{enterCount},
+			</if>
+			<if test="lastLoginTime != null">
+				`LastLoginTime`=#{lastLoginTime},
+			</if>
+			<if test="registerIP != null">
+				`RegisterIP`=#{registerIP},
+			</if>
+			<if test="ipaddress != null">
+				`Ipaddress`=#{ipaddress},
+			</if>
+			<if test="type != null">
+				`Type`=#{type},
+			</if>
+			<if test="websiteSource != null">
+				`WebsiteSource`=#{websiteSource},
+			</if>
+			<if test="tuanflags != null">
+				`Tuanflags`=#{tuanflags},
+			</if>
+			<if test="userLevelId != null">
+				`UserLevelId`=#{userLevelId},
+			</if>
+			<if test="userLevelStartTime != null">
+				`UserLevelStartTime`=#{userLevelStartTime},
+			</if>
+			<if test="userLevelEndTime != null">
+				`UserLevelEndTime`=#{userLevelEndTime},
+			</if>
+			<if test="birthDay != null">
+				`BirthDay`=#{birthDay},
+			</if>
+			<if test="nickName != null">
+				`NickName`=#{nickName},
+			</if>
+			<if test="imgUrl != null">
+				`ImgUrl`=#{imgUrl},
+			</if>
+			<if test="yearOrderFee != null">
+				`YearOrderFee`=#{yearOrderFee},
+			</if>
+			<if test="totalFinishOrderFee != null">
+				`TotalFinishOrderFee`=#{totalFinishOrderFee},
+			</if>
+			<if test="totalFinishOrderCount != null">
+				`TotalFinishOrderCount`=#{totalFinishOrderCount},
+			</if>
+			<if test="userLevelValidOrderFee != null">
+				`UserLevel_ValidOrderFee`=#{userLevelValidOrderFee},
+			</if>
+			<if test="userLevelValidBuyCount != null">
+				`UserLevel_ValidBuyCount`=#{userLevelValidBuyCount},
+			</if>
+			<if test="userLevelLastModifyTime != null">
+				`UserLevel_LastModifyTime`=#{userLevelLastModifyTime},
+			</if>
+			<if test="userLevelIsHandProtect != null">
+				`UserLevel_IsHandProtect`=#{userLevelIsHandProtect},
+			</if>
+			<if test="partnerType != null">
+				`PartnerType`=#{partnerType},
+			</if>
+		</trim>
+		<!--没有主键-->
+	</update>
+
+	<!--删除-->
+	<!--没有主键-->
+
+	<!--查询-->
+	<!--没有主键-->
+
+</mapper>

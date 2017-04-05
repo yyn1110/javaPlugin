@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcquyiShiptoDao">
+
+	<!--属性-->
+	<parameterMap id="ecquyiShiptoParameterMap" type="com.yao.yz.kubauser.persistence.model.EcquyiShipto">
+		<parameter property="id"/>
+		<parameter property="userId"/>
+		<parameter property="person"/>
+		<parameter property="contact"/>
+		<parameter property="provinceName"/>
+		<parameter property="provinceCode"/>
+		<parameter property="cityName"/>
+		<parameter property="cityCode"/>
+		<parameter property="districtName"/>
+		<parameter property="districtCode"/>
+		<parameter property="detailAddress"/>
+		<parameter property="fullAddress"/>
+		<parameter property="createDate"/>
+		<parameter property="remark"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecquyiShiptoResultMap" type="com.yao.yz.kubauser.persistence.model.EcquyiShipto">
+		<result property="id" column="id"/>
+		<result property="userId" column="userId"/>
+		<result property="person" column="person"/>
+		<result property="contact" column="contact"/>
+		<result property="provinceName" column="provinceName"/>
+		<result property="provinceCode" column="provinceCode"/>
+		<result property="cityName" column="cityName"/>
+		<result property="cityCode" column="cityCode"/>
+		<result property="districtName" column="districtName"/>
+		<result property="districtCode" column="districtCode"/>
+		<result property="detailAddress" column="detailAddress"/>
+		<result property="fullAddress" column="fullAddress"/>
+		<result property="createDate" column="createDate"/>
+		<result property="remark" column="remark"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecquyiShiptoParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into ecquyi_shipto(`id`,`userId`,`person`,`contact`,`provinceName`,`provinceCode`,`cityName`,`cityCode`,`districtName`,`districtCode`,`detailAddress`,`fullAddress`,`createDate`,`remark`) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecquyiShiptoParameterMap">
+		update ecquyi_shipto set
+		<trim suffixOverrides=",">
+			<if test="userId != null">
+				`userId`=#{userId},
+			</if>
+			<if test="person != null">
+				`person`=#{person},
+			</if>
+			<if test="contact != null">
+				`contact`=#{contact},
+			</if>
+			<if test="provinceName != null">
+				`provinceName`=#{provinceName},
+			</if>
+			<if test="provinceCode != null">
+				`provinceCode`=#{provinceCode},
+			</if>
+			<if test="cityName != null">
+				`cityName`=#{cityName},
+			</if>
+			<if test="cityCode != null">
+				`cityCode`=#{cityCode},
+			</if>
+			<if test="districtName != null">
+				`districtName`=#{districtName},
+			</if>
+			<if test="districtCode != null">
+				`districtCode`=#{districtCode},
+			</if>
+			<if test="detailAddress != null">
+				`detailAddress`=#{detailAddress},
+			</if>
+			<if test="fullAddress != null">
+				`fullAddress`=#{fullAddress},
+			</if>
+			<if test="createDate != null">
+				`createDate`=#{createDate},
+			</if>
+			<if test="remark != null">
+				`remark`=#{remark},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ecquyi_shipto where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcquyiShiptoByKey" resultMap="ecquyiShiptoResultMap" parameterType="java.lang.Integer">
+		select `id`,`userId`,`person`,`contact`,`provinceName`,`provinceCode`,`cityName`,`cityCode`,`districtName`,`districtCode`,`detailAddress`,`fullAddress`,`createDate`,`remark` from ecquyi_shipto where `id`=#{id}
+	</select>
+
+</mapper>

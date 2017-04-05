@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.OpenVenderUserDao">
+
+	<!--属性-->
+	<parameterMap id="openVenderUserParameterMap" type="com.yao.yz.kubauser.persistence.model.OpenVenderUser">
+		<parameter property="id"/>
+		<parameter property="venderId"/>
+		<parameter property="userId"/>
+		<parameter property="userName"/>
+		<parameter property="type"/>
+		<parameter property="status"/>
+		<parameter property="mobile"/>
+		<parameter property="inputer"/>
+		<parameter property="inputTime"/>
+		<parameter property="updater"/>
+		<parameter property="updateTime"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="openVenderUserResultMap" type="com.yao.yz.kubauser.persistence.model.OpenVenderUser">
+		<result property="id" column="id"/>
+		<result property="venderId" column="vender_id"/>
+		<result property="userId" column="user_id"/>
+		<result property="userName" column="user_name"/>
+		<result property="type" column="type"/>
+		<result property="status" column="status"/>
+		<result property="mobile" column="mobile"/>
+		<result property="inputer" column="inputer"/>
+		<result property="inputTime" column="input_time"/>
+		<result property="updater" column="updater"/>
+		<result property="updateTime" column="update_time"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="openVenderUserParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into open_vender_user(`id`,`vender_id`,`user_id`,`user_name`,`type`,`status`,`mobile`,`inputer`,`input_time`,`updater`,`update_time`) values(?,?,?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="openVenderUserParameterMap">
+		update open_vender_user set
+		<trim suffixOverrides=",">
+			<if test="venderId != null">
+				`vender_id`=#{venderId},
+			</if>
+			<if test="userId != null">
+				`user_id`=#{userId},
+			</if>
+			<if test="userName != null">
+				`user_name`=#{userName},
+			</if>
+			<if test="type != null">
+				`type`=#{type},
+			</if>
+			<if test="status != null">
+				`status`=#{status},
+			</if>
+			<if test="mobile != null">
+				`mobile`=#{mobile},
+			</if>
+			<if test="inputer != null">
+				`inputer`=#{inputer},
+			</if>
+			<if test="inputTime != null">
+				`input_time`=#{inputTime},
+			</if>
+			<if test="updater != null">
+				`updater`=#{updater},
+			</if>
+			<if test="updateTime != null">
+				`update_time`=#{updateTime},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from open_vender_user where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getOpenVenderUserByKey" resultMap="openVenderUserResultMap" parameterType="java.lang.Integer">
+		select `id`,`vender_id`,`user_id`,`user_name`,`type`,`status`,`mobile`,`inputer`,`input_time`,`updater`,`update_time` from open_vender_user where `id`=#{id}
+	</select>
+
+</mapper>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.CustomerMiddleDao">
+
+	<!--属性-->
+	<parameterMap id="customerMiddleParameterMap" type="com.yao.yz.kubauser.persistence.model.CustomerMiddle">
+		<parameter property="ecuserid"/>
+		<parameter property="userName"/>
+		<parameter property="backcount"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="customerMiddleResultMap" type="com.yao.yz.kubauser.persistence.model.CustomerMiddle">
+		<result property="ecuserid" column="ecuserid"/>
+		<result property="userName" column="userName"/>
+		<result property="backcount" column="backcount"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="customerMiddleParameterMap">
+		insert into customer_middle(`ecuserid`,`userName`,`backcount`) values(?,?,?)
+		<!--没有主键-->
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="customerMiddleParameterMap">
+		update customer_middle set
+		<trim suffixOverrides=",">
+			<if test="ecuserid != null">
+				`ecuserid`=#{ecuserid},
+			</if>
+			<if test="userName != null">
+				`userName`=#{userName},
+			</if>
+			<if test="backcount != null">
+				`backcount`=#{backcount},
+			</if>
+		</trim>
+		<!--没有主键-->
+	</update>
+
+	<!--删除-->
+	<!--没有主键-->
+
+	<!--查询-->
+	<!--没有主键-->
+
+</mapper>

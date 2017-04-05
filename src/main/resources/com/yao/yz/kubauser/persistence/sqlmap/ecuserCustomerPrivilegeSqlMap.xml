@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserCustomerPrivilegeDao">
+
+	<!--属性-->
+	<parameterMap id="ecuserCustomerPrivilegeParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerPrivilege">
+		<parameter property="userName"/>
+		<parameter property="oldScore"/>
+		<parameter property="newScore"/>
+		<parameter property="runFlag"/>
+		<parameter property="id"/>
+		<parameter property="latestScore"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserCustomerPrivilegeResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerPrivilege">
+		<result property="userName" column="UserName"/>
+		<result property="oldScore" column="OldScore"/>
+		<result property="newScore" column="NewScore"/>
+		<result property="runFlag" column="RunFlag"/>
+		<result property="id" column="id"/>
+		<result property="latestScore" column="LatestScore"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserCustomerPrivilegeParameterMap" keyProperty="userName" useGeneratedKeys="true">
+		insert into ecuser_customer_privilege(`UserName`,`OldScore`,`NewScore`,`RunFlag`,`id`,`LatestScore`) values(?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserCustomerPrivilegeParameterMap">
+		update ecuser_customer_privilege set
+		<trim suffixOverrides=",">
+			<if test="oldScore != null">
+				`OldScore`=#{oldScore},
+			</if>
+			<if test="newScore != null">
+				`NewScore`=#{newScore},
+			</if>
+			<if test="runFlag != null">
+				`RunFlag`=#{runFlag},
+			</if>
+			<if test="id != null">
+				`id`=#{id},
+			</if>
+			<if test="latestScore != null">
+				`LatestScore`=#{latestScore},
+			</if>
+		</trim>
+		where `UserName`=#{userName}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from ecuser_customer_privilege where `UserName`=#{userName}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcuserCustomerPrivilegeByKey" resultMap="ecuserCustomerPrivilegeResultMap" parameterType="string">
+		select `UserName`,`OldScore`,`NewScore`,`RunFlag`,`id`,`LatestScore` from ecuser_customer_privilege where `UserName`=#{userName}
+	</select>
+
+</mapper>

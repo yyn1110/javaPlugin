@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.WczTestDao">
+
+	<!--属性-->
+	<parameterMap id="wczTestParameterMap" type="com.yao.yz.kubauser.persistence.model.WczTest">
+		<parameter property="orderid"/>
+		<parameter property="username"/>
+		<parameter property="orderdate"/>
+		<parameter property="orderfinishtime"/>
+		<parameter property="theallmoney"/>
+		<parameter property="catname"/>
+		<parameter property="goodsname"/>
+		<parameter property="productscore"/>
+		<parameter property="orderScore"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="wczTestResultMap" type="com.yao.yz.kubauser.persistence.model.WczTest">
+		<result property="orderid" column="orderid"/>
+		<result property="username" column="username"/>
+		<result property="orderdate" column="orderdate"/>
+		<result property="orderfinishtime" column="orderfinishtime"/>
+		<result property="theallmoney" column="theallmoney"/>
+		<result property="catname" column="catname"/>
+		<result property="goodsname" column="goodsname"/>
+		<result property="productscore" column="productscore"/>
+		<result property="orderScore" column="OrderScore"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="wczTestParameterMap">
+		insert into wcz_test(`orderid`,`username`,`orderdate`,`orderfinishtime`,`theallmoney`,`catname`,`goodsname`,`productscore`,`OrderScore`) values(?,?,?,?,?,?,?,?,?)
+		<!--没有主键-->
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="wczTestParameterMap">
+		update wcz_test set
+		<trim suffixOverrides=",">
+			<if test="orderid != null">
+				`orderid`=#{orderid},
+			</if>
+			<if test="username != null">
+				`username`=#{username},
+			</if>
+			<if test="orderdate != null">
+				`orderdate`=#{orderdate},
+			</if>
+			<if test="orderfinishtime != null">
+				`orderfinishtime`=#{orderfinishtime},
+			</if>
+			<if test="theallmoney != null">
+				`theallmoney`=#{theallmoney},
+			</if>
+			<if test="catname != null">
+				`catname`=#{catname},
+			</if>
+			<if test="goodsname != null">
+				`goodsname`=#{goodsname},
+			</if>
+			<if test="productscore != null">
+				`productscore`=#{productscore},
+			</if>
+			<if test="orderScore != null">
+				`OrderScore`=#{orderScore},
+			</if>
+		</trim>
+		<!--没有主键-->
+	</update>
+
+	<!--删除-->
+	<!--没有主键-->
+
+	<!--查询-->
+	<!--没有主键-->
+
+</mapper>

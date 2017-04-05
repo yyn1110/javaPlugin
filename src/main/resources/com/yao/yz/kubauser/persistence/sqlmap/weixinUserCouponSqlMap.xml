@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.WeixinUserCouponDao">
+
+	<!--属性-->
+	<parameterMap id="weixinUserCouponParameterMap" type="com.yao.yz.kubauser.persistence.model.WeixinUserCoupon">
+		<parameter property="id"/>
+		<parameter property="openId"/>
+		<parameter property="userId"/>
+		<parameter property="batchCode"/>
+		<parameter property="getTime"/>
+		<parameter property="shopId"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="weixinUserCouponResultMap" type="com.yao.yz.kubauser.persistence.model.WeixinUserCoupon">
+		<result property="id" column="id"/>
+		<result property="openId" column="open_id"/>
+		<result property="userId" column="user_id"/>
+		<result property="batchCode" column="batch_code"/>
+		<result property="getTime" column="get_time"/>
+		<result property="shopId" column="shop_id"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="weixinUserCouponParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into weixin_user_coupon(`id`,`open_id`,`user_id`,`batch_code`,`get_time`,`shop_id`) values(?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="weixinUserCouponParameterMap">
+		update weixin_user_coupon set
+		<trim suffixOverrides=",">
+			<if test="openId != null">
+				`open_id`=#{openId},
+			</if>
+			<if test="userId != null">
+				`user_id`=#{userId},
+			</if>
+			<if test="batchCode != null">
+				`batch_code`=#{batchCode},
+			</if>
+			<if test="getTime != null">
+				`get_time`=#{getTime},
+			</if>
+			<if test="shopId != null">
+				`shop_id`=#{shopId},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from weixin_user_coupon where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getWeixinUserCouponByKey" resultMap="weixinUserCouponResultMap" parameterType="java.lang.Integer">
+		select `id`,`open_id`,`user_id`,`batch_code`,`get_time`,`shop_id` from weixin_user_coupon where `id`=#{id}
+	</select>
+
+</mapper>

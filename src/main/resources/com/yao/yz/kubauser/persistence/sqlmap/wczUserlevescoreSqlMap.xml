@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.WczUserlevescoreDao">
+
+	<!--属性-->
+	<parameterMap id="wczUserlevescoreParameterMap" type="com.yao.yz.kubauser.persistence.model.WczUserlevescore">
+		<parameter property="id"/>
+		<parameter property="userlevelid"/>
+		<parameter property="userscore"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="wczUserlevescoreResultMap" type="com.yao.yz.kubauser.persistence.model.WczUserlevescore">
+		<result property="id" column="id"/>
+		<result property="userlevelid" column="userlevelid"/>
+		<result property="userscore" column="userscore"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="wczUserlevescoreParameterMap">
+		insert into wcz_userlevescore(`id`,`userlevelid`,`userscore`) values(?,?,?)
+		<!--没有主键-->
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="wczUserlevescoreParameterMap">
+		update wcz_userlevescore set
+		<trim suffixOverrides=",">
+			<if test="id != null">
+				`id`=#{id},
+			</if>
+			<if test="userlevelid != null">
+				`userlevelid`=#{userlevelid},
+			</if>
+			<if test="userscore != null">
+				`userscore`=#{userscore},
+			</if>
+		</trim>
+		<!--没有主键-->
+	</update>
+
+	<!--删除-->
+	<!--没有主键-->
+
+	<!--查询-->
+	<!--没有主键-->
+
+</mapper>

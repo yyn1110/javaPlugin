@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.TempCouponTouserDao">
+
+	<!--属性-->
+	<parameterMap id="tempCouponTouserParameterMap" type="com.yao.yz.kubauser.persistence.model.TempCouponTouser">
+		<parameter property="username"/>
+		<parameter property="batchcode"/>
+		<parameter property="activedate"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="tempCouponTouserResultMap" type="com.yao.yz.kubauser.persistence.model.TempCouponTouser">
+		<result property="username" column="username"/>
+		<result property="batchcode" column="batchcode"/>
+		<result property="activedate" column="activedate"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="tempCouponTouserParameterMap" keyProperty="username" useGeneratedKeys="true">
+		insert into temp_coupon_touser(`username`,`batchcode`,`activedate`) values(?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="tempCouponTouserParameterMap">
+		update temp_coupon_touser set
+		<trim suffixOverrides=",">
+			<if test="batchcode != null">
+				`batchcode`=#{batchcode},
+			</if>
+			<if test="activedate != null">
+				`activedate`=#{activedate},
+			</if>
+		</trim>
+		where `username`=#{username}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from temp_coupon_touser where `username`=#{username}
+	</delete>
+
+	<!--查询-->
+	<select id="getTempCouponTouserByKey" resultMap="tempCouponTouserResultMap" parameterType="string">
+		select `username`,`batchcode`,`activedate` from temp_coupon_touser where `username`=#{username}
+	</select>
+
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.TempCouponUsernameSumDao">
+
+	<!--属性-->
+	<parameterMap id="tempCouponUsernameSumParameterMap" type="com.yao.yz.kubauser.persistence.model.TempCouponUsernameSum">
+		<parameter property="username"/>
+		<parameter property="denomination"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="tempCouponUsernameSumResultMap" type="com.yao.yz.kubauser.persistence.model.TempCouponUsernameSum">
+		<result property="username" column="username"/>
+		<result property="denomination" column="denomination"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="tempCouponUsernameSumParameterMap" keyProperty="username" useGeneratedKeys="true">
+		insert into temp_coupon_username_sum(`username`,`denomination`) values(?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="tempCouponUsernameSumParameterMap">
+		update temp_coupon_username_sum set
+		<trim suffixOverrides=",">
+			<if test="denomination != null">
+				`denomination`=#{denomination},
+			</if>
+		</trim>
+		where `username`=#{username}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from temp_coupon_username_sum where `username`=#{username}
+	</delete>
+
+	<!--查询-->
+	<select id="getTempCouponUsernameSumByKey" resultMap="tempCouponUsernameSumResultMap" parameterType="string">
+		select `username`,`denomination` from temp_coupon_username_sum where `username`=#{username}
+	</select>
+
+</mapper>

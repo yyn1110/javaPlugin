@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserCustomerUseremail201007181141Dao">
+
+	<!--属性-->
+	<parameterMap id="ecuserCustomerUseremail201007181141ParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerUseremail201007181141">
+		<parameter property="email"/>
+		<parameter property="con"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserCustomerUseremail201007181141ResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerUseremail201007181141">
+		<result property="email" column="email"/>
+		<result property="con" column="con"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserCustomerUseremail201007181141ParameterMap">
+		insert into ecuser_customer_useremail_201007181141(`email`,`con`) values(?,?)
+		<!--没有主键-->
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserCustomerUseremail201007181141ParameterMap">
+		update ecuser_customer_useremail_201007181141 set
+		<trim suffixOverrides=",">
+			<if test="email != null">
+				`email`=#{email},
+			</if>
+			<if test="con != null">
+				`con`=#{con},
+			</if>
+		</trim>
+		<!--没有主键-->
+	</update>
+
+	<!--删除-->
+	<!--没有主键-->
+
+	<!--查询-->
+	<!--没有主键-->
+
+</mapper>

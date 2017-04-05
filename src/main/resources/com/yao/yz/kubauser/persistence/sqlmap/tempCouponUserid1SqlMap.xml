@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.TempCouponUserid1Dao">
+
+	<!--属性-->
+	<parameterMap id="tempCouponUserid1ParameterMap" type="com.yao.yz.kubauser.persistence.model.TempCouponUserid1">
+		<parameter property="userid"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="tempCouponUserid1ResultMap" type="com.yao.yz.kubauser.persistence.model.TempCouponUserid1">
+		<result property="userid" column="userid"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="tempCouponUserid1ParameterMap" keyProperty="userid" useGeneratedKeys="true">
+		insert into temp_coupon_userid1(`userid`) values(?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="tempCouponUserid1ParameterMap">
+		update temp_coupon_userid1 set
+		<trim suffixOverrides=",">
+		</trim>
+		where `userid`=#{userid}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from temp_coupon_userid1 where `userid`=#{userid}
+	</delete>
+
+	<!--查询-->
+	<select id="getTempCouponUserid1ByKey" resultMap="tempCouponUserid1ResultMap" parameterType="java.lang.Integer">
+		select `userid` from temp_coupon_userid1 where `userid`=#{userid}
+	</select>
+
+</mapper>

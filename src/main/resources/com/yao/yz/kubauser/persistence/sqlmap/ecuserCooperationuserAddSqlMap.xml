@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserCooperationuserAddDao">
+
+	<!--属性-->
+	<parameterMap id="ecuserCooperationuserAddParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserCooperationuserAdd">
+		<parameter property="id"/>
+		<parameter property="platform"/>
+		<parameter property="outUserId"/>
+		<parameter property="loginName"/>
+		<parameter property="realName"/>
+		<parameter property="nickName"/>
+		<parameter property="mobile"/>
+		<parameter property="telphone"/>
+		<parameter property="email"/>
+		<parameter property="birthday"/>
+		<parameter property="originalParameter"/>
+		<parameter property="kubaUserId"/>
+		<parameter property="addTime"/>
+		<parameter property="status"/>
+		<parameter property="gender"/>
+		<parameter property="userSafeKey"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserCooperationuserAddResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserCooperationuserAdd">
+		<result property="id" column="Id"/>
+		<result property="platform" column="Platform"/>
+		<result property="outUserId" column="OutUserId"/>
+		<result property="loginName" column="LoginName"/>
+		<result property="realName" column="RealName"/>
+		<result property="nickName" column="NickName"/>
+		<result property="mobile" column="Mobile"/>
+		<result property="telphone" column="Telphone"/>
+		<result property="email" column="Email"/>
+		<result property="birthday" column="Birthday"/>
+		<result property="originalParameter" column="OriginalParameter"/>
+		<result property="kubaUserId" column="KubaUserId"/>
+		<result property="addTime" column="AddTime"/>
+		<result property="status" column="Status"/>
+		<result property="gender" column="Gender"/>
+		<result property="userSafeKey" column="UserSafeKey"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserCooperationuserAddParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into ecuser_cooperationuser_add(`Id`,`Platform`,`OutUserId`,`LoginName`,`RealName`,`NickName`,`Mobile`,`Telphone`,`Email`,`Birthday`,`OriginalParameter`,`KubaUserId`,`AddTime`,`Status`,`Gender`,`UserSafeKey`) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserCooperationuserAddParameterMap">
+		update ecuser_cooperationuser_add set
+		<trim suffixOverrides=",">
+			<if test="platform != null">
+				`Platform`=#{platform},
+			</if>
+			<if test="outUserId != null">
+				`OutUserId`=#{outUserId},
+			</if>
+			<if test="loginName != null">
+				`LoginName`=#{loginName},
+			</if>
+			<if test="realName != null">
+				`RealName`=#{realName},
+			</if>
+			<if test="nickName != null">
+				`NickName`=#{nickName},
+			</if>
+			<if test="mobile != null">
+				`Mobile`=#{mobile},
+			</if>
+			<if test="telphone != null">
+				`Telphone`=#{telphone},
+			</if>
+			<if test="email != null">
+				`Email`=#{email},
+			</if>
+			<if test="birthday != null">
+				`Birthday`=#{birthday},
+			</if>
+			<if test="originalParameter != null">
+				`OriginalParameter`=#{originalParameter},
+			</if>
+			<if test="kubaUserId != null">
+				`KubaUserId`=#{kubaUserId},
+			</if>
+			<if test="addTime != null">
+				`AddTime`=#{addTime},
+			</if>
+			<if test="status != null">
+				`Status`=#{status},
+			</if>
+			<if test="gender != null">
+				`Gender`=#{gender},
+			</if>
+			<if test="userSafeKey != null">
+				`UserSafeKey`=#{userSafeKey},
+			</if>
+		</trim>
+		where `Id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ecuser_cooperationuser_add where `Id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcuserCooperationuserAddByKey" resultMap="ecuserCooperationuserAddResultMap" parameterType="java.lang.Integer">
+		select `Id`,`Platform`,`OutUserId`,`LoginName`,`RealName`,`NickName`,`Mobile`,`Telphone`,`Email`,`Birthday`,`OriginalParameter`,`KubaUserId`,`AddTime`,`Status`,`Gender`,`UserSafeKey` from ecuser_cooperationuser_add where `Id`=#{id}
+	</select>
+
+</mapper>

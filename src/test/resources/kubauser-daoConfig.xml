@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context.xsd
+			http://www.springframework.org/schema/aop
+			http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"
+       default-init-method="init"
+       default-lazy-init="false"
+       default-destroy-method="destroy">
+
+	<!--开启注解扫描-->
+	<context:component-scan base-package="com.yao.yz.kubauser"/>
+	<!--属性加载-->
+	<bean id="jdbcConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:kubauser-db.properties</value>
+			</list>
+		</property>
+	</bean>
+	<bean id="dataSource_R_kubauser" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="${datasource_kubauser_r.driverClassName}" />
+		<property name="jdbcUrl" value="${datasource_kubauser_r.url}" />
+		<property name="user" value="${datasource_kubauser_r.username}" />
+		<property name="password" value="${datasource_kubauser_r.password}" />
+		<property name="initialPoolSize" value="${datasource_kubauser_r.initialPoolSize}" />
+		<property name="maxPoolSize" value="${datasource_kubauser_r.maxPoolSize}" />
+		<property name="minPoolSize" value="${datasource_kubauser_r.minPoolSize}" />
+		<property name="maxIdleTime" value="${datasource_kubauser_r.maxIdleTime}" />
+	</bean>
+	<bean id="dataSource_W_kubauser" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="${datasource_kubauser_w.driverClassName}" />
+		<property name="jdbcUrl" value="${datasource_kubauser_w.url}" />
+		<property name="user" value="${datasource_kubauser_w.username}" />
+		<property name="password" value="${datasource_kubauser_w.password}" />
+		<property name="initialPoolSize" value="${datasource_kubauser_w.initialPoolSize}" />
+		<property name="maxPoolSize" value="${datasource_kubauser_w.maxPoolSize}" />
+		<property name="minPoolSize" value="${datasource_kubauser_w.minPoolSize}" />
+		<property name="maxIdleTime" value="${datasource_kubauser_w.maxIdleTime}" />
+	</bean>
+
+	<!--自定义数据源，将所有的数据源都纳入自定数据源管理-->
+	<bean id="dataSource" class="com.yao.yz.kubauser.dataSource.DynamicDataSource">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<!--写数据源-->
+				<entry key="dataSource_R_kubauser" value-ref="dataSource_R_kubauser"/>
+				<!--读数据源-->
+				<entry key="dataSource_W_kubauser" value-ref="dataSource_W_kubauser"/>
+			</map>
+		</property>
+	</bean>
+	<!--配置myBatis数据库连接工厂-->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="mapperLocations" value="classpath:/com/yao/yz/kubauser/persistence/sqlmap/*.xml"/>
+	</bean>
+	<!--采用自动扫描方式创建mapper bean-->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.yao.yz.kubauser.persistence.dao"/>
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+	</bean>
+
+	<!--采用AOP注解的方式决定使用哪个数据源-->
+	<bean id="dataSourceAspect" class="com.yao.yz.kubauser.dataSource.DynamicDataSourceAspect"/>
+	<aop:config>
+		<aop:aspect id="DynamicDataSourceAspect" ref="dataSourceAspect">
+			<aop:pointcut id="dataSourcePoint" expression="execution(* com.yao.yz.kubauser.persistence.dao.*.*(..))"/>
+			<aop:before method="before" pointcut-ref="dataSourcePoint"/>
+		</aop:aspect>
+	</aop:config>
+
+</beans>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserMajiausernameDao">
+
+	<!--属性-->
+	<parameterMap id="ecuserMajiausernameParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserMajiausername">
+		<parameter property="id"/>
+		<parameter property="majianame"/>
+		<parameter property="type"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserMajiausernameResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserMajiausername">
+		<result property="id" column="id"/>
+		<result property="majianame" column="majianame"/>
+		<result property="type" column="type"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserMajiausernameParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into ecuser_majiausername(`id`,`majianame`,`type`) values(?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserMajiausernameParameterMap">
+		update ecuser_majiausername set
+		<trim suffixOverrides=",">
+			<if test="majianame != null">
+				`majianame`=#{majianame},
+			</if>
+			<if test="type != null">
+				`type`=#{type},
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ecuser_majiausername where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcuserMajiausernameByKey" resultMap="ecuserMajiausernameResultMap" parameterType="java.lang.Integer">
+		select `id`,`majianame`,`type` from ecuser_majiausername where `id`=#{id}
+	</select>
+
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "log4j.dtd">
+
+<log4j:configuration>
+	
+	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%d{HH:mm:ss.SSS\} %-5p][%t]%c{1}.%M(%L) | %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="LOGFILE" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="yz-persistence.log" />
+		<param name="DatePattern" value=".yyyyMMdd-HH" />
+		<param name="encoding" value="UTF-8"/>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[%d{HH:mm:ss.SSS\} %-5p][%t]%c{1}.%M(%L) | %m%n" />
+		</layout>
+	</appender>
+	<!-- Suppress success logging from InteractiveAuthenticationSuccessEvent -->
+	<logger name="org.springframework.security">
+		<level value="ERROR" />
+	</logger>
+
+	<logger name="org.apache">
+		<level value="ERROR" />
+	</logger>
+
+	<logger name="com.opensymphony">
+		<level value="ERROR" />
+	</logger>
+
+	<logger name="org.apache.velocity">
+		<level value="ERROR" />
+	</logger>
+
+	<logger name="org.springframework">
+		<level value="ERROR" />
+	</logger>
+
+	<logger name="net.sf">
+		<level value="ERROR" />
+	</logger>
+
+	<logger name="org.castor">
+		<level value="ERROR" />
+	</logger>
+
+	<logger name="org.exolab">
+		<level value="ERROR" />
+	</logger>
+
+	<logger name="com.ibatis" additivity="true">
+		<level value="ERROR" />
+	</logger>
+	<logger name="java.sql.Connection" additivity="true">
+		<level value="ERROR" />
+	</logger>
+	<logger name="java.sql.Statement" additivity="true">
+		<level value="ERROR" />
+	</logger>
+	<logger name="java.sql.PreparedStatement" additivity="true">
+		<level value="ERROR" />
+	</logger>
+	<logger name="java.sql.ResultSet" additivity="true">
+		<level value="ERROR" />
+	</logger>
+	<logger name="com.yao.yz.kubauser" additivity="true">
+		<level value="INFO" />
+	</logger>
+	
+	<root>
+		<level value="ERROR" />
+		<appender-ref ref="CONSOLE" />
+	</root>
+</log4j:configuration>

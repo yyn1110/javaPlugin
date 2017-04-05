@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.WczOrder2000Dao">
+
+	<!--属性-->
+	<parameterMap id="wczOrder2000ParameterMap" type="com.yao.yz.kubauser.persistence.model.WczOrder2000">
+		<parameter property="用户名"/>
+		<parameter property="真实姓名"/>
+		<parameter property="手机"/>
+		<parameter property="省"/>
+		<parameter property="市"/>
+		<parameter property="区"/>
+		<parameter property="下单时间"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="wczOrder2000ResultMap" type="com.yao.yz.kubauser.persistence.model.WczOrder2000">
+		<result property="用户名" column="用户名"/>
+		<result property="真实姓名" column="真实姓名"/>
+		<result property="手机" column="手机"/>
+		<result property="省" column="省"/>
+		<result property="市" column="市"/>
+		<result property="区" column="区"/>
+		<result property="下单时间" column="下单时间"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="wczOrder2000ParameterMap">
+		insert into wcz_order2000(`用户名`,`真实姓名`,`手机`,`省`,`市`,`区`,`下单时间`) values(?,?,?,?,?,?,?)
+		<!--没有主键-->
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="wczOrder2000ParameterMap">
+		update wcz_order2000 set
+		<trim suffixOverrides=",">
+			<if test="用户名 != null">
+				`用户名`=#{用户名},
+			</if>
+			<if test="真实姓名 != null">
+				`真实姓名`=#{真实姓名},
+			</if>
+			<if test="手机 != null">
+				`手机`=#{手机},
+			</if>
+			<if test="省 != null">
+				`省`=#{省},
+			</if>
+			<if test="市 != null">
+				`市`=#{市},
+			</if>
+			<if test="区 != null">
+				`区`=#{区},
+			</if>
+			<if test="下单时间 != null">
+				`下单时间`=#{下单时间},
+			</if>
+		</trim>
+		<!--没有主键-->
+	</update>
+
+	<!--删除-->
+	<!--没有主键-->
+
+	<!--查询-->
+	<!--没有主键-->
+
+</mapper>

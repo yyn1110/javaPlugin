@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.UserHuodongZombieDao">
+
+	<!--属性-->
+	<parameterMap id="userHuodongZombieParameterMap" type="com.yao.yz.kubauser.persistence.model.UserHuodongZombie">
+		<parameter property="id"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="userHuodongZombieResultMap" type="com.yao.yz.kubauser.persistence.model.UserHuodongZombie">
+		<result property="id" column="id"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="userHuodongZombieParameterMap" keyProperty="id" useGeneratedKeys="true">
+		insert into user_huodong_zombie(`id`) values(?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="userHuodongZombieParameterMap">
+		update user_huodong_zombie set
+		<trim suffixOverrides=",">
+		</trim>
+		where `id`=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from user_huodong_zombie where `id`=#{id}
+	</delete>
+
+	<!--查询-->
+	<select id="getUserHuodongZombieByKey" resultMap="userHuodongZombieResultMap" parameterType="string">
+		select `id` from user_huodong_zombie where `id`=#{id}
+	</select>
+
+</mapper>

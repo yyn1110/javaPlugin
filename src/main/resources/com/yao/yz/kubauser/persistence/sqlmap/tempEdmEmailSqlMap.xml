@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.TempEdmEmailDao">
+
+	<!--属性-->
+	<parameterMap id="tempEdmEmailParameterMap" type="com.yao.yz.kubauser.persistence.model.TempEdmEmail">
+		<parameter property="emailAddress"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="tempEdmEmailResultMap" type="com.yao.yz.kubauser.persistence.model.TempEdmEmail">
+		<result property="emailAddress" column="EmailAddress"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="tempEdmEmailParameterMap" keyProperty="emailAddress" useGeneratedKeys="true">
+		insert into temp_edm_email(`EmailAddress`) values(?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="tempEdmEmailParameterMap">
+		update temp_edm_email set
+		<trim suffixOverrides=",">
+		</trim>
+		where `EmailAddress`=#{emailAddress}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from temp_edm_email where `EmailAddress`=#{emailAddress}
+	</delete>
+
+	<!--查询-->
+	<select id="getTempEdmEmailByKey" resultMap="tempEdmEmailResultMap" parameterType="string">
+		select `EmailAddress` from temp_edm_email where `EmailAddress`=#{emailAddress}
+	</select>
+
+</mapper>

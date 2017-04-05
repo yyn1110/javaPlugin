@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserMiddleDao">
+
+	<!--属性-->
+	<parameterMap id="ecuserMiddleParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserMiddle">
+		<parameter property="userId"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserMiddleResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserMiddle">
+		<result property="userId" column="userId"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserMiddleParameterMap" keyProperty="userId" useGeneratedKeys="true">
+		insert into ecuser_middle(`userId`) values(?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserMiddleParameterMap">
+		update ecuser_middle set
+		<trim suffixOverrides=",">
+		</trim>
+		where `userId`=#{userId}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from ecuser_middle where `userId`=#{userId}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcuserMiddleByKey" resultMap="ecuserMiddleResultMap" parameterType="java.lang.Integer">
+		select `userId` from ecuser_middle where `userId`=#{userId}
+	</select>
+
+</mapper>

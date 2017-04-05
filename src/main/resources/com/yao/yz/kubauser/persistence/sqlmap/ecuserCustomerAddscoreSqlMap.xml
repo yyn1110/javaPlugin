@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.EcuserCustomerAddscoreDao">
+
+	<!--属性-->
+	<parameterMap id="ecuserCustomerAddscoreParameterMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerAddscore">
+		<parameter property="userId"/>
+		<parameter property="userName"/>
+		<parameter property="score"/>
+		<parameter property="runflag"/>
+		<parameter property="addTime"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="ecuserCustomerAddscoreResultMap" type="com.yao.yz.kubauser.persistence.model.EcuserCustomerAddscore">
+		<result property="userId" column="UserId"/>
+		<result property="userName" column="UserName"/>
+		<result property="score" column="Score"/>
+		<result property="runflag" column="Runflag"/>
+		<result property="addTime" column="AddTime"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="ecuserCustomerAddscoreParameterMap" keyProperty="userName" useGeneratedKeys="true">
+		insert into ecuser_customer_addscore(`UserId`,`UserName`,`Score`,`Runflag`,`AddTime`) values(?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="ecuserCustomerAddscoreParameterMap">
+		update ecuser_customer_addscore set
+		<trim suffixOverrides=",">
+			<if test="userId != null">
+				`UserId`=#{userId},
+			</if>
+			<if test="score != null">
+				`Score`=#{score},
+			</if>
+			<if test="runflag != null">
+				`Runflag`=#{runflag},
+			</if>
+			<if test="addTime != null">
+				`AddTime`=#{addTime},
+			</if>
+		</trim>
+		where `UserName`=#{userName}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="string">
+		delete from ecuser_customer_addscore where `UserName`=#{userName}
+	</delete>
+
+	<!--查询-->
+	<select id="getEcuserCustomerAddscoreByKey" resultMap="ecuserCustomerAddscoreResultMap" parameterType="string">
+		select `UserId`,`UserName`,`Score`,`Runflag`,`AddTime` from ecuser_customer_addscore where `UserName`=#{userName}
+	</select>
+
+</mapper>

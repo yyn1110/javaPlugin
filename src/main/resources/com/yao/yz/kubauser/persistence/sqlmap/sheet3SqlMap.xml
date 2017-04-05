@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yao.yz.kubauser.persistence.dao.Sheet3Dao">
+
+	<!--属性-->
+	<parameterMap id="sheet3ParameterMap" type="com.yao.yz.kubauser.persistence.model.Sheet3">
+		<parameter property="f1"/>
+	</parameterMap>
+
+	<!--数据库字段与对象属性映射-->
+	<resultMap id="sheet3ResultMap" type="com.yao.yz.kubauser.persistence.model.Sheet3">
+		<result property="f1" column="F1"/>
+	</resultMap>
+
+	<!--新增-->
+	<insert id="insert" parameterMap="sheet3ParameterMap">
+		insert into sheet3(`F1`) values(?)
+		<!--没有主键-->
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="sheet3ParameterMap">
+		update sheet3 set
+		<trim suffixOverrides=",">
+			<if test="f1 != null">
+				`F1`=#{f1},
+			</if>
+		</trim>
+		<!--没有主键-->
+	</update>
+
+	<!--删除-->
+	<!--没有主键-->
+
+	<!--查询-->
+	<!--没有主键-->
+
+</mapper>

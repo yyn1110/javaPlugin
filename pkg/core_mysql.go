@@ -30,18 +30,7 @@ const (
 	version     = "0.11"
 )
 
-//var (
-//	dbAddr      *string = flag.String("DbAddr", "10.6.80.97:3306", "The MySQL connect link.")
-//	dbUser      *string = flag.String("DbUser", "root", "The MySQL user name.")
-//	dbPassword  *string = flag.String("DbPassword", "dev123", "The MySQL password.")
-//	dbName      *string = flag.String("DbName", "yzadmin", "The DB name.")
-//	dbNameTest  *string = flag.String("dbNameTest", "", "The empty DB name for unit test.")
-//	packageName *string = flag.String("Package", "com.yao.yz", "The package name of Java classes.")
-//	maxCore     *int    = flag.Int("MaxCore", 1, "The max core number. (0: Number of CPU - 1)")
-//	prefix      *string = flag.String("Prefix", "yw", "The prefix of table name.")
-//	outputPath  *string = flag.String("OutputPath", "/Users/hujie/yizhen/tmp", "The output file path.")
-//	exclude     *string = flag.String("Exclude", "open_app_log,health_report_stats_month,drug_question_stats_month,video_stats_month", "The exclude tables name.")
-//)
+
 var (
 	dbAddr      string;
 	dbUser      string

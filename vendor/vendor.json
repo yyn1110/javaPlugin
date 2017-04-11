@@ -10,6 +10,13 @@
 			"tree": true
 		},
 		{
+			"checksumSHA1": "nHJdUDXAZiKg0gVZSMQYJGtAZek=",
+			"path": "github.com/spf13/cobra",
+			"revision": "de09d9ce07d0d8a74442cfeaa91628cf9492cc23",
+			"revisionTime": "2016-12-22T15:12:50Z",
+			"tree": true
+		},
+		{
 			"checksumSHA1": "wFqsgtKaWAc2/bZRHQyMVVNoLNE=",
 			"path": "github.com/yyn1110/logs",
 			"revision": "d18de1c7bc84de77134e54cec9820ee91b76e485",

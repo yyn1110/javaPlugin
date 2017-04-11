@@ -43,11 +43,17 @@ var (
 	outputPath  string
 	exclude     string
 	logPath string
+	createPom bool
+	jdk string
+	pomVersion string
 
 )
 func InitConfig(cmd *cobra.Command){
+	cmd.Flags().BoolVarP(&createPom,"createPom","c", false, "creaete pom ")
+	cmd.Flags().StringVar(&pomVersion,"version", "0.1", "pom version")
+	cmd.Flags().StringVar(&jdk,"jdk", "1.7", "jdk version")
 	cmd.Flags().StringVar(&dbAddr,"dbAddr", "10.6.80.97:3306", "The MySQL connect link.")
-	cmd.Flags().StringVar(&logPath,"logPath", "./logger.log", "the log file path")
+	cmd.Flags().StringVar(&logPath,"logPath", ".", "the log file path")
 	cmd.Flags().StringVar(&dbUser,"dbUser", "root", "The MySQL user name.")
 	cmd.Flags().StringVar(&dbPassword,"dbPassword", "dev123", "The MySQL password.")
 	cmd.Flags().StringVar(&dbName,"dbName", "yzadmin", "The DB name.")
@@ -62,6 +68,9 @@ func InitConfig(cmd *cobra.Command){
 type resources struct {
 	daoConfigFile   *os.File
 	daoConfigWriter *bufio.Writer
+
+	pomFile 	*os.File
+	pomWriter      *bufio.Writer
 }
 
 var (
@@ -84,13 +93,9 @@ var (
 )
 func init(){
 	log := logs.NewLogger(10000)
-	p,err:=filepath.Abs(logPath)
-	if err==nil{
-		lp := fmt.Sprint(`{"filename":"%s", "perm": "0666"}`, p)
-		log.SetLogger("file", lp)
-	}else{
-		logger.Error(err.Error())
-	}
+	p:=filepath.Join(logPath,"table2class.log")
+	lp := fmt.Sprint(`{"filename":"%s", "perm": "0666"}`, p)
+	log.SetLogger("file", lp)
 
 	log.SetLogger("console", "")
 	logger = log
@@ -110,7 +115,7 @@ func Run() {
 		runtime.GOMAXPROCS(cpu)
 	}
 	g_upperDbName = strings.ToUpper(dbName)
-	g_packageName = (packageName) + "." + (dbName)
+	g_packageName = packageName + "." + dbName
 	g_packageNamePath = strings.Replace(g_packageName, ".", string(filepath.Separator), -1)
 
 
@@ -1464,13 +1469,42 @@ func writeTestTailer(bw *bufio.Writer) {
 ////////////////////////////////////////////////////
 // Resource files
 func (res *resources) init() {
+
 	var err error
+
+	if createPom{
+		if  res.pomFile,err=os.Create(filepath.Join(outputPath,"pom.xml"));err!=nil{
+			logger.Error("Create pom file error %s" ,err.Error())
+			return
+		}
+		res.pomWriter = bufio.NewWriter(res.pomFile)
+		pomxml:=strings.Replace(POM_XML,"$(groupId)$",packageName,-1)
+		pomxml = strings.Replace(pomxml,"$(artifactId)$",dbName+"-db",-1)
+		pomxml = strings.Replace(pomxml,"$(name)$",dbName+"-persistence",-1)
+		pomxml = strings.Replace(pomxml,"$(description)$","description for this project",-1)
+		pomxml = strings.Replace(pomxml,"$(jdk)$",jdk,-1)
+		pomxml = strings.Replace(pomxml,"$(version)$",pomVersion,-1)
+
+		res.pomWriter.WriteString(pomxml)
+
+	}
+
+
+
 	if res.daoConfigFile, err = os.Create(filepath.Join(g_testResourcesPath, (dbName)+"-daoConfig.xml")); err != nil {
 		logger.Error("Create file", filepath.Join(g_testResourcesPath, (dbName)+"-daoConfig.xml"), ", error:", err.Error())
 		return
 	}
 	res.daoConfigWriter = bufio.NewWriter(res.daoConfigFile)
+	daoConfigXml:=strings.Replace(daoConfigXML,"$(packageName)$",g_packageName,-1)
+	daoConfigXml=strings.Replace(daoConfigXml,"$(properties)$",dbName+"-db.properties",-1)
+	daoConfigXml=strings.Replace(daoConfigXml,"$(dbName)$",dbName,-1)
+	daoConfigXml=strings.Replace(daoConfigXml,"$(driver)$","com.mchange.v2.c3p0.ComboPooledDataSource",-1)
+	daoConfigXml=strings.Replace(daoConfigXml,"$(classPath)$",strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/*.xml",-1)
 
+	res.daoConfigWriter.WriteString(daoConfigXml)
+
+	/*
 	res.daoConfigWriter.WriteString(`<?xml version="1.0" encoding="utf-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1639,13 +1673,16 @@ func (res *resources) init() {
 		</aop:aspect>
 	</aop:config>
 `)
+	*/
 }
 func (res *resources) writeLine(class *classDefine) {
 }
 func (res *resources) close() {
-	res.daoConfigWriter.WriteString("\n</beans>")
+	//res.daoConfigWriter.WriteString("\n</beans>")
 	res.daoConfigWriter.Flush()
 	res.daoConfigFile.Close()
+	res.pomWriter.Flush()
+	res.pomFile.Close()
 }
 
 ////////////////////////////////////////////////////

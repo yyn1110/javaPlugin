@@ -1287,7 +1287,7 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 	bw.WriteString(" objInsert = new ")
 	bw.WriteString(class.ClassName)
 	bw.WriteString("();\n\t\tsetObjVal(objInsert);\n\n")
-	bw.WriteString("\t\tLOGGER.info(\"+ [")
+	bw.WriteString("\t\tLOGGER.info(\"insert [")
 	bw.WriteString(class.ClassName)
 	bw.WriteString("]\");\n")
 

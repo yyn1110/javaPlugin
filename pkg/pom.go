@@ -59,6 +59,7 @@ const POM_XML  =`<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 		<junit_version>4.12</junit_version>
 		<aspectjweaver_version>1.6.12</aspectjweaver_version>
 		<c3p0_version>0.9.1.2</c3p0_version>
+		<druid_version>1.0.29</druid_version>
 		<mybatis_version>3.3.0</mybatis_version>
 		<mybatis_spring_version>1.2.2</mybatis_spring_version>
 	</properties>
@@ -109,6 +110,12 @@ const POM_XML  =`<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 			<artifactId>c3p0</artifactId>
 			<version>${c3p0_version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
+		<dependency>
+		    <groupId>com.alibaba</groupId>
+		    <artifactId>druid</artifactId>
+		    <version>${druid_version}</version>
+		</dependency>
 
 		<!-- 单元测试依赖jar包 -->
 		<dependency>
@@ -125,10 +132,10 @@ const POM_XML  =`<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 		</dependency>
 
 		<dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.20</version>
-        </dependency>
+            		<groupId>org.slf4j</groupId>
+            		<artifactId>slf4j-log4j12</artifactId>
+            		<version>1.7.20</version>
+        	</dependency>
 	</dependencies>
 	<distributionManagement>
 		<repository>

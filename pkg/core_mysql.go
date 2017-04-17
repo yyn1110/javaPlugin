@@ -46,11 +46,13 @@ var (
 	createPom bool
 	jdk string
 	pomVersion string
+	dbDriver string
 
 )
 func InitConfig(cmd *cobra.Command){
-	cmd.Flags().BoolVarP(&createPom,"createPom","c", false, "creaete pom ")
+	cmd.Flags().BoolVarP(&createPom,"createPom","c", false, "create pom ")
 	cmd.Flags().StringVar(&pomVersion,"version", "0.1", "pom version")
+	cmd.Flags().StringVar(&dbDriver,"dbDriver", "c3p0", "c3p0 or druid")
 	cmd.Flags().StringVar(&jdk,"jdk", "1.7", "jdk version")
 	cmd.Flags().StringVar(&dbAddr,"dbAddr", "10.6.80.97:3306", "The MySQL connect link.")
 	cmd.Flags().StringVar(&logPath,"logPath", ".", "the log file path")
@@ -81,6 +83,7 @@ var (
 	g_daoPath           string
 	g_dataSourcePath    string
 	g_myBatisPath       string
+	g_myBatisExtPath       string
 	g_testPath          string
 	g_testExceptionPath          string
 	g_mainResourcesPath string
@@ -141,6 +144,12 @@ func Run() {
 	g_myBatisPath = filepath.Join(outputPath, "src", "main", "resources", g_packageNamePath, "persistence", "sqlmap")
 	if err = os.MkdirAll(g_myBatisPath, 0777); err != nil {
 		logger.Error("Create folder", g_myBatisPath, "error:", err.Error())
+		os.Exit(-1)
+	}
+
+	g_myBatisExtPath = filepath.Join(outputPath, "src", "main", "resources", g_packageNamePath, "persistence", "sqlmap","ext")
+	if err = os.MkdirAll(g_myBatisExtPath, 0777); err != nil {
+		logger.Error("Create folder", g_myBatisExtPath, "error:", err.Error())
 		os.Exit(-1)
 	}
 	g_testPath = filepath.Join(outputPath, "src", "test", "java", g_packageNamePath)
@@ -613,17 +622,23 @@ func composeTestException(){
 	bw.Flush()
 }
 func composeDataSourceFiles() {
+	header:=packageName+"."+dbName
 	var err error
 	var file *os.File
 	var dynamicFile *os.File
 	var dynamicAspectFile *os.File
 	var dynamicAspectHolderFile *os.File
+	var interceptorFile *os.File
 	if file, err = os.Create(filepath.Join( g_dataSourcePath,"DataSource.java")); err != nil {
 		logger.Error("Create file", filepath.Join( g_dataSourcePath+"DataSource.java"), ", error:", err.Error())
 		return
 	}
 
 	defer file.Close()
+	bw := bufio.NewWriter(file)
+	text:=strings.Replace(dataSourceJava,"$(package)$",header,-1)
+	bw.WriteString(text)
+	bw.Flush()
 
 	if dynamicFile, err = os.Create(filepath.Join( g_dataSourcePath,"DynamicDataSource.java")); err != nil {
 		logger.Error("Create file", filepath.Join( g_dataSourcePath+"DynamicDataSource.java"), ", error:", err.Error())
@@ -631,8 +646,10 @@ func composeDataSourceFiles() {
 	}
 
 	defer dynamicFile.Close()
-
-
+	dybw := bufio.NewWriter(dynamicFile)
+	text1:=strings.Replace(dynamicDataSource,"$(package)$",header,-1)
+	dybw.WriteString(text1)
+	dybw.Flush()
 
 	if dynamicAspectFile, err = os.Create(filepath.Join( g_dataSourcePath,"DynamicDataSourceAspect.java")); err != nil {
 		logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSourceAspect.java"), ", error:", err.Error())
@@ -640,8 +657,10 @@ func composeDataSourceFiles() {
 	}
 
 	defer dynamicAspectFile.Close()
-
-
+	dyAsbw := bufio.NewWriter(dynamicAspectFile)
+	text2:=strings.Replace(dynamicDataSourceAspect,"$(package)$",header,-1)
+	dyAsbw.WriteString(text2)
+	dyAsbw.Flush()
 
 	if dynamicAspectHolderFile, err = os.Create(filepath.Join( g_dataSourcePath,"DynamicDataSourceHolder.java")); err != nil {
 		logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSourceHolder.java"), ", error:", err.Error())
@@ -649,106 +668,24 @@ func composeDataSourceFiles() {
 	}
 
 	defer dynamicAspectHolderFile.Close()
-
-
-	dybw := bufio.NewWriter(dynamicFile)
-	dyAsbw := bufio.NewWriter(dynamicAspectFile)
 	holder:=bufio.NewWriter(dynamicAspectHolderFile)
-	bw := bufio.NewWriter(file)
-
-	header:=packageName+"."+dbName+".dataSource"
-	bw.WriteString("package "+header+";")
-	bw.WriteString(`
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-	/**
-	* 描述: 自定义数据源注解
-	*
-	*/
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface DataSource{
-
-	String value();
-
-}
-	`)
-
-
-
-	dybw.WriteString("package "+header+";\n")
-	dybw.WriteString(`import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;`)
-	dybw.WriteString(`
-public class DynamicDataSource extends AbstractRoutingDataSource{
-   	@Override
-   	protected Object determineCurrentLookupKey() {
-       		return DynamicDataSourceHolder.getDataSource();
-    		}
-	}
-`)
-
-
-
-	dyAsbw.WriteString("package "+header+";")
-	dyAsbw.WriteString(`
-import org.apache.log4j.Logger;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.reflect.MethodSignature;
-
-import java.lang.reflect.Method;
-/**
-* 描述：自定义数据源切面
-*/
-public class DynamicDataSourceAspect {
-
-    private static final Logger logger = Logger.getLogger(DynamicDataSourceAspect.class);
-
-    public void before(JoinPoint point) {
-	Object target = point.getTarget();
-	String method = point.getSignature().getName();
-
-	Class<?>[] classz = target.getClass().getInterfaces();
-	Class<?>[] parameterTypes = ((MethodSignature) point.getSignature()).getMethod().getParameterTypes();
-	try {
-	    Method m = classz[0].getMethod(method, parameterTypes);
-	    if (m != null && m.isAnnotationPresent(DataSource.class)) {
-		DataSource data = m.getAnnotation(DataSource.class);
-		DynamicDataSourceHolder.setDataSource(data.value());
-		logger.debug("Set dataSource of SqlSession : [" + data.value() + "]");
-	    }
-	} catch (Exception e) {
-	    logger.error(e);
-	}
-    }
-}
-	`)
-
-
-	holder.WriteString("package "+header+";")
-	holder.WriteString(`
-public class DynamicDataSourceHolder {
-
-    public static final ThreadLocal<String> holder = new ThreadLocal<String>();
-
-    public static String getDataSource() {
-        return holder.get();
-    }
-
-    public static void setDataSource(String dataSourceName) {
-        holder.set(dataSourceName);
-    }
-}
-`)
-
-
-
-	bw.Flush()
-	dyAsbw.Flush()
-	dybw.Flush()
+	text3:=strings.Replace(dynamicDataSourceHolder,"$(package)$",header,-1)
+	holder.WriteString(text3)
 	holder.Flush()
+
+
+	if interceptorFile, err = os.Create(filepath.Join( g_dataSourcePath,"MybatisInterceptor.java")); err != nil {
+		logger.Error("Create file", filepath.Join(g_dataSourcePath+"MybatisInterceptor.java"), ", error:", err.Error())
+		return
+	}
+
+	defer interceptorFile.Close()
+
+	interceptor := bufio.NewWriter(interceptorFile)
+	text4:=strings.Replace(interceptorJava,"$(package)$",header,-1)
+	interceptor.WriteString(text4)
+	interceptor.Flush()
+
 }
 func composeDaoFiles(class *classDefine) {
 	var err error
@@ -1295,13 +1232,14 @@ func writeTestHeader(bw *bufio.Writer, class *classDefine) {
 	bw.WriteString("Dao;\n")
 	header:=packageName+"."+dbName+".exception"
 	bw.WriteString("import "+header+".UnitTestException;\n")
-	bw.WriteString("import org.apache.log4j.Logger;\n")
+	bw.WriteString("import org.slf4j.Logger;\n")
+	bw.WriteString("import org.slf4j.LoggerFactory;\n")
 	bw.WriteString("import org.junit.Test;\n")
 	bw.WriteString("import org.springframework.beans.factory.annotation.Autowired;\n\n")
 	bw.WriteString("public class ")
 	bw.WriteString(class.ClassName)
 	bw.WriteString("Test extends AbstractTest {\n")
-	bw.WriteString("\tprivate static final Logger LOGGER = Logger.getLogger(")
+	bw.WriteString("\tprivate static final Logger LOGGER = LoggerFactory.getLogger(")
 	bw.WriteString(class.ClassName)
 	bw.WriteString(".class);\n")
 }
@@ -1479,7 +1417,7 @@ func (res *resources) init() {
 		}
 		res.pomWriter = bufio.NewWriter(res.pomFile)
 		pomxml:=strings.Replace(POM_XML,"$(groupId)$",packageName,-1)
-		pomxml = strings.Replace(pomxml,"$(artifactId)$",dbName+"-db",-1)
+		pomxml = strings.Replace(pomxml,"$(artifactId)$",dbName,-1)
 		pomxml = strings.Replace(pomxml,"$(name)$",dbName+"-persistence",-1)
 		pomxml = strings.Replace(pomxml,"$(description)$","description for this project",-1)
 		pomxml = strings.Replace(pomxml,"$(jdk)$",jdk,-1)
@@ -1497,183 +1435,30 @@ func (res *resources) init() {
 	}
 	res.daoConfigWriter = bufio.NewWriter(res.daoConfigFile)
 	daoConfigXml:=strings.Replace(daoConfigXML,"$(packageName)$",g_packageName,-1)
+
+
+
+	daoConfigXml=strings.Replace(daoConfigXml,"$(classPath)$",strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/*.xml",-1)
+	daoConfigXml=strings.Replace(daoConfigXml,"$(classPathExt)$",strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/ext/*.xml",-1)
+
+	switch dbDriver {
+	case "c3p0":
+		daoConfigXml=strings.Replace(daoConfigXml,"$(driverExtR)$",c3p0_r,-1)
+		daoConfigXml=strings.Replace(daoConfigXml,"$(driverExtW)$",c3p0_w,-1)
+		daoConfigXml=strings.Replace(daoConfigXml,"$(init)$","",-1)
+
+		daoConfigXml=strings.Replace(daoConfigXml,"$(driver)$","com.mchange.v2.c3p0.ComboPooledDataSource",-1)
+	case "druid":
+		daoConfigXml=strings.Replace(daoConfigXml,"$(driverExtR)$",druid_r,-1)
+		daoConfigXml=strings.Replace(daoConfigXml,"$(driverExtW)$",druid_w,-1)
+		daoConfigXml=strings.Replace(daoConfigXml,"$(init)$",`init-method="init"`,-1)
+		daoConfigXml=strings.Replace(daoConfigXml,"$(driver)$","com.alibaba.druid.pool.DruidDataSource",-1)
+	}
 	daoConfigXml=strings.Replace(daoConfigXml,"$(properties)$",dbName+"-db.properties",-1)
 	daoConfigXml=strings.Replace(daoConfigXml,"$(dbName)$",dbName,-1)
-	daoConfigXml=strings.Replace(daoConfigXml,"$(driver)$","com.mchange.v2.c3p0.ComboPooledDataSource",-1)
-	daoConfigXml=strings.Replace(daoConfigXml,"$(classPath)$",strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/*.xml",-1)
 
 	res.daoConfigWriter.WriteString(daoConfigXml)
 
-	/*
-	res.daoConfigWriter.WriteString(`<?xml version="1.0" encoding="utf-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-	   xmlns:aop="http://www.springframework.org/schema/aop"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-			http://www.springframework.org/schema/context
-			http://www.springframework.org/schema/context/spring-context.xsd
-			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"
-       default-init-method="init"
-       default-lazy-init="false"
-       default-destroy-method="destroy">
-
-	<!--开启注解扫描-->
-`)
-	res.daoConfigWriter.WriteString("\t<context:component-scan base-package=\"")
-	res.daoConfigWriter.WriteString(g_packageName)
-	res.daoConfigWriter.WriteString("\"/>\n")
-	res.daoConfigWriter.WriteString(`	<!--属性加载-->
-	<bean id="jdbcConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="locations">
-			<list>
-				<value>classpath:`)
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`-db.properties</value>
-			</list>
-		</property>
-	</bean>
-`)
-	res.daoConfigWriter.WriteString("\t<bean id=\"dataSource_R_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"driverClass\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_r.driverClassName}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"jdbcUrl\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_r.url}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"user\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_r.username}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"password\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_r.password}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"initialPoolSize\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_r.initialPoolSize}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"maxPoolSize\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_r.maxPoolSize}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"minPoolSize\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_r.minPoolSize}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"maxIdleTime\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_r.maxIdleTime}" />
-`)
-	res.daoConfigWriter.WriteString("\t</bean>\n")
-
-	res.daoConfigWriter.WriteString("\t<bean id=\"dataSource_W_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"driverClass\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_w.driverClassName}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"jdbcUrl\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_w.url}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"user\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_w.username}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"password\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_w.password}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"initialPoolSize\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_w.initialPoolSize}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"maxPoolSize\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_w.maxPoolSize}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"minPoolSize\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_w.minPoolSize}" />
-`)
-	res.daoConfigWriter.WriteString("\t\t<property name=\"maxIdleTime\" value=\"${datasource_")
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`_w.maxIdleTime}" />
-`)
-	res.daoConfigWriter.WriteString("\t</bean>\n")
-	header:=packageName+"."+dbName+".dataSource"
-	res.daoConfigWriter.WriteString(`
-	<!--自定义数据源，将所有的数据源都纳入自定数据源管理-->
-	<bean id="dataSource" class="`+header+".DynamicDataSource")
-
-	res.daoConfigWriter.WriteString(`">
-		<property name="targetDataSources">
-			<map key-type="java.lang.String">
-				<!--写数据源-->
-				<entry key="dataSource_R_`)
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`" value-ref="dataSource_R_`)
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`"/>
-				<!--读数据源-->
-				<entry key="dataSource_W_`)
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`" value-ref="dataSource_W_`)
-	res.daoConfigWriter.WriteString(dbName)
-	res.daoConfigWriter.WriteString(`"/>
-			</map>
-		</property>
-	</bean>
-`)
-
-	res.daoConfigWriter.WriteString("\t<!--配置myBatis数据库连接工厂-->\n")
-	res.daoConfigWriter.WriteString("\t<bean id=\"sqlSessionFactory\" class=\"org.mybatis.spring.SqlSessionFactoryBean\">\n")
-	res.daoConfigWriter.WriteString("\t\t<property name=\"dataSource\" ref=\"dataSource\"/>\n")
-	res.daoConfigWriter.WriteString("\t\t<property name=\"mapperLocations\" value=\"classpath:/")
-	res.daoConfigWriter.WriteString(strings.Replace(g_packageName, ".", "/", -1))
-	res.daoConfigWriter.WriteString("/persistence/sqlmap/*.xml")
-	res.daoConfigWriter.WriteString("\"/>\n")
-	res.daoConfigWriter.WriteString("\t</bean>\n")
-
-	res.daoConfigWriter.WriteString("\t<!--采用自动扫描方式创建mapper bean-->\n")
-	res.daoConfigWriter.WriteString("\t<bean class=\"org.mybatis.spring.mapper.MapperScannerConfigurer\">\n")
-	res.daoConfigWriter.WriteString("\t\t<property name=\"basePackage\" value=\"")
-	res.daoConfigWriter.WriteString(g_packageName)
-	res.daoConfigWriter.WriteString(".persistence.dao\"/>\n")
-	res.daoConfigWriter.WriteString("\t\t<property name=\"sqlSessionFactoryBeanName\" value=\"sqlSessionFactory\"/>\n")
-	res.daoConfigWriter.WriteString("\t</bean>\n")
-
-
-	s:=`
-	<!--采用AOP注解的方式决定使用哪个数据源-->
-	<bean id="dataSourceAspect" class="com.yao.yz.util.datasource.DynamicDataSourceAspect"/>
-	<aop:config>
-		<aop:aspect id="DynamicDataSourceAspect" ref="dataSourceAspect">
-			<aop:pointcut id="dataSourcePoint" expression="execution(* `
-
-
-	s=strings.Replace(s,"com.yao.yz.util.datasource",header,-1)
-	res.daoConfigWriter.WriteString(s)
-
-
-
-	res.daoConfigWriter.WriteString(g_packageName)
-	res.daoConfigWriter.WriteString(`.persistence.dao.*.*(..))"/>
-			<aop:before method="before" pointcut-ref="dataSourcePoint"/>
-		</aop:aspect>
-	</aop:config>
-`)
-	*/
 }
 func (res *resources) writeLine(class *classDefine) {
 }
@@ -1703,86 +1488,8 @@ func writeLog4j() {
 	}
 	defer file.Close()
 	bw := bufio.NewWriter(file)
-	bw.WriteString(`<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "log4j.dtd">
-
-<log4j:configuration>
-	
-	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="[%d{HH:mm:ss.SSS\} %-5p][%t]%c{1}.%M(%L) | %m%n" />
-		</layout>
-	</appender>
-
-	<appender name="LOGFILE" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="File" value="yz-persistence.log" />
-		<param name="DatePattern" value=".yyyyMMdd-HH" />
-		<param name="encoding" value="UTF-8"/>
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern"
-				value="[%d{HH:mm:ss.SSS\} %-5p][%t]%c{1}.%M(%L) | %m%n" />
-		</layout>
-	</appender>
-	<!-- Suppress success logging from InteractiveAuthenticationSuccessEvent -->
-	<logger name="org.springframework.security">
-		<level value="ERROR" />
-	</logger>
-
-	<logger name="org.apache">
-		<level value="ERROR" />
-	</logger>
-
-	<logger name="com.opensymphony">
-		<level value="ERROR" />
-	</logger>
-
-	<logger name="org.apache.velocity">
-		<level value="ERROR" />
-	</logger>
-
-	<logger name="org.springframework">
-		<level value="ERROR" />
-	</logger>
-
-	<logger name="net.sf">
-		<level value="ERROR" />
-	</logger>
-
-	<logger name="org.castor">
-		<level value="ERROR" />
-	</logger>
-
-	<logger name="org.exolab">
-		<level value="ERROR" />
-	</logger>
-
-	<logger name="com.ibatis" additivity="true">
-		<level value="ERROR" />
-	</logger>
-	<logger name="java.sql.Connection" additivity="true">
-		<level value="ERROR" />
-	</logger>
-	<logger name="java.sql.Statement" additivity="true">
-		<level value="ERROR" />
-	</logger>
-	<logger name="java.sql.PreparedStatement" additivity="true">
-		<level value="ERROR" />
-	</logger>
-	<logger name="java.sql.ResultSet" additivity="true">
-		<level value="ERROR" />
-	</logger>
-	<logger name="`)
-	bw.WriteString(g_packageName)
-	bw.WriteString(`" additivity="true">
-		<level value="INFO" />
-	</logger>
-	
-	<root>
-		<level value="ERROR" />
-		<appender-ref ref="CONSOLE" />
-	</root>
-</log4j:configuration>
-`)
+	log4jxml:=strings.Replace(log4jXML,"$(packageName)$",g_packageName,-1)
+	bw.WriteString(log4jxml)
 	bw.Flush()
 }
 
@@ -1795,79 +1502,12 @@ func writeConfigProperties() {
 	}
 	defer file.Close()
 	bw := bufio.NewWriter(file)
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_r.driverClassName=com.mysql.jdbc.Driver\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_r.url=jdbc:mysql://")
-	bw.WriteString(dbAddr)
-	bw.WriteString("/")
-	if len(dbNameTest) == 0 {
-		bw.WriteString(dbName)
-	} else {
-		bw.WriteString(dbNameTest)
-	}
-	bw.WriteString("?useUnicode=true&amp;characterEncoding=UTF-8&amp;zeroDateTimeBehavior=convertToNull\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_r.username=")
-	bw.WriteString(dbUser)
-	bw.WriteString("\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_r.password=")
-	bw.WriteString(dbPassword)
-	bw.WriteString("\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_r.initialPoolSize=5\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_r.maxPoolSize=30\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_r.minPoolSize=10\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_r.maxIdleTime=300000\n")
 
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_w.driverClassName=com.mysql.jdbc.Driver\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_w.url=jdbc:mysql://")
-	bw.WriteString(dbAddr)
-	bw.WriteString("/")
-	if len(dbNameTest) == 0 {
-		bw.WriteString(dbName)
-	} else {
-		bw.WriteString(dbNameTest)
-	}
-	bw.WriteString("?useUnicode=true&amp;characterEncoding=UTF-8&amp;zeroDateTimeBehavior=convertToNull\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_w.username=")
-	bw.WriteString(dbUser)
-	bw.WriteString("\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_w.password=")
-	bw.WriteString(dbPassword)
-	bw.WriteString("\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_w.initialPoolSize=5\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_w.maxPoolSize=30\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_w.minPoolSize=10\n")
-	bw.WriteString("datasource_")
-	bw.WriteString(dbName)
-	bw.WriteString("_w.maxIdleTime=300000\n")
+	mysql_properties:=strings.Replace(ProPerties_Mysql,"$(dbAddr)$",dbAddr,-1)
+	mysql_properties=strings.Replace(mysql_properties,"$(dbUser)$",dbUser,-1)
+	mysql_properties=strings.Replace(mysql_properties,"$(dbPassword)$",dbPassword,-1)
+	mysql_properties=strings.Replace(mysql_properties,"$(dbName)$",dbName,-1)
+	bw.WriteString(mysql_properties)
 	bw.Flush()
 }
 

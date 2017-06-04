@@ -135,7 +135,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 	var tableNameFields []string
 	class.Fields = make(map[string]*tableDefineString)
 	class.TableName = tableName
-	tableNameFields, class.HasPrefix = parseName(tableName, (prefix))
+	tableNameFields, class.HasPrefix = parseName(tableName, "")
 	class.ClassName = toClassName(tableNameFields)
 	if len(class.ClassName) == 0 {
 		logger.Info("tableName:", tableName)

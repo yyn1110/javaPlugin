@@ -20,7 +20,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"table2class/pkg"
+
 
 )
 
@@ -31,10 +31,8 @@ var RootCmd = &cobra.Command{
 	Use:   "table2class",
 	Short: "db table to java class ",
 	Long: `根据数据库表生成java数据层的dao 和mapping`,
-// Uncomment the following line if your bare application
-// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		pkg.Run()
+
 	},
 }
 
@@ -56,7 +54,7 @@ func init() {
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.table2class.yaml)")
 
-	pkg.InitConfig(RootCmd)
+
 }
 
 // initConfig reads in config file and ENV variables if set.

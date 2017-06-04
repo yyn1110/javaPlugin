@@ -29,7 +29,7 @@ var (
 	dbNameTest  string
 	packageName string
 	maxCore     int
-	prefix      string
+
 	outputPath  string
 	exclude     string
 	logPath     string
@@ -81,7 +81,7 @@ func InitConfig(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&dbNameTest, "dbNameTest", "", "The empty DB name for unit test.")
 	cmd.Flags().StringVar(&packageName, "packageName", "com.yao.yz", "The package name of Java classes.")
 	cmd.Flags().IntVar(&maxCore, "maxCore", 1, "The max core number. (0: Number of CPU - 1)")
-	cmd.Flags().StringVar(&prefix, "prefix", "yw", "The prefix of table name.")
+
 	cmd.Flags().StringVar(&outputPath, "outputPath", "/Users/hujie/yizhen/tmp", "The output file path.")
 	cmd.Flags().StringVar(&exclude, "exclude", "open_app_log,health_report_stats_month,drug_question_stats_month,video_stats_month", "The exclude tables name.")
 

@@ -13,7 +13,7 @@ const log4jXML  = `<?xml version="1.0" encoding="UTF-8"?>
         </layout>
     </appender>
     <!-- 默认日志目录-->
-    <appender name="YZ-DEFAULT-CONSOLE" class="org.apache.log4j.DailyRollingFileAppender">
+    <appender name="YZ-DEFAULT-FILE" class="org.apache.log4j.DailyRollingFileAppender">
         <param name="File" value="./app/api.log"/>
         <param name="append" value="true"/>
         <param name="DatePattern" value="'info_'yyyy-MM-dd'.log'"/>
@@ -75,7 +75,7 @@ const log4jXML  = `<?xml version="1.0" encoding="UTF-8"?>
     <!-- 业务信息默认为INFO级别 -->
     <logger name="$(packageName)$" additivity="true">
         <level value="INFO"/>
-        <appender-ref ref="YZ-DEFAULT-CONSOLE"/>
+        <appender-ref ref="YZ-DEFAULT-FILE"/>
     </logger>
 
     <root>

@@ -95,7 +95,7 @@ const c3p0_r=`<!-- 基本属性 url、user、password -->
 		 <!-- 配置获取连接等待超时的时间 -->
 		<property name="maxIdleTime" value="${datasource_$(dbName)$_r.maxIdleTime}" />
 		`
-const c3p0_w=`<!-- 基本属性 url、user、password -->
+const c3p0_w=`          <!-- 基本属性 url、user、password -->
 		<property name="driverClass" value="${datasource_$(dbName)$_w.driverClassName}" />
 		<property name="jdbcUrl" value="${datasource_$(dbName)$_w.url}" />
 		<property name="user" value="${datasource_$(dbName)$_w.username}" />
@@ -107,7 +107,7 @@ const c3p0_w=`<!-- 基本属性 url、user、password -->
 		<!-- 配置获取连接等待超时的时间 -->
 		<property name="maxIdleTime" value="${datasource_$(dbName)$_w.maxIdleTime}" />
 		`
-const druid_r=`<!-- 基本属性 url、user、password -->
+const druid_r=`           <!-- 基本属性 url、user、password -->
 		<property name="driverClassName" value="${datasource_$(dbName)$_r.driverClassName}" />
 		<property name="url" value="${datasource_$(dbName)$_r.url}" />
 		<property name="username" value="${datasource_$(dbName)$_r.username}" />

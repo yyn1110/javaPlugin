@@ -12,7 +12,7 @@ const log4jXML  = `<?xml version="1.0" encoding="UTF-8"?>
             <param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss}] [%c] [%L] %p [%m]%n"/>
         </layout>
     </appender>
-    <!-- mobile 默认日志目录-->
+    <!-- 默认日志目录-->
     <appender name="YZ-DEFAULT-CONSOLE" class="org.apache.log4j.DailyRollingFileAppender">
         <param name="File" value="./app/api.log"/>
         <param name="append" value="true"/>

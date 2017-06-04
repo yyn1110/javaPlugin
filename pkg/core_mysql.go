@@ -9,50 +9,18 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/signal"
+
 	"path/filepath"
 
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
+
 	"time"
 	"unicode"
 
 	_ "github.com/go-sql-driver/mysql"
-
-
 )
-
-
-
-func Run() {
-	initEnviroment()
-	dbURL := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8", (dbUser), (dbPassword), (dbAddr), (dbName))
-	logger.Info(dbURL)
-	var dbConn *sql.DB
-	dbConn, err := sql.Open("mysql", dbURL)
-	if err != nil {
-		logger.Error("Connect database:", dbURL, "Error:", err.Error())
-		os.Exit(-1)
-	}
-	defer dbConn.Close()
-
-	var wg sync.WaitGroup
-	go run(dbConn, &wg)
-	time.Sleep(time.Second)
-	ch := make(chan os.Signal)
-	signal.Notify(ch, syscall.SIGINT)
-	finishChannel := make(chan bool)
-	go wait(&wg, finishChannel)
-	select {
-	case <-ch:
-		logger.Info("Canceled by user.")
-		os.Exit(-1)
-	case <-finishChannel:
-		logger.Info("Convert finished successfully!")
-	}
-}
 
 func wait(wg *sync.WaitGroup, ch chan<- bool) {
 	wg.Wait()
@@ -193,46 +161,52 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			tds.Type = FIELD_TYPE_STRING
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
+			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "text") {
 			tds.Type = FIELD_TYPE_STRING
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName)
+			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "char") {
 			tds.Type = FIELD_TYPE_STRING
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
-		} else if strings.HasSuffix(tds.DbTypeString, "text"){
-			tds.Type = FIELD_TYPE_STRING
-			tds.TypeString = "String"
-			tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName)
-		} else if strings.HasPrefix(tds.DbTypeString, "int") {
+			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+		}  else if strings.HasPrefix(tds.DbTypeString, "int") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("%d", index+1)
+			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "tinyint") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("%d", index+1)
+			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "smallint") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("%d", index+1)
+			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "mediumint") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("%d", index+1)
+			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "bigint") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("%d", index+1)
+			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "float") {
 			tds.Type = FIELD_TYPE_FLOAT
 			tds.TypeString = "Float"
 			tds.TestValue = fmt.Sprintf("%d.0f", index+1)
+			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "double") {
 			tds.Type = FIELD_TYPE_DOUBLE
 			tds.TypeString = "Double"
 			tds.TestValue = fmt.Sprintf("%d.0", index+1)
+			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "decimal") {
 			tds.Type = FIELD_TYPE_BID_DECIMAL
 			tds.TypeString = "java.math.BigDecimal"
@@ -270,9 +244,10 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else {
 			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("==========")
 			continue
 		}
-
+		logger.Info("keyName = %s tds = %v",keyName,tds)
 		tds.Null = string(td.Null)
 		tds.Key = string(td.Key)
 		tds.Default = string(td.Default)
@@ -281,6 +256,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			tds.AutoIncrement = true
 		}
 		class.Fields[keyName] = &tds
+
 		switch tds.Key {
 		case "PRI":
 			class.PrimaryKey = &tds
@@ -344,7 +320,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			logger.Info("|odd key: Multi Key")
 		}
 		if class.PrimaryKey == nil && len(class.UnionKeys) == 0 {
-			logger.Info("%s|%s||odd key: No Key", tableName, class.ClassName)
+			logger.Info("%s|%s||odd key: No Key %v", tableName, class.ClassName,class.Fields)
 		}
 	}
 	if class.PrimaryKey != nil {
@@ -438,19 +414,19 @@ func composeClassFile(class *classDefine) {
 	writeClassTailer(bw)
 	bw.Flush()
 }
-func composeTestException(){
+func composeTestException() {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_testExceptionPath,"UnitTestException.java")); err != nil {
-		logger.Error("Create file", filepath.Join( g_dataSourcePath+"UnitTestException.java"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_testExceptionPath, "UnitTestException.java")); err != nil {
+		logger.Error("Create file", filepath.Join(g_dataSourcePath+"UnitTestException.java"), ", error:", err.Error())
 		return
 	}
 
 	defer file.Close()
 	bw := bufio.NewWriter(file)
 
-	header:=packageName+"."+dbName+".exception"
-	bw.WriteString("package "+header+";")
+	header := packageName + "." + dbName + ".exception"
+	bw.WriteString("package " + header + ";")
 	bw.WriteString(`
 	public class UnitTestException extends Exception {
 	private static final long serialVersionUID = -6233799140764822106L;
@@ -472,59 +448,58 @@ func composeTestException(){
 	bw.Flush()
 }
 func composeDataSourceFiles() {
-	header:=packageName+"."+dbName
+	header := packageName + "." + dbName
 	var err error
 	var file *os.File
 	var dynamicFile *os.File
 	var dynamicAspectFile *os.File
 	var dynamicAspectHolderFile *os.File
 	var interceptorFile *os.File
-	if file, err = os.Create(filepath.Join( g_dataSourcePath,"DataSource.java")); err != nil {
-		logger.Error("Create file", filepath.Join( g_dataSourcePath+"DataSource.java"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_dataSourcePath, "DataSource.java")); err != nil {
+		logger.Error("Create file", filepath.Join(g_dataSourcePath+"DataSource.java"), ", error:", err.Error())
 		return
 	}
 
 	defer file.Close()
 	bw := bufio.NewWriter(file)
-	text:=strings.Replace(dataSourceJava,"$(package)$",header,-1)
+	text := strings.Replace(dataSourceJava, "$(package)$", header, -1)
 	bw.WriteString(text)
 	bw.Flush()
 
-	if dynamicFile, err = os.Create(filepath.Join( g_dataSourcePath,"DynamicDataSource.java")); err != nil {
-		logger.Error("Create file", filepath.Join( g_dataSourcePath+"DynamicDataSource.java"), ", error:", err.Error())
+	if dynamicFile, err = os.Create(filepath.Join(g_dataSourcePath, "DynamicDataSource.java")); err != nil {
+		logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSource.java"), ", error:", err.Error())
 		return
 	}
 
 	defer dynamicFile.Close()
 	dybw := bufio.NewWriter(dynamicFile)
-	text1:=strings.Replace(dynamicDataSource,"$(package)$",header,-1)
+	text1 := strings.Replace(dynamicDataSource, "$(package)$", header, -1)
 	dybw.WriteString(text1)
 	dybw.Flush()
 
-	if dynamicAspectFile, err = os.Create(filepath.Join( g_dataSourcePath,"DynamicDataSourceAspect.java")); err != nil {
+	if dynamicAspectFile, err = os.Create(filepath.Join(g_dataSourcePath, "DynamicDataSourceAspect.java")); err != nil {
 		logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSourceAspect.java"), ", error:", err.Error())
 		return
 	}
 
 	defer dynamicAspectFile.Close()
 	dyAsbw := bufio.NewWriter(dynamicAspectFile)
-	text2:=strings.Replace(dynamicDataSourceAspect,"$(package)$",header,-1)
+	text2 := strings.Replace(dynamicDataSourceAspect, "$(package)$", header, -1)
 	dyAsbw.WriteString(text2)
 	dyAsbw.Flush()
 
-	if dynamicAspectHolderFile, err = os.Create(filepath.Join( g_dataSourcePath,"DynamicDataSourceHolder.java")); err != nil {
+	if dynamicAspectHolderFile, err = os.Create(filepath.Join(g_dataSourcePath, "DynamicDataSourceHolder.java")); err != nil {
 		logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSourceHolder.java"), ", error:", err.Error())
 		return
 	}
 
 	defer dynamicAspectHolderFile.Close()
-	holder:=bufio.NewWriter(dynamicAspectHolderFile)
-	text3:=strings.Replace(dynamicDataSourceHolder,"$(package)$",header,-1)
+	holder := bufio.NewWriter(dynamicAspectHolderFile)
+	text3 := strings.Replace(dynamicDataSourceHolder, "$(package)$", header, -1)
 	holder.WriteString(text3)
 	holder.Flush()
 
-
-	if interceptorFile, err = os.Create(filepath.Join( g_dataSourcePath,"MybatisInterceptor.java")); err != nil {
+	if interceptorFile, err = os.Create(filepath.Join(g_dataSourcePath, "MybatisInterceptor.java")); err != nil {
 		logger.Error("Create file", filepath.Join(g_dataSourcePath+"MybatisInterceptor.java"), ", error:", err.Error())
 		return
 	}
@@ -532,7 +507,7 @@ func composeDataSourceFiles() {
 	defer interceptorFile.Close()
 
 	interceptor := bufio.NewWriter(interceptorFile)
-	text4:=strings.Replace(interceptorJava,"$(package)$",header,-1)
+	text4 := strings.Replace(interceptorJava, "$(package)$", header, -1)
 	interceptor.WriteString(text4)
 	interceptor.Flush()
 
@@ -654,6 +629,7 @@ func writeClassHeader(bw *bufio.Writer, class *classDefine) {
 func writeClassFields(bw *bufio.Writer, class *classDefine) {
 	hash := md5.New()
 	hash.Write([]byte(class.ClassName))
+	logger.Info("====%v   %v",class.Names,class.Fields)
 	for _, fieldName := range class.Names {
 		logger.Info(class.ClassName + "::" + fieldName)
 		field := class.Fields[fieldName]
@@ -721,11 +697,11 @@ func writeClassTailer(bw *bufio.Writer) {
 ////////////////////////////////
 // DAO file
 func writeDaoHeader(bw *bufio.Writer, class *classDefine) {
-	header:=packageName+"."+dbName+".dataSource"
+	header := packageName + "." + dbName + ".dataSource"
 	bw.WriteString(`package `)
 	bw.WriteString(g_packageName)
 	bw.WriteString(".persistence.dao;\n\n")
-	bw.WriteString("import "+header+".DataSource;\n")
+	bw.WriteString("import " + header + ".DataSource;\n")
 	bw.WriteString("import ")
 	bw.WriteString(g_packageName)
 	bw.WriteString(".persistence.model.")
@@ -1072,24 +1048,24 @@ func writeMappingTailer(bw *bufio.Writer) {
 ////////////////////////////////
 // Test file
 func writeTestHeader(bw *bufio.Writer, class *classDefine) {
-	bw.WriteString(`package `+g_packageName+";\n\n")
-	bw.WriteString("import "+g_packageName+".persistence.model."+class.ClassName+";\n")
-	bw.WriteString("import "+g_packageName+".persistence.dao."+class.ClassName+"Dao;\n")
-	header:=packageName+"."+dbName+".exception"
-	bw.WriteString("import "+header+".UnitTestException;\n")
+	bw.WriteString(`package ` + g_packageName + ";\n\n")
+	bw.WriteString("import " + g_packageName + ".persistence.model." + class.ClassName + ";\n")
+	bw.WriteString("import " + g_packageName + ".persistence.dao." + class.ClassName + "Dao;\n")
+	header := packageName + "." + dbName + ".exception"
+	bw.WriteString("import " + header + ".UnitTestException;\n")
 	bw.WriteString("import org.slf4j.Logger;\n")
 	bw.WriteString("import org.slf4j.LoggerFactory;\n")
 	bw.WriteString("import org.junit.Test;\n")
 	bw.WriteString("import org.springframework.beans.factory.annotation.Autowired;\n\n")
-	bw.WriteString("public class "+class.ClassName+"Test extends AbstractTest {\n")
-	bw.WriteString("\tprivate static final Logger logger = LoggerFactory.getLogger("+class.ClassName+".class);\n")
+	bw.WriteString("public class " + class.ClassName + "Test extends AbstractTest {\n")
+	bw.WriteString("\tprivate static final Logger logger = LoggerFactory.getLogger(" + class.ClassName + ".class);\n")
 }
 func writeTestBody(bw *bufio.Writer, class *classDefine) {
 	bw.WriteString("\t@Autowired\n")
-	bw.WriteString("\tprivate "+class.ClassName+"Dao dao;\n")
+	bw.WriteString("\tprivate " + class.ClassName + "Dao dao;\n")
 
 	// setObjVal function
-	bw.WriteString("\n\tprivate void setObjVal("+class.ClassName+" sObj) {\n")
+	bw.WriteString("\n\tprivate void setObjVal(" + class.ClassName + " sObj) {\n")
 
 	index := 0
 	keyType := "Integer"
@@ -1107,7 +1083,7 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 		if field == class.PrimaryKey {
 			keyValue = field.TestValue
 		}
-		bw.WriteString("\t\tsObj.set"+field.MethodName+"("+field.TestValue+");\n")
+		bw.WriteString("\t\tsObj.set" + field.MethodName + "(" + field.TestValue + ");\n")
 		index++
 	}
 	for _, field := range class.UnionKeys {
@@ -1118,7 +1094,7 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 
 	// Test case
 	bw.WriteString("\t@Test\n\tpublic void testCase() throws UnitTestException {\n")
-	new:=fmt.Sprintf("\t\t%s  objInsert = new %s();\n",class.ClassName,class.ClassName)
+	new := fmt.Sprintf("\t\t%s  objInsert = new %s();\n", class.ClassName, class.ClassName)
 	//bw.WriteString(class.ClassName+" objInsert = new "+class.ClassName+"")
 	//bw.WriteString(" objInsert = new ")
 	bw.WriteString(new)
@@ -1247,52 +1223,48 @@ func (res *resources) init() {
 
 	var err error
 
-	if createPom{
-		if  res.pomFile,err=os.Create(filepath.Join(outputPath,"pom.xml"));err!=nil{
-			logger.Error("Create pom file error %s" ,err.Error())
+	if createPom {
+		if res.pomFile, err = os.Create(filepath.Join(outputPath, "pom.xml")); err != nil {
+			logger.Error("Create pom file error %s", err.Error())
 			return
 		}
 		res.pomWriter = bufio.NewWriter(res.pomFile)
-		pomxml:=strings.Replace(POM_XML,"$(groupId)$",packageName,-1)
-		pomxml = strings.Replace(pomxml,"$(artifactId)$",dbName,-1)
-		pomxml = strings.Replace(pomxml,"$(name)$",dbName+"-persistence",-1)
-		pomxml = strings.Replace(pomxml,"$(description)$","description for this project",-1)
-		pomxml = strings.Replace(pomxml,"$(jdk)$",jdk,-1)
-		pomxml = strings.Replace(pomxml,"$(version)$",pomVersion,-1)
+		pomxml := strings.Replace(POM_XML, "$(groupId)$", packageName, -1)
+		pomxml = strings.Replace(pomxml, "$(artifactId)$", dbName, -1)
+		pomxml = strings.Replace(pomxml, "$(name)$", dbName+"-persistence", -1)
+		pomxml = strings.Replace(pomxml, "$(description)$", "description for this project", -1)
+		pomxml = strings.Replace(pomxml, "$(jdk)$", jdk, -1)
+		pomxml = strings.Replace(pomxml, "$(version)$", pomVersion, -1)
 
 		res.pomWriter.WriteString(pomxml)
 
 	}
-
-
 
 	if res.daoConfigFile, err = os.Create(filepath.Join(g_testResourcesPath, (dbName)+"-daoConfig.xml")); err != nil {
 		logger.Error("Create file", filepath.Join(g_testResourcesPath, (dbName)+"-daoConfig.xml"), ", error:", err.Error())
 		return
 	}
 	res.daoConfigWriter = bufio.NewWriter(res.daoConfigFile)
-	daoConfigXml:=strings.Replace(daoConfigXML,"$(packageName)$",g_packageName,-1)
+	daoConfigXml := strings.Replace(daoConfigXML, "$(packageName)$", g_packageName, -1)
 
-
-
-	daoConfigXml=strings.Replace(daoConfigXml,"$(classPath)$",strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/*.xml",-1)
-	daoConfigXml=strings.Replace(daoConfigXml,"$(classPathExt)$",strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/ext/*.xml",-1)
+	daoConfigXml = strings.Replace(daoConfigXml, "$(classPath)$", strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/*.xml", -1)
+	daoConfigXml = strings.Replace(daoConfigXml, "$(classPathExt)$", strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/ext/*.xml", -1)
 
 	switch dbDriver {
 	case "c3p0":
-		daoConfigXml=strings.Replace(daoConfigXml,"$(driverExtR)$",c3p0_r,-1)
-		daoConfigXml=strings.Replace(daoConfigXml,"$(driverExtW)$",c3p0_w,-1)
-		daoConfigXml=strings.Replace(daoConfigXml,"$(init)$","",-1)
+		daoConfigXml = strings.Replace(daoConfigXml, "$(driverExtR)$", c3p0_r, -1)
+		daoConfigXml = strings.Replace(daoConfigXml, "$(driverExtW)$", c3p0_w, -1)
+		daoConfigXml = strings.Replace(daoConfigXml, "$(init)$", "", -1)
 
-		daoConfigXml=strings.Replace(daoConfigXml,"$(driver)$","com.mchange.v2.c3p0.ComboPooledDataSource",-1)
+		daoConfigXml = strings.Replace(daoConfigXml, "$(driver)$", "com.mchange.v2.c3p0.ComboPooledDataSource", -1)
 	case "druid":
-		daoConfigXml=strings.Replace(daoConfigXml,"$(driverExtR)$",druid_r,-1)
-		daoConfigXml=strings.Replace(daoConfigXml,"$(driverExtW)$",druid_w,-1)
-		daoConfigXml=strings.Replace(daoConfigXml,"$(init)$",`init-method="init"`,-1)
-		daoConfigXml=strings.Replace(daoConfigXml,"$(driver)$","com.alibaba.druid.pool.DruidDataSource",-1)
+		daoConfigXml = strings.Replace(daoConfigXml, "$(driverExtR)$", druid_r, -1)
+		daoConfigXml = strings.Replace(daoConfigXml, "$(driverExtW)$", druid_w, -1)
+		daoConfigXml = strings.Replace(daoConfigXml, "$(init)$", `init-method="init"`, -1)
+		daoConfigXml = strings.Replace(daoConfigXml, "$(driver)$", "com.alibaba.druid.pool.DruidDataSource", -1)
 	}
-	daoConfigXml=strings.Replace(daoConfigXml,"$(properties)$",dbName+"-db.properties",-1)
-	daoConfigXml=strings.Replace(daoConfigXml,"$(dbName)$",dbName,-1)
+	daoConfigXml = strings.Replace(daoConfigXml, "$(properties)$", dbName+"-db.properties", -1)
+	daoConfigXml = strings.Replace(daoConfigXml, "$(dbName)$", dbName, -1)
 
 	res.daoConfigWriter.WriteString(daoConfigXml)
 
@@ -1325,7 +1297,7 @@ func writeLog4j() {
 	}
 	defer file.Close()
 	bw := bufio.NewWriter(file)
-	log4jxml:=strings.Replace(log4jXML,"$(packageName)$",g_packageName,-1)
+	log4jxml := strings.Replace(log4jXML, "$(packageName)$", g_packageName, -1)
 	bw.WriteString(log4jxml)
 	bw.Flush()
 }
@@ -1340,10 +1312,10 @@ func writeConfigProperties() {
 	defer file.Close()
 	bw := bufio.NewWriter(file)
 
-	mysql_properties:=strings.Replace(ProPerties_Mysql,"$(dbAddr)$",dbAddr,-1)
-	mysql_properties=strings.Replace(mysql_properties,"$(dbUser)$",dbUser,-1)
-	mysql_properties=strings.Replace(mysql_properties,"$(dbPassword)$",dbPassword,-1)
-	mysql_properties=strings.Replace(mysql_properties,"$(dbName)$",dbName,-1)
+	mysql_properties := strings.Replace(ProPerties_Mysql, "$(dbAddr)$", dbAddr, -1)
+	mysql_properties = strings.Replace(mysql_properties, "$(dbUser)$", dbUser, -1)
+	mysql_properties = strings.Replace(mysql_properties, "$(dbPassword)$", dbPassword, -1)
+	mysql_properties = strings.Replace(mysql_properties, "$(dbName)$", dbName, -1)
 	bw.WriteString(mysql_properties)
 	bw.Flush()
 }

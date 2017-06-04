@@ -161,93 +161,93 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			tds.Type = FIELD_TYPE_STRING
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "text") {
 			tds.Type = FIELD_TYPE_STRING
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName)
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "char") {
 			tds.Type = FIELD_TYPE_STRING
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		}  else if strings.HasPrefix(tds.DbTypeString, "int") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("%d", index+1)
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "tinyint") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("%d", index+1)
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "smallint") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("%d", index+1)
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "mediumint") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("%d", index+1)
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "bigint") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("%d", index+1)
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "float") {
 			tds.Type = FIELD_TYPE_FLOAT
 			tds.TypeString = "Float"
 			tds.TestValue = fmt.Sprintf("%d.0f", index+1)
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "double") {
 			tds.Type = FIELD_TYPE_DOUBLE
 			tds.TypeString = "Double"
 			tds.TestValue = fmt.Sprintf("%d.0", index+1)
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "decimal") {
 			tds.Type = FIELD_TYPE_BID_DECIMAL
 			tds.TypeString = "java.math.BigDecimal"
 			tds.TestValue = fmt.Sprintf("new java.math.BigDecimal(%d.0)", index+1)
-			logger.Info("%s|%s|%s|odd type: BigDecimal", tableName, class.ClassName, tds.DbFieldName)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "timestamp") {
 			tds.Type = FIELD_TYPE_TIMESTAMP
 			tds.TypeString = "java.util.Date"
 			tds.TestValue = "new java.util.Date()"
-			logger.Info("%s|%s|%s|odd type: timestamp", tableName, class.ClassName, tds.DbFieldName)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "date") {
 			tds.Type = FIELD_TYPE_TIMESTAMP
 			tds.TypeString = "java.util.Date"
 			tds.TestValue = "new java.util.Date()"
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "time") {
 			tds.Type = FIELD_TYPE_TIMESTAMP
 			tds.TypeString = "java.util.Date"
 			tds.TestValue = "new java.util.Date()"
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "set") {
 			tds.Type = FIELD_TYPE_SET
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", getFirstItemFromSet(tds.DbTypeString))
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "enum") {
 			tds.Type = FIELD_TYPE_ENUM
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", getFirstItemFromSet(tds.DbTypeString))
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "point") {
 			tds.Type = FIELD_TYPE_POINT
 			tds.TypeString = "String"
 			tds.TestValue = `""` //"\"POINT(1 1)\""
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else {
-			logger.Info("%s|%s|%s|odd type: %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-			logger.Info("==========")
+			logger.Info("no support Db Type tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+
 			continue
 		}
-		logger.Info("keyName = %s tds = %v",keyName,tds)
+
 		tds.Null = string(td.Null)
 		tds.Key = string(td.Key)
 		tds.Default = string(td.Default)
@@ -297,10 +297,10 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			if len(class.UnionKeys) == 1 {
 				class.PrimaryKey = class.UnionKeys[0]
 				class.UnionKeys = nil
-				logger.Info("%s|%s|%s|odd key: Not Primary Key", tableName, class.ClassName, class.PrimaryKey.DbFieldName)
+				logger.Info("tableName = %s ClassName = %s PrimaryKey = %s DB key: Not Primary Key", tableName, class.ClassName, class.PrimaryKey.DbFieldName)
 				//fmt.Printf("table %s (class %s) only one key %s\n", class.TableName, class.ClassName, class.PrimaryKey.DbFieldName)
 			} else {
-				logger.Info("%s|%s|", tableName, class.ClassName)
+
 				for index, key := range class.UnionKeys {
 					if index > 0 {
 						fmt.Print(",")
@@ -310,7 +310,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 				logger.Info("|odd key: Union Key")
 			}
 		} else if len(class.UnionKeys) > 1 {
-			logger.Info("%s|%s|", tableName, class.ClassName)
+
 			for index, key := range class.UnionKeys {
 				if index > 0 {
 					fmt.Print(", ")
@@ -320,14 +320,14 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			logger.Info("|odd key: Multi Key")
 		}
 		if class.PrimaryKey == nil && len(class.UnionKeys) == 0 {
-			logger.Info("%s|%s||odd key: No Key %v", tableName, class.ClassName,class.Fields)
+			logger.Info("tableName = %s  ClassName %s||odd key: No Key %v", tableName, class.ClassName,class.Fields)
 		}
 	}
 	if class.PrimaryKey != nil {
 		if class.PrimaryKey.Type != FIELD_TYPE_INTEGER {
-			logger.Info("%s|%s|%s|odd key: Key type is %s", tableName, class.ClassName, class.PrimaryKey.FieldName, class.PrimaryKey.TypeString)
+			logger.Info("tableName = %s ClassName = %s PrimaryKey = %s DB key: Key type is %s", tableName, class.ClassName, class.PrimaryKey.FieldName, class.PrimaryKey.TypeString)
 		} else if !class.PrimaryKey.AutoIncrement {
-			logger.Info("%s|%s|%s|odd key: not auto increment", tableName, class.ClassName, class.PrimaryKey.FieldName)
+			logger.Info("tableName = %s ClassName = %s PrimaryKey = %s DB key: Key type is %s", tableName, class.ClassName, class.PrimaryKey.FieldName, class.PrimaryKey.TypeString)
 		}
 	}
 	/*
@@ -629,7 +629,7 @@ func writeClassHeader(bw *bufio.Writer, class *classDefine) {
 func writeClassFields(bw *bufio.Writer, class *classDefine) {
 	hash := md5.New()
 	hash.Write([]byte(class.ClassName))
-	logger.Info("====%v   %v",class.Names,class.Fields)
+
 	for _, fieldName := range class.Names {
 		logger.Info(class.ClassName + "::" + fieldName)
 		field := class.Fields[fieldName]

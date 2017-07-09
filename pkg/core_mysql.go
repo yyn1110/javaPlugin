@@ -818,6 +818,8 @@ func writeMappingHeader(bw *bufio.Writer, class *classDefine) {
 	bw.WriteString("Dao\">\n\n")
 }
 func writeMappingBody(bw *bufio.Writer, class *classDefine) {
+	bufSelectFields := new(bytes.Buffer)
+
 	bufProperty := new(bytes.Buffer)
 	bufMapping := new(bytes.Buffer)
 	bufInsert := new(bytes.Buffer)
@@ -826,7 +828,15 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 	bufDelete := new(bytes.Buffer)
 	bufSelect := new(bytes.Buffer)
 
-	bufProperty.WriteString("\t<!--属性-->\n\t<parameterMap id=\"")
+	tableSelectFileds:=fmt.Sprintf("%sTableFields",class.CamelCaseName)
+
+	bufSelectFields.WriteString("\t<!--table select 字段-->\n\t<sql id=\"")
+	bufSelectFields.WriteString(tableSelectFileds)
+	bufSelectFields.WriteString("\">")
+
+
+
+	bufProperty.WriteString("\n\t<!--属性-->\n\t<parameterMap id=\"")
 	bufProperty.WriteString(class.CamelCaseName)
 	bufProperty.WriteString("ParameterMap\" type=\"")
 	bufProperty.WriteString(g_packageName)
@@ -893,6 +903,9 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 
 	for index, fieldKey := range class.Names {
 		field := class.Fields[fieldKey]
+
+
+
 		bufProperty.WriteString("\t\t<parameter property=\"")
 		bufProperty.WriteString(field.FieldName)
 		bufProperty.WriteString("\"/>\n")
@@ -903,21 +916,24 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufMapping.WriteString(field.DbFieldName)
 		bufMapping.WriteString("\"/>\n")
 		if index > 0 {
+
 			bufInsert.WriteString(",")
 			bufInsertValue.WriteString(",")
+			bufSelectFields.WriteString(",")
 		}
+		bufSelectFields.WriteString("\n\t\t`"+field.DbFieldName+"`")
 		bufInsert.WriteString("`")
 		bufInsert.WriteString(field.DbFieldName)
 		bufInsert.WriteString("`")
 		bufInsertValue.WriteString("?")
-		if createSelect {
-			if index > 0 {
-				bufSelect.WriteString(",")
-			}
-			bufSelect.WriteString("`")
-			bufSelect.WriteString(field.DbFieldName)
-			bufSelect.WriteString("`")
-		}
+		//if createSelect {
+		//	if index > 0 {
+		//		bufSelect.WriteString(",")
+		//	}
+		//	bufSelect.WriteString("`")
+		//	bufSelect.WriteString(field.DbFieldName)
+		//	bufSelect.WriteString("`")
+		//}
 
 		if class.PrimaryKey != field {
 			bufUpdate.WriteString("\t\t\t<if test=\"")
@@ -931,11 +947,22 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 
 		index++
 	}
+	bufSelectFields.WriteString("\n\t</sql>")
+
 	bufProperty.WriteString("\t</parameterMap>\n\n")
 	bufMapping.WriteString("\t</resultMap>\n\n")
+
+
 	bufInsert.WriteString(") values(")
 	bufInsertValue.WriteTo(bufInsert)
 	bufInsert.WriteString(")\n")
+
+
+	if createSelect{
+		bufSelect.WriteString("<include refid=\"")
+		bufSelect.WriteString(tableSelectFileds)
+		bufSelect.WriteString("\"/>")
+	}
 
 	bufUpdate.WriteString("\t\t</trim>\n")
 
@@ -1027,6 +1054,8 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufSelect.WriteString("\t<!--没有主键-->\n\n")
 	}
 
+	//all fileds
+	io.Copy(bw, bufSelectFields)
 	// Properties
 	io.Copy(bw, bufProperty)
 	// Mapping

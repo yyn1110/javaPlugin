@@ -55,7 +55,7 @@ var (
 	g_daoPath           string
 	g_dataSourcePath    string
 	g_myBatisPath       string
-	g_myBatisExtPath    string
+	//g_myBatisExtPath    string
 	g_testPath          string
 	g_testExceptionPath string
 	g_mainResourcesPath string
@@ -167,11 +167,11 @@ func initEnviroment() {
 		os.Exit(-1)
 	}
 
-	g_myBatisExtPath = filepath.Join(outputPath, "src", "main", "resources", g_packageNamePath, "persistence", "sqlmap", "ext")
-	if err = os.MkdirAll(g_myBatisExtPath, 0777); err != nil {
-		logger.Error("Create folder", g_myBatisExtPath, "error:", err.Error())
-		os.Exit(-1)
-	}
+	//g_myBatisExtPath = filepath.Join(outputPath, "src", "main", "resources", g_packageNamePath, "persistence", "sqlmap", "ext")
+	//if err = os.MkdirAll(g_myBatisExtPath, 0777); err != nil {
+	//	logger.Error("Create folder", g_myBatisExtPath, "error:", err.Error())
+	//	os.Exit(-1)
+	//}
 	g_testPath = filepath.Join(outputPath, "src", "test", "java", g_packageNamePath)
 	if err = os.MkdirAll(g_testPath, 0777); err != nil {
 		logger.Error("Create folder", g_testPath, "error:", err.Error())

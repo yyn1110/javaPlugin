@@ -135,7 +135,7 @@ public class MybatisInterceptor implements Interceptor {
 		String sql = showSql(configuration, boundSql);
 		StringBuilder str = new StringBuilder(100);
 		str.append(sqlId);
-		str.append("  执行SQL:【");
+		str.append("【");
 		str.append(sql);
 		str.append("】   执行时间");
 		str.append(":");

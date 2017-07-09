@@ -1,1 +1,1 @@
-#table2class
+#golang语言开发的java插件

@@ -3,10 +3,52 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "LE7q4aPITU5N090e8Y8RdW0MNJ0=",
+			"path": "github.com/fsnotify/fsnotify",
+			"revision": "4da3e2cfbabc9f751898f250b49f2439785783a1",
+			"revisionTime": "2017-03-29T04:21:07Z",
+			"tree": true
+		},
+		{
 			"checksumSHA1": "W7OFi8RC+99JY3lVFkqL8dVhUT0=",
 			"path": "github.com/go-sql-driver/mysql",
 			"revision": "665b83488b90b902ce0a305ef6652e599771cdf9",
 			"revisionTime": "2016-11-16T07:07:42Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "+ZxL6oePzIzrNkcyzIzVd+h4shQ=",
+			"path": "github.com/hashicorp/hcl",
+			"revision": "630949a3c5fa3c613328e1b8256052cbc2327c9b",
+			"revisionTime": "2017-02-17T16:47:38Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "nw7Ho8uoUoNhcRrhKu2MvlKhJiM=",
+			"path": "github.com/magiconair/properties",
+			"revision": "51463bfca2576e06c62a8504b5c0f06d61312647",
+			"revisionTime": "2017-03-21T09:30:39Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "l+YbiNiS5UliS6RzcJcEsXT83H4=",
+			"path": "github.com/mitchellh/mapstructure",
+			"revision": "53818660ed4955e899c0bcafa97299a388bd7c8e",
+			"revisionTime": "2017-03-07T20:11:23Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "7KdFqotXHii6dAz7sOa3sb+wGSU=",
+			"path": "github.com/spf13/afero",
+			"revision": "9be650865eab0c12963d8753212f4f9c66cdcf12",
+			"revisionTime": "2017-02-17T16:41:46Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "Nhdxg1SzvXoe/5FfK3E+oItLb2s=",
+			"path": "github.com/spf13/cast",
+			"revision": "acbeb36b902d72a7a4c18e8f3241075e7ab763e4",
+			"revisionTime": "2017-04-13T08:50:28Z",
 			"tree": true
 		},
 		{
@@ -17,10 +59,45 @@
 			"tree": true
 		},
 		{
+			"checksumSHA1": "2x2OTLInT7gjDYwOK2PCfpOOhEw=",
+			"path": "github.com/spf13/jwalterweatherman",
+			"revision": "fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66",
+			"revisionTime": "2017-01-09T13:33:55Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "L7lP4S+h1mOJ7TxgaHxFuJ4MVAk=",
+			"path": "github.com/spf13/pflag",
+			"revision": "2300d0f8576fe575f71aaa5b9bbe4e1b0dc2eb51",
+			"revisionTime": "2017-04-18T05:23:14Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "qCSszDD+GOylp7oqeXNL9+7N1I0=",
+			"path": "github.com/spf13/viper",
+			"revision": "0967fc9aceab2ce9da34061253ac10fb99bba5b2",
+			"revisionTime": "2017-04-17T08:08:15Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "+LK6jdiDR3a/HF8SoN5Mf+XftU0=",
+			"path": "github.com/xordataexchange/crypt/config",
+			"revision": "b2862e3d0a775f18c7cfe02273500ae307b61218",
+			"revisionTime": "2017-06-26T21:55:01Z",
+			"tree": true
+		},
+		{
 			"checksumSHA1": "wFqsgtKaWAc2/bZRHQyMVVNoLNE=",
 			"path": "github.com/yyn1110/logs",
 			"revision": "d18de1c7bc84de77134e54cec9820ee91b76e485",
 			"revisionTime": "2017-04-05T07:13:52Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "QX69hdf0wsAInBxC21QNkmXXD4o=",
+			"path": "gopkg.in/yaml.v2",
+			"revision": "cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b",
+			"revisionTime": "2017-04-07T17:21:22Z",
 			"tree": true
 		}
 	],

@@ -25,7 +25,7 @@ import (
 var DBCmd = &cobra.Command{
 	Use:   "db",
 	Short: "create model and mapping from db ",
-	Long: `db from mysql`,
+	Long: `从数据库中生成model和mapping`,
 	Run: func(cmd *cobra.Command, args []string) {
 		pkg.Run()
 	},

@@ -29,8 +29,8 @@ var cfgFile string
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "table2class",
-	Short: "db table to java class ",
-	Long: `根据数据库表生成java数据层的dao 和mapping`,
+	Short: "spring and mybatis project",
+	Long: `一键生成项目和mapping`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 	},

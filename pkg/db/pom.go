@@ -1,4 +1,4 @@
-package pkg
+package db
 
 const POM_XML  =`<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -78,6 +78,29 @@ const POM_XML  =`<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 			<artifactId>spring-context</artifactId>
 			<version>${spring_version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${spring_version}</version>
+		</dependency>
+
+		<!-- spring单元测试依赖jar包 -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring_version}</version>
+		</dependency>
+
 		<!-- mybatis整合spring依赖jar包 -->
 		<dependency>
 			<groupId>org.mybatis</groupId>
@@ -89,14 +112,6 @@ const POM_XML  =`<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 			<artifactId>mybatis</artifactId>
 			<version>${mybatis_version}</version>
 		</dependency>
-
-		<!-- spring单元测试依赖jar包 -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>${spring_version}</version>
-		</dependency>
-
 
 		<!-- mysql数据库驱动包 -->
 		<dependency>
@@ -132,10 +147,10 @@ const POM_XML  =`<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 		</dependency>
 
 		<dependency>
-            		<groupId>org.slf4j</groupId>
-            		<artifactId>slf4j-log4j12</artifactId>
-            		<version>1.7.20</version>
-        	</dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.20</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<repository>

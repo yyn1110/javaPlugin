@@ -1,4 +1,4 @@
-package pkg
+package db
 
 
 const daoConfigXML=`<?xml version="1.0" encoding="utf-8"?>

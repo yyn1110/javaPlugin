@@ -1,4 +1,4 @@
-package pkg
+package db
 
 const ProPerties_Mysql  =
 	`#r-datasource

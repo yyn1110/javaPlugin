@@ -18,7 +18,7 @@ import (
 
 
 	"github.com/spf13/cobra"
-	"table2class/pkg"
+	"table2class/pkg/db"
 )
 
 // DBCmd represents the DB command
@@ -27,13 +27,13 @@ var DBCmd = &cobra.Command{
 	Short: "create model and mapping from db ",
 	Long: `从数据库中生成model和mapping`,
 	Run: func(cmd *cobra.Command, args []string) {
-		pkg.Run()
+		db.Run()
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(DBCmd)
-	pkg.InitConfig(DBCmd)
+	db.InitConfig(DBCmd)
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

@@ -28,7 +28,7 @@ var cfgFile string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "table2class",
+	Use:   "javaPlugin",
 	Short: "spring and mybatis project",
 	Long: `一键生成项目和mapping`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -52,7 +52,7 @@ func init() {
 	// Cobra supports Persistent Flags, which, if defined here,
 	// will be global for your application.
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.table2class.yaml)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.javaPlugin.yaml)")
 
 
 }
@@ -63,7 +63,7 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	}
 
-	viper.SetConfigName(".table2class") // name of config file (without extension)
+	viper.SetConfigName(".javaPlugin") // name of config file (without extension)
 	viper.AddConfigPath("$HOME")  // adding home directory as first search path
 	viper.AutomaticEnv()          // read in environment variables that match
 

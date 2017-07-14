@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	programName = "table2class"
+	programName = "javaPlugin"
 	version     = "0.11"
 )
 
@@ -88,7 +88,7 @@ func InitConfig(cmd *cobra.Command) {
 }
 func init() {
 	log := logs.NewLogger(10000)
-	p := filepath.Join(logPath, "table2class.log")
+	p := filepath.Join(logPath, "javaPlugin.log")
 	lp := fmt.Sprint(`{"filename":"%s", "perm": "0666"}`, p)
 	log.SetLogger("file", lp)
 

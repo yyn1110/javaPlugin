@@ -38,7 +38,7 @@ $(driverExtW)$
 	</bean>
 
 	<!--自定义数据源，将所有的数据源都纳入自定数据源管理-->
-	<bean id="dataSource" class="$(packageName)$.dataSource.DynamicDataSource">
+	<bean id="mybatis_dataSource" class="$(packageName)$.dataSource.DynamicDataSource">
 		<property name="targetDataSources">
 			<map key-type="java.lang.String">
 				<!--写数据源-->
@@ -50,7 +50,7 @@ $(driverExtW)$
 	</bean>
 	<!--配置myBatis数据库连接工厂-->
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="dataSource"/>
+		<property name="dataSource" ref="mybatis_dataSource"/>
 		<property name="mapperLocations">
 		 <list>
                 <value>
@@ -73,7 +73,7 @@ $(driverExtW)$
 
 	<!--采用AOP注解的方式决定使用哪个数据源-->
 	<bean id="dataSourceAspect" class="$(packageName)$.dataSource.DynamicDataSourceAspect"/>
-	<aop:config>
+	<aop:config proxy-target-class="false">
 		<aop:aspect id="DynamicDataSourceAspect" ref="dataSourceAspect">
 			<aop:pointcut id="dataSourcePoint" expression="execution(* $(packageName)$.persistence.dao.*.*(..))"/>
 			<aop:before method="before" pointcut-ref="dataSourcePoint"/>

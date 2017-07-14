@@ -18,7 +18,7 @@ import (
 
 
 	"github.com/spf13/cobra"
-	"table2class/pkg/db"
+	"javaPlugin/pkg/db"
 )
 
 // DBCmd represents the DB command

@@ -14,7 +14,7 @@
 
 package main
 
-import "table2class/cmd"
+import "javaPlugin/cmd"
 
 func main() {
 	cmd.Execute()

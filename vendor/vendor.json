@@ -80,6 +80,13 @@
 			"tree": true
 		},
 		{
+			"checksumSHA1": "TXlLEU/rjpg4lTmSXkoJBxgLFtU=",
+			"path": "github.com/xordataexchange/crypt/backend",
+			"revision": "b2862e3d0a775f18c7cfe02273500ae307b61218",
+			"revisionTime": "2017-06-26T21:55:01Z",
+			"tree": true
+		},
+		{
 			"checksumSHA1": "+LK6jdiDR3a/HF8SoN5Mf+XftU0=",
 			"path": "github.com/xordataexchange/crypt/config",
 			"revision": "b2862e3d0a775f18c7cfe02273500ae307b61218",

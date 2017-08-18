@@ -47,6 +47,7 @@ $(driverExtW)$
 				<entry key="dataSource_W_$(dbName)$" value-ref="dataSource_W_$(dbName)$"/>
 			</map>
 		</property>
+		<property name="defaultTargetDataSource" ref="dataSource_W_$(dbName)$"/>
 	</bean>
 	<!--配置myBatis数据库连接工厂-->
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">

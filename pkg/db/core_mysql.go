@@ -162,7 +162,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "text") {
+		} else if strings.Contains(tds.DbTypeString, "text") {
 			tds.Type = FIELD_TYPE_STRING
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName)
@@ -629,10 +629,11 @@ func writeClassHeader(bw *bufio.Writer, class *classDefine) {
 func writeClassFields(bw *bufio.Writer, class *classDefine) {
 	hash := md5.New()
 	hash.Write([]byte(class.ClassName))
-
+	logger.Info("%+v",class.Fields)
 	for _, fieldName := range class.Names {
-		logger.Info(class.ClassName + "::" + fieldName)
+
 		field := class.Fields[fieldName]
+		logger.Info(class.ClassName + "::" + fieldName +"::"+field.TypeString+"::"+field.FieldName)
 		hash.Write([]byte(field.TypeString))
 		hash.Write([]byte(field.FieldName))
 	}

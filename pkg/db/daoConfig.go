@@ -78,7 +78,7 @@ $(driverExtW)$
                 </value>
             </list>
             </property >
-              <property name="plugins">
+        <property name="plugins">
             <list>
                 <ref local="statementHandlerInterceptor"/>
             </list>

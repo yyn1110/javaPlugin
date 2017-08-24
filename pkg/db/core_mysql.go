@@ -76,22 +76,28 @@ func tableNameFilter(tableName string) bool {
 type tableDefine struct {
 	Field   []byte
 	Type    []byte
+	DBType    []byte
 	Null    []byte
 	Key     []byte
 	Default []byte
 	Extra   []byte
+	Comment   []byte
+	CharacterSetName   []byte
+	Schema   []byte
+	TableName   []byte
 }
 
 const (
-	FIELD_TYPE_STRING      = 1
-	FIELD_TYPE_INTEGER     = 2
-	FIELD_TYPE_FLOAT       = 3
-	FIELD_TYPE_TIMESTAMP   = 4
-	FIELD_TYPE_DOUBLE      = 5
-	FIELD_TYPE_ENUM        = 6
-	FIELD_TYPE_SET         = 7
-	FIELD_TYPE_POINT       = 8
-	FIELD_TYPE_BID_DECIMAL = 9
+	FIELD_TYPE_STRING      = iota
+	FIELD_TYPE_INTEGER
+	FIELD_TYPE_FLOAT
+	FIELD_TYPE_TIMESTAMP
+	FIELD_TYPE_DOUBLE
+	FIELD_TYPE_LONG
+	FIELD_TYPE_ENUM
+	FIELD_TYPE_SET
+	FIELD_TYPE_POINT
+	FIELD_TYPE_BID_DECIMAL
 )
 
 type tableDefineString struct {
@@ -100,11 +106,15 @@ type tableDefineString struct {
 	MethodName    string
 	Type          int
 	TypeString    string
+	JDBCType      string
 	DbTypeString  string
 	Null          string
 	Key           string
 	Default       string
 	Extra         string
+	Comment         string
+	CharacterSetName string
+	DBType string
 	AutoIncrement bool
 	TestValue     string
 }
@@ -126,7 +136,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 	wg.Add(1)
 	defer wg.Done()
 	var rows *sql.Rows
-	if rows, err = dbConn.Query("SHOW fields FROM " + tableName); err != nil {
+	if rows, err = dbConn.Query("select COLUMN_NAME,DATA_TYPE,IS_NULLABLE,COLUMN_KEY,COLUMN_DEFAULT,EXTRA,COLUMN_COMMENT,CHARACTER_SET_NAME,TABLE_SCHEMA,TABLE_NAME,COLUMN_TYPE from INFORMATION_SCHEMA.Columns where table_name= '" + tableName+"'"); err != nil {
 		return
 	}
 	defer rows.Close()
@@ -145,7 +155,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 	index := 0
 	for rows.Next() {
 		var tds tableDefineString
-		if err = rows.Scan(&td.Field, &td.Type, &td.Null, &td.Key, &td.Default, &td.Extra); err != nil {
+		if err = rows.Scan(&td.Field, &td.Type, &td.Null, &td.Key, &td.Default, &td.Extra,&td.Comment,&td.CharacterSetName,&td.Schema,&td.TableName,&td.DBType); err != nil {
 			logger.Error("Error parse")
 			return
 		}
@@ -160,85 +170,102 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 		if strings.HasPrefix(tds.DbTypeString, "varchar") {
 			tds.Type = FIELD_TYPE_STRING
 			tds.TypeString = "String"
-			tds.TestValue = fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
+			tds.JDBCType = "VARCHAR"
+			tds.TestValue = fmt.Sprintf("\"%s\"",tds.FieldName)//fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.Contains(tds.DbTypeString, "text") {
 			tds.Type = FIELD_TYPE_STRING
+			tds.JDBCType = "LONGVARCHAR"
 			tds.TypeString = "String"
-			tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName)
+			tds.TestValue = fmt.Sprintf("\"%s\"",tds.FieldName)//fmt.Sprintf("\"%s\"", tds.FieldName)
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "char") {
 			tds.Type = FIELD_TYPE_STRING
+			tds.JDBCType = "CHAR"
 			tds.TypeString = "String"
-			tds.TestValue = fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
+			tds.TestValue = fmt.Sprintf("\"%s\"",tds.FieldName)//fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		}  else if strings.HasPrefix(tds.DbTypeString, "int") {
 			tds.Type = FIELD_TYPE_INTEGER
+			tds.JDBCType = "INTEGER"
 			tds.TypeString = "Integer"
-			tds.TestValue = fmt.Sprintf("%d", index+1)
+			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "tinyint") {
 			tds.Type = FIELD_TYPE_INTEGER
+			tds.JDBCType = "TINYINT"
 			tds.TypeString = "Integer"
-			tds.TestValue = fmt.Sprintf("%d", index+1)
+			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "smallint") {
 			tds.Type = FIELD_TYPE_INTEGER
+			tds.JDBCType = "INTEGER"
 			tds.TypeString = "Integer"
-			tds.TestValue = fmt.Sprintf("%d", index+1)
+			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "mediumint") {
 			tds.Type = FIELD_TYPE_INTEGER
+			tds.JDBCType = "INTEGER"
 			tds.TypeString = "Integer"
-			tds.TestValue = fmt.Sprintf("%d", index+1)
+			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "bigint") {
-			tds.Type = FIELD_TYPE_INTEGER
-			tds.TypeString = "Integer"
-			tds.TestValue = fmt.Sprintf("%d", index+1)
+			tds.Type = FIELD_TYPE_LONG
+			tds.JDBCType = "BIGINT"
+			tds.TypeString = "Long"
+			tds.TestValue = fmt.Sprintf("new Long(%d)", index+1)
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "float") {
 			tds.Type = FIELD_TYPE_FLOAT
+			tds.JDBCType = "FLOAT"
 			tds.TypeString = "Float"
-			tds.TestValue = fmt.Sprintf("%d.0f", index+1)
+			tds.TestValue = fmt.Sprintf("new Float(%d.0f)", index+1)
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "double") {
 			tds.Type = FIELD_TYPE_DOUBLE
+			tds.JDBCType = "DOUBLE"
 			tds.TypeString = "Double"
-			tds.TestValue = fmt.Sprintf("%d.0", index+1)
+			tds.TestValue = fmt.Sprintf("new Double(%d.0)", index+1)
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "decimal") {
 			tds.Type = FIELD_TYPE_BID_DECIMAL
+			tds.JDBCType = "DECIMAL"
 			tds.TypeString = "java.math.BigDecimal"
 			tds.TestValue = fmt.Sprintf("new java.math.BigDecimal(%d.0)", index+1)
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "timestamp") {
 			tds.Type = FIELD_TYPE_TIMESTAMP
+			tds.JDBCType = "TIMESTAMP"
 			tds.TypeString = "java.util.Date"
 			tds.TestValue = "new java.util.Date()"
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "date") {
 			tds.Type = FIELD_TYPE_TIMESTAMP
+			tds.JDBCType = "DATE"
 			tds.TypeString = "java.util.Date"
 			tds.TestValue = "new java.util.Date()"
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "time") {
 			tds.Type = FIELD_TYPE_TIMESTAMP
+			tds.JDBCType = "TIME"
 			tds.TypeString = "java.util.Date"
 			tds.TestValue = "new java.util.Date()"
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "set") {
 			tds.Type = FIELD_TYPE_SET
+			tds.JDBCType = ""
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", getFirstItemFromSet(tds.DbTypeString))
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "enum") {
 			tds.Type = FIELD_TYPE_ENUM
+			tds.JDBCType = ""
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", getFirstItemFromSet(tds.DbTypeString))
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "point") {
 			tds.Type = FIELD_TYPE_POINT
+			tds.JDBCType = ""
 			tds.TypeString = "String"
 			tds.TestValue = `""` //"\"POINT(1 1)\""
 			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
@@ -251,7 +278,10 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 		tds.Null = string(td.Null)
 		tds.Key = string(td.Key)
 		tds.Default = string(td.Default)
-		tds.Extra = string(td.Extra)
+		tds.Extra = string(td.Type)
+		tds.DBType = string(td.DBType)
+		tds.Comment = string(td.Comment)
+		tds.CharacterSetName  =string(td.CharacterSetName)
 		if tds.Extra == "auto_increment" {
 			tds.AutoIncrement = true
 		}
@@ -343,7 +373,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 	composeTestException()
 	g_resources.writeLine(&class)
 }
-
+/*
 func getMaxLength(name, varcharString string) (result string) {
 	ss := strings.Split(varcharString, "(")
 	if len(ss) < 2 {
@@ -364,7 +394,7 @@ func getMaxLength(name, varcharString string) (result string) {
 
 	return
 }
-
+*/
 func getFirstItemFromSet(setString string) (result string) {
 	ss := strings.Split(setString, "(")
 	if len(ss) < 2 {
@@ -646,7 +676,9 @@ func writeClassFields(bw *bufio.Writer, class *classDefine) {
 		bw.WriteString(" ")
 		bw.WriteString(field.FieldName)
 		bw.WriteString("; // type in db: ")
-		bw.WriteString(field.DbTypeString)
+		bw.WriteString(field.DBType)
+		bw.WriteString("\tCharacter: "+field.CharacterSetName)
+		bw.WriteString("\tComment: "+field.Comment)
 		bw.WriteString("\n")
 	}
 	bw.WriteString("\n")
@@ -800,6 +832,12 @@ func writeDaoBody(bw *bufio.Writer, class *classDefine) {
 	} else {
 		bw.WriteString("\t/*\n\t * No primary key defined in DB table!\n\t */\n")
 	}
+	bw.WriteString(dsw)
+	bw.WriteString("\tpublic java.util.List<"+class.ClassName+"> get"+class.ClassName+"s (")
+	bw.WriteString(class.ClassName)
+	bw.WriteString(" s")
+	bw.WriteString(class.ClassName)
+	bw.WriteString(");\n")
 }
 func writeDaoTailer(bw *bufio.Writer) {
 	bw.WriteString("}\n")
@@ -828,6 +866,7 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 	bufUpdate := new(bytes.Buffer)
 	bufDelete := new(bytes.Buffer)
 	bufSelect := new(bytes.Buffer)
+	bufSelectAll := new(bytes.Buffer)
 
 	tableSelectFileds:=fmt.Sprintf("%sTableFields",class.CamelCaseName)
 
@@ -901,11 +940,16 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufSelect.WriteString("ResultMap\" parameterType=\"java.util.Map\">\n\t\tselect ")
 		createSelect = true
 	}
-
+	bufSelectAll.WriteString("\t<!--根据条件查询-->\n")
+	bufSelectAll.WriteString("\t"+`<select id="get`+class.ClassName+`s" resultMap="`+class.CamelCaseName+`ResultMap" parameterMap="`+class.CamelCaseName+`ParameterMap">`+"\n")
+	bufSelectAll.WriteString("\t\t"+`select <include refid="`+class.CamelCaseName+`TableFields"/> from `+class.TableName+" where 1=1 \n")
+	bufSelectAll.WriteString("\t\t<choose>\n")
 	for index, fieldKey := range class.Names {
 		field := class.Fields[fieldKey]
 
-
+		bufSelectAll.WriteString("\t\t\t<when test=\""+field.FieldName+" != null\">\n")
+		bufSelectAll.WriteString("\t\t\t\tAND  `"+field.DbFieldName+"`=#{"+field.FieldName+",jdbcType="+field.JDBCType+"}\n")
+		bufSelectAll.WriteString("\t\t\t</when>\n")
 
 		bufProperty.WriteString("\t\t<parameter property=\"")
 		bufProperty.WriteString(field.FieldName)
@@ -943,11 +987,15 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 			bufUpdate.WriteString(field.DbFieldName)
 			bufUpdate.WriteString("`=#{")
 			bufUpdate.WriteString(field.FieldName)
+			if len(field.JDBCType) >0{
+				bufUpdate.WriteString(",jdbcType="+field.JDBCType)
+			}
 			bufUpdate.WriteString("},\n\t\t\t</if>\n")
 		}
 
 		index++
 	}
+	bufSelectAll.WriteString("\t\t</choose>\n\t</select>\n")
 	bufSelectFields.WriteString("\n\t</sql>")
 
 	bufProperty.WriteString("\t</parameterMap>\n\n")
@@ -973,6 +1021,10 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufUpdate.WriteString(class.PrimaryKey.DbFieldName)
 		bufUpdate.WriteString("`=#{")
 		bufUpdate.WriteString(class.PrimaryKey.FieldName)
+		if len(class.PrimaryKey.JDBCType) >0{
+			bufUpdate.WriteString(",jdbcType="+class.PrimaryKey.JDBCType)
+		}
+
 		bufUpdate.WriteString("}\n\t</update>\n\n")
 
 		bufDelete.WriteString("\t<delete id=\"delete\" parameterType=\"")
@@ -991,6 +1043,9 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufDelete.WriteString(class.PrimaryKey.DbFieldName)
 		bufDelete.WriteString("`=#{")
 		bufDelete.WriteString(class.PrimaryKey.FieldName)
+		if len(class.PrimaryKey.JDBCType)>0{
+			bufDelete.WriteString(",jdbcType="+class.PrimaryKey.JDBCType)
+		}
 		bufDelete.WriteString("}\n\t</delete>\n\n")
 
 		bufSelect.WriteString(" from ")
@@ -999,6 +1054,9 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufSelect.WriteString(class.PrimaryKey.DbFieldName)
 		bufSelect.WriteString("`=#{")
 		bufSelect.WriteString(class.PrimaryKey.FieldName)
+		if len(class.PrimaryKey.JDBCType)>0{
+			bufSelect.WriteString(",jdbcType="+class.PrimaryKey.JDBCType)
+		}
 		bufSelect.WriteString("}\n\t</select>\n\n")
 	} else if len(class.UnionKeys) > 0 {
 		bufInsert.WriteString("\t\t<!--联合主键-->")
@@ -1069,6 +1127,7 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 	io.Copy(bw, bufDelete)
 	// select
 	io.Copy(bw, bufSelect)
+	io.Copy(bw, bufSelectAll)
 
 }
 func writeMappingTailer(bw *bufio.Writer) {
@@ -1184,6 +1243,14 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 			bw.WriteString("\t\t\tlogger.info(\"\tselect OK \"+objSelect.toString());\n\n")
 			bw.WriteString("\t\t}\n")
 		}
+
+		bw.WriteString("\t\tjava.util.List<"+class.ClassName+"> list = dao.get"+class.ClassName+"s(objSelect);\n")
+		bw.WriteString("\t\t");
+		bw.WriteString(`if (list !=null){
+            logger.info("	selectAll OK "+list.toString());
+        }else{
+            throw new UnitTestException("EcuserWxUserinfoTest", "test of selectAll is failed");
+        }`+"\n\n")
 
 		bw.WriteString("\t\tInteger res = dao.update(objSelect);\n")
 		bw.WriteString("\t\tif (res == null || res == 0) {\n")

@@ -1,7 +1,6 @@
-package db
+package project
 
-const ProPerties_Mysql  =
-	`#r-datasource
+const ProPerties_Mysql = `#r-datasource
 datasource_$(dbName)$_r.driverClassName=com.mysql.jdbc.Driver
 datasource_$(dbName)$_r.url=jdbc:mysql://$(dbAddr)$/$(dbName)$?useUnicode=true&amp;characterEncoding=UTF8MB4&amp;zeroDateTimeBehavior=convertToNull&amp;autoReconnectForPools=true&amp;userSSL=false
 datasource_$(dbName)$_r.username=$(dbUser)$
@@ -30,3 +29,4 @@ datasource_$(dbName)$_w.maxPoolPreparedStatementPerConnectionSize=20
 
 
 `
+

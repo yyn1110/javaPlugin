@@ -1,21 +1,23 @@
-package db
+package project
 
-
-const daoConfigXML=`<?xml version="1.0" encoding="utf-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-                           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-                           http://www.springframework.org/schema/context
-                           http://www.springframework.org/schema/context/spring-context-2.5.xsd
-                           http://www.springframework.org/schema/tx
-                           http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-                           http://www.springframework.org/schema/aop
-			               http://www.springframework.org/schema/aop/spring-aop-2.5.xsd"
-       default-init-method="init" default-lazy-init="false"
-       default-destroy-method="destroy">
+const daoConfigXML = `<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-3.1.xsd "
+		default-init-method="init" default-destroy-method="destroy" default-lazy-init="false">
        <!--开启注解扫描 -->
 	<context:annotation-config/>
 	<!--开启注解扫描-->
@@ -102,9 +104,11 @@ $(driverExtW)$
 		</aop:aspect>
 	</aop:config>
 
+$(redisConfig)$
+
 </beans>`
 
-const c3p0_r=`<!-- 基本属性 url、user、password -->
+const c3p0_r = `<!-- 基本属性 url、user、password -->
 		<property name="driverClass" value="${datasource_$(dbName)$_r.driverClassName}" />
 		<property name="jdbcUrl" value="${datasource_$(dbName)$_r.url}" />
 		<property name="user" value="${datasource_$(dbName)$_r.username}" />
@@ -117,7 +121,7 @@ const c3p0_r=`<!-- 基本属性 url、user、password -->
 		 <!-- 配置获取连接等待超时的时间 -->
 		<property name="maxIdleTime" value="${datasource_$(dbName)$_r.maxIdleTime}" />
 		`
-const c3p0_w=`          <!-- 基本属性 url、user、password -->
+const c3p0_w = `          <!-- 基本属性 url、user、password -->
 		<property name="driverClass" value="${datasource_$(dbName)$_w.driverClassName}" />
 		<property name="jdbcUrl" value="${datasource_$(dbName)$_w.url}" />
 		<property name="user" value="${datasource_$(dbName)$_w.username}" />
@@ -129,7 +133,7 @@ const c3p0_w=`          <!-- 基本属性 url、user、password -->
 		<!-- 配置获取连接等待超时的时间 -->
 		<property name="maxIdleTime" value="${datasource_$(dbName)$_w.maxIdleTime}" />
 		`
-const druid_r=`           <!-- 基本属性 url、user、password -->
+const druid_r = `           <!-- 基本属性 url、user、password -->
 		<property name="driverClassName" value="${datasource_$(dbName)$_r.driverClassName}" />
 		<property name="url" value="${datasource_$(dbName)$_r.url}" />
 		<property name="username" value="${datasource_$(dbName)$_r.username}" />
@@ -162,7 +166,8 @@ const druid_r=`           <!-- 基本属性 url、user、password -->
 
         	<!-- 配置监控统计拦截的filters -->
         	<property name="filters" value="stat"/>`
-const druid_w=`<!-- 基本属性 url、user、password -->
+
+const druid_w = `<!-- 基本属性 url、user、password -->
 		<property name="driverClassName" value="${datasource_$(dbName)$_w.driverClassName}" />
 		<property name="url" value="${datasource_$(dbName)$_w.url}" />
 		<property name="username" value="${datasource_$(dbName)$_w.username}" />

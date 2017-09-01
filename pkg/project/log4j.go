@@ -1,4 +1,4 @@
-package db
+package project
 
 const log4jXML  = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE log4j:configuration PUBLIC "-//LOGGER" "log4j.dtd">

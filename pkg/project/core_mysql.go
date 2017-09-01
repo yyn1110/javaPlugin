@@ -1,17 +1,15 @@
-package db
+package project
 
 import (
 	"bufio"
 	"bytes"
 	"crypto/md5"
 	"database/sql"
-
 	"fmt"
 	"io"
+	"javaPlugin/pkg/logs"
 	"os"
-
 	"path/filepath"
-
 	"strconv"
 	"strings"
 	"sync"
@@ -29,14 +27,14 @@ func wait(wg *sync.WaitGroup, ch chan<- bool) {
 
 func run(dbConn *sql.DB, wg *sync.WaitGroup) {
 	var err error
-	logger.Info("Begin Enter")
+	logs.Logger.Info("Begin Enter")
 	wg.Add(1)
 	defer wg.Done()
 
 	// Get tables name
 	var rows *sql.Rows
 	if rows, err = dbConn.Query("SHOW tables;"); err != nil {
-		logger.Error("SHOW tables err:", err.Error())
+		logs.Logger.Error("SHOW tables err:", err.Error())
 		return
 	}
 	defer rows.Close()
@@ -50,7 +48,7 @@ func run(dbConn *sql.DB, wg *sync.WaitGroup) {
 	var tableName string
 	for rows.Next() {
 		if err = rows.Scan(&tableName); err != nil {
-			logger.Error("rows.Scan err:", err.Error())
+			logs.Logger.Error("rows.Scan err:", err.Error())
 			return
 		}
 		if tableNameFilter(tableName) {
@@ -58,7 +56,7 @@ func run(dbConn *sql.DB, wg *sync.WaitGroup) {
 		}
 	}
 	time.Sleep(time.Second)
-	logger.Info("End")
+	logs.Logger.Info("End")
 }
 
 func tableNameFilter(tableName string) bool {
@@ -73,70 +71,13 @@ func tableNameFilter(tableName string) bool {
 	return true
 }
 
-type tableDefine struct {
-	Field   []byte
-	Type    []byte
-	DBType    []byte
-	Null    []byte
-	Key     []byte
-	Default []byte
-	Extra   []byte
-	Comment   []byte
-	CharacterSetName   []byte
-	Schema   []byte
-	TableName   []byte
-}
-
-const (
-	FIELD_TYPE_STRING      = iota
-	FIELD_TYPE_INTEGER
-	FIELD_TYPE_FLOAT
-	FIELD_TYPE_TIMESTAMP
-	FIELD_TYPE_DOUBLE
-	FIELD_TYPE_LONG
-	FIELD_TYPE_ENUM
-	FIELD_TYPE_SET
-	FIELD_TYPE_POINT
-	FIELD_TYPE_BID_DECIMAL
-)
-
-type tableDefineString struct {
-	DbFieldName   string
-	FieldName     string
-	MethodName    string
-	Type          int
-	TypeString    string
-	JDBCType      string
-	DbTypeString  string
-	Null          string
-	Key           string
-	Default       string
-	Extra         string
-	Comment         string
-	CharacterSetName string
-	DBType string
-	AutoIncrement bool
-	TestValue     string
-}
-
-type classDefine struct {
-	HasPrefix     bool
-	ClassName     string
-	TableName     string
-	CamelCaseName string
-	Fields        map[string]*tableDefineString
-	Names         []string
-	PrimaryKey    *tableDefineString
-	UnionKeys     []*tableDefineString
-}
-
 func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 	var err error
 	// Get tables name
 	wg.Add(1)
 	defer wg.Done()
 	var rows *sql.Rows
-	if rows, err = dbConn.Query("select COLUMN_NAME,DATA_TYPE,IS_NULLABLE,COLUMN_KEY,COLUMN_DEFAULT,EXTRA,COLUMN_COMMENT,CHARACTER_SET_NAME,TABLE_SCHEMA,TABLE_NAME,COLUMN_TYPE from INFORMATION_SCHEMA.Columns where table_name= '" + tableName+"'"); err != nil {
+	if rows, err = dbConn.Query("select COLUMN_NAME,DATA_TYPE,IS_NULLABLE,COLUMN_KEY,COLUMN_DEFAULT,EXTRA,COLUMN_COMMENT,CHARACTER_SET_NAME,TABLE_SCHEMA,TABLE_NAME,COLUMN_TYPE from INFORMATION_SCHEMA.Columns where table_name= '" + tableName + "'"); err != nil {
 		return
 	}
 	defer rows.Close()
@@ -148,15 +89,15 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 	tableNameFields, class.HasPrefix = parseName(tableName, "")
 	class.ClassName = toClassName(tableNameFields)
 	if len(class.ClassName) == 0 {
-		logger.Info("tableName:", tableName)
-		logger.Info("tableNameFields: %+v", tableNameFields)
+		logs.Logger.Info("tableName:", tableName)
+		logs.Logger.Info("tableNameFields: %+v", tableNameFields)
 	}
 	class.CamelCaseName = toFieldName(tableNameFields)
 	index := 0
 	for rows.Next() {
 		var tds tableDefineString
-		if err = rows.Scan(&td.Field, &td.Type, &td.Null, &td.Key, &td.Default, &td.Extra,&td.Comment,&td.CharacterSetName,&td.Schema,&td.TableName,&td.DBType); err != nil {
-			logger.Error("Error parse")
+		if err = rows.Scan(&td.Field, &td.Type, &td.Null, &td.Key, &td.Default, &td.Extra, &td.Comment, &td.CharacterSetName, &td.Schema, &td.TableName, &td.DBType); err != nil {
+			logs.Logger.Error("Error parse")
 			return
 		}
 		tds.DbFieldName = string(td.Field)
@@ -171,106 +112,106 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			tds.Type = FIELD_TYPE_STRING
 			tds.TypeString = "String"
 			tds.JDBCType = "VARCHAR"
-			tds.TestValue = fmt.Sprintf("\"%s\"",tds.FieldName)//fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName) //fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.Contains(tds.DbTypeString, "text") {
 			tds.Type = FIELD_TYPE_STRING
 			tds.JDBCType = "LONGVARCHAR"
 			tds.TypeString = "String"
-			tds.TestValue = fmt.Sprintf("\"%s\"",tds.FieldName)//fmt.Sprintf("\"%s\"", tds.FieldName)
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName) //fmt.Sprintf("\"%s\"", tds.FieldName)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "char") {
 			tds.Type = FIELD_TYPE_STRING
 			tds.JDBCType = "CHAR"
 			tds.TypeString = "String"
-			tds.TestValue = fmt.Sprintf("\"%s\"",tds.FieldName)//fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		}  else if strings.HasPrefix(tds.DbTypeString, "int") {
+			tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName) //fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+		} else if strings.HasPrefix(tds.DbTypeString, "int") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.JDBCType = "INTEGER"
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "tinyint") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.JDBCType = "TINYINT"
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "smallint") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.JDBCType = "INTEGER"
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "mediumint") {
 			tds.Type = FIELD_TYPE_INTEGER
 			tds.JDBCType = "INTEGER"
 			tds.TypeString = "Integer"
 			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "bigint") {
 			tds.Type = FIELD_TYPE_LONG
 			tds.JDBCType = "BIGINT"
 			tds.TypeString = "Long"
 			tds.TestValue = fmt.Sprintf("new Long(%d)", index+1)
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "float") {
 			tds.Type = FIELD_TYPE_FLOAT
 			tds.JDBCType = "FLOAT"
 			tds.TypeString = "Float"
 			tds.TestValue = fmt.Sprintf("new Float(%d.0f)", index+1)
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "double") {
 			tds.Type = FIELD_TYPE_DOUBLE
 			tds.JDBCType = "DOUBLE"
 			tds.TypeString = "Double"
 			tds.TestValue = fmt.Sprintf("new Double(%d.0)", index+1)
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "decimal") {
 			tds.Type = FIELD_TYPE_BID_DECIMAL
 			tds.JDBCType = "DECIMAL"
 			tds.TypeString = "java.math.BigDecimal"
 			tds.TestValue = fmt.Sprintf("new java.math.BigDecimal(%d.0)", index+1)
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "timestamp") {
 			tds.Type = FIELD_TYPE_TIMESTAMP
 			tds.JDBCType = "TIMESTAMP"
 			tds.TypeString = "java.util.Date"
 			tds.TestValue = "new java.util.Date()"
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "date") {
 			tds.Type = FIELD_TYPE_TIMESTAMP
 			tds.JDBCType = "DATE"
 			tds.TypeString = "java.util.Date"
 			tds.TestValue = "new java.util.Date()"
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "time") {
 			tds.Type = FIELD_TYPE_TIMESTAMP
 			tds.JDBCType = "TIME"
 			tds.TypeString = "java.util.Date"
 			tds.TestValue = "new java.util.Date()"
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "set") {
 			tds.Type = FIELD_TYPE_SET
 			tds.JDBCType = ""
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", getFirstItemFromSet(tds.DbTypeString))
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "enum") {
 			tds.Type = FIELD_TYPE_ENUM
 			tds.JDBCType = ""
 			tds.TypeString = "String"
 			tds.TestValue = fmt.Sprintf("\"%s\"", getFirstItemFromSet(tds.DbTypeString))
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else if strings.HasPrefix(tds.DbTypeString, "point") {
 			tds.Type = FIELD_TYPE_POINT
 			tds.JDBCType = ""
 			tds.TypeString = "String"
 			tds.TestValue = `""` //"\"POINT(1 1)\""
-			logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 		} else {
-			logger.Info("no support Db Type tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			logs.Logger.Info("no support Db Type tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 
 			continue
 		}
@@ -281,7 +222,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 		tds.Extra = string(td.Type)
 		tds.DBType = string(td.DBType)
 		tds.Comment = string(td.Comment)
-		tds.CharacterSetName  =string(td.CharacterSetName)
+		tds.CharacterSetName = string(td.CharacterSetName)
 		if tds.Extra == "auto_increment" {
 			tds.AutoIncrement = true
 		}
@@ -308,7 +249,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			if rowsCreateTable.Next() {
 				var t1, t2 string
 				if err = rowsCreateTable.Scan(&t1, &t2); err != nil {
-					logger.Error("Error parse create table")
+					logs.Logger.Error("Error parse create table")
 					return
 				}
 				uniqueKeys := getUniqueKeyFrom(t2)
@@ -322,12 +263,12 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 					}
 				}
 			} else {
-				logger.Error("create table no respones")
+				logs.Logger.Error("create table no respones")
 			}
 			if len(class.UnionKeys) == 1 {
 				class.PrimaryKey = class.UnionKeys[0]
 				class.UnionKeys = nil
-				logger.Info("tableName = %s ClassName = %s PrimaryKey = %s DB key: Not Primary Key", tableName, class.ClassName, class.PrimaryKey.DbFieldName)
+				logs.Logger.Info("tableName = %s ClassName = %s PrimaryKey = %s DB key: Not Primary Key", tableName, class.ClassName, class.PrimaryKey.DbFieldName)
 				//fmt.Printf("table %s (class %s) only one key %s\n", class.TableName, class.ClassName, class.PrimaryKey.DbFieldName)
 			} else {
 
@@ -337,7 +278,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 					}
 					fmt.Print(key.DbFieldName)
 				}
-				logger.Info("|odd key: Union Key")
+				logs.Logger.Info("|odd key: Union Key")
 			}
 		} else if len(class.UnionKeys) > 1 {
 
@@ -347,17 +288,17 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 				}
 				fmt.Print(key.DbFieldName)
 			}
-			logger.Info("|odd key: Multi Key")
+			logs.Logger.Info("|odd key: Multi Key")
 		}
 		if class.PrimaryKey == nil && len(class.UnionKeys) == 0 {
-			logger.Info("tableName = %s  ClassName %s||odd key: No Key %v", tableName, class.ClassName,class.Fields)
+			logs.Logger.Info("tableName = %s  ClassName %s||odd key: No Key %v", tableName, class.ClassName, class.Fields)
 		}
 	}
 	if class.PrimaryKey != nil {
 		if class.PrimaryKey.Type != FIELD_TYPE_INTEGER {
-			logger.Info("tableName = %s ClassName = %s PrimaryKey = %s DB key: Key type is %s", tableName, class.ClassName, class.PrimaryKey.FieldName, class.PrimaryKey.TypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s PrimaryKey = %s DB key: Key type is %s", tableName, class.ClassName, class.PrimaryKey.FieldName, class.PrimaryKey.TypeString)
 		} else if !class.PrimaryKey.AutoIncrement {
-			logger.Info("tableName = %s ClassName = %s PrimaryKey = %s DB key: Key type is %s", tableName, class.ClassName, class.PrimaryKey.FieldName, class.PrimaryKey.TypeString)
+			logs.Logger.Info("tableName = %s ClassName = %s PrimaryKey = %s DB key: Key type is %s", tableName, class.ClassName, class.PrimaryKey.FieldName, class.PrimaryKey.TypeString)
 		}
 	}
 	/*
@@ -373,6 +314,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 	composeTestException()
 	g_resources.writeLine(&class)
 }
+
 /*
 func getMaxLength(name, varcharString string) (result string) {
 	ss := strings.Split(varcharString, "(")
@@ -431,7 +373,7 @@ func composeClassFile(class *classDefine) {
 	var err error
 	var file *os.File
 	if file, err = os.Create(filepath.Join(g_modelPath, class.ClassName+".java")); err != nil {
-		logger.Error(filepath.Join(g_modelPath, class.ClassName+".java"), ", error:", err.Error())
+		logs.Logger.Error(filepath.Join(g_modelPath, class.ClassName+".java"), ", error:", err.Error())
 		return
 	}
 
@@ -448,7 +390,7 @@ func composeTestException() {
 	var err error
 	var file *os.File
 	if file, err = os.Create(filepath.Join(g_testExceptionPath, "UnitTestException.java")); err != nil {
-		logger.Error("Create file", filepath.Join(g_dataSourcePath+"UnitTestException.java"), ", error:", err.Error())
+		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"UnitTestException.java"), ", error:", err.Error())
 		return
 	}
 
@@ -485,8 +427,24 @@ func composeDataSourceFiles() {
 	var dynamicAspectFile *os.File
 	var dynamicAspectHolderFile *os.File
 	var interceptorFile *os.File
+
+	if useRedis {
+		var redisFile *os.File
+		if redisFile, err = os.Create(filepath.Join(g_dataSourcePath, "RedisUtils.java")); err != nil {
+			logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"RedisUtils.java"), ", error:", err.Error())
+			return
+		}
+
+		defer redisFile.Close()
+		bw := bufio.NewWriter(redisFile)
+		text := strings.Replace(redis_class, "$(package)$", header, -1)
+		bw.WriteString(text)
+		bw.Flush()
+	}
+
+	//=====
 	if file, err = os.Create(filepath.Join(g_dataSourcePath, "DataSource.java")); err != nil {
-		logger.Error("Create file", filepath.Join(g_dataSourcePath+"DataSource.java"), ", error:", err.Error())
+		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"DataSource.java"), ", error:", err.Error())
 		return
 	}
 
@@ -495,9 +453,9 @@ func composeDataSourceFiles() {
 	text := strings.Replace(dataSourceJava, "$(package)$", header, -1)
 	bw.WriteString(text)
 	bw.Flush()
-
+	//=====
 	if dynamicFile, err = os.Create(filepath.Join(g_dataSourcePath, "DynamicDataSource.java")); err != nil {
-		logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSource.java"), ", error:", err.Error())
+		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSource.java"), ", error:", err.Error())
 		return
 	}
 
@@ -506,9 +464,9 @@ func composeDataSourceFiles() {
 	text1 := strings.Replace(dynamicDataSource, "$(package)$", header, -1)
 	dybw.WriteString(text1)
 	dybw.Flush()
-
+	//=====
 	if dynamicAspectFile, err = os.Create(filepath.Join(g_dataSourcePath, "DynamicDataSourceAspect.java")); err != nil {
-		logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSourceAspect.java"), ", error:", err.Error())
+		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSourceAspect.java"), ", error:", err.Error())
 		return
 	}
 
@@ -519,7 +477,7 @@ func composeDataSourceFiles() {
 	dyAsbw.Flush()
 
 	if dynamicAspectHolderFile, err = os.Create(filepath.Join(g_dataSourcePath, "DynamicDataSourceHolder.java")); err != nil {
-		logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSourceHolder.java"), ", error:", err.Error())
+		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSourceHolder.java"), ", error:", err.Error())
 		return
 	}
 
@@ -530,7 +488,7 @@ func composeDataSourceFiles() {
 	holder.Flush()
 
 	if interceptorFile, err = os.Create(filepath.Join(g_dataSourcePath, "MybatisInterceptor.java")); err != nil {
-		logger.Error("Create file", filepath.Join(g_dataSourcePath+"MybatisInterceptor.java"), ", error:", err.Error())
+		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"MybatisInterceptor.java"), ", error:", err.Error())
 		return
 	}
 
@@ -546,7 +504,7 @@ func composeDaoFiles(class *classDefine) {
 	var err error
 	var file *os.File
 	if file, err = os.Create(filepath.Join(g_daoPath, class.ClassName+"Dao.java")); err != nil {
-		logger.Error("Create file", filepath.Join(g_daoPath, class.ClassName+"Dao.java"), ", error:", err.Error())
+		logs.Logger.Error("Create file", filepath.Join(g_daoPath, class.ClassName+"Dao.java"), ", error:", err.Error())
 		return
 	}
 
@@ -561,7 +519,7 @@ func composeMappingFiles(class *classDefine) {
 	var err error
 	var file *os.File
 	if file, err = os.Create(filepath.Join(g_myBatisPath, class.CamelCaseName+"SqlMap.xml")); err != nil {
-		logger.Error("Create file", filepath.Join(g_myBatisPath, class.CamelCaseName+"SqlMap.xml"), ", error:", err.Error())
+		logs.Logger.Error("Create file", filepath.Join(g_myBatisPath, class.CamelCaseName+"SqlMap.xml"), ", error:", err.Error())
 		return
 	}
 
@@ -576,7 +534,7 @@ func composeTestFiles(class *classDefine) {
 	var err error
 	var file *os.File
 	if file, err = os.Create(filepath.Join(g_testPath, class.ClassName+"Test.java")); err != nil {
-		logger.Error("Create file", filepath.Join(g_testPath, class.ClassName+"Test.java"), ", error:", err.Error())
+		logs.Logger.Error("Create file", filepath.Join(g_testPath, class.ClassName+"Test.java"), ", error:", err.Error())
 		return
 	}
 
@@ -659,11 +617,11 @@ func writeClassHeader(bw *bufio.Writer, class *classDefine) {
 func writeClassFields(bw *bufio.Writer, class *classDefine) {
 	hash := md5.New()
 	hash.Write([]byte(class.ClassName))
-	logger.Info("%+v",class.Fields)
+	logs.Logger.Info("%+v", class.Fields)
 	for _, fieldName := range class.Names {
 
 		field := class.Fields[fieldName]
-		logger.Info(class.ClassName + "::" + fieldName +"::"+field.TypeString+"::"+field.FieldName)
+		logs.Logger.Info(class.ClassName + "::" + fieldName + "::" + field.TypeString + "::" + field.FieldName)
 		hash.Write([]byte(field.TypeString))
 		hash.Write([]byte(field.FieldName))
 	}
@@ -677,8 +635,8 @@ func writeClassFields(bw *bufio.Writer, class *classDefine) {
 		bw.WriteString(field.FieldName)
 		bw.WriteString("; // type in db: ")
 		bw.WriteString(field.DBType)
-		bw.WriteString("\tCharacter: "+field.CharacterSetName)
-		bw.WriteString("\tComment: "+field.Comment)
+		bw.WriteString("\tCharacter: " + field.CharacterSetName)
+		bw.WriteString("\tComment: " + field.Comment)
 		bw.WriteString("\n")
 	}
 	bw.WriteString("\n")
@@ -833,7 +791,7 @@ func writeDaoBody(bw *bufio.Writer, class *classDefine) {
 		bw.WriteString("\t/*\n\t * No primary key defined in DB table!\n\t */\n")
 	}
 	bw.WriteString(dsw)
-	bw.WriteString("\tpublic java.util.List<"+class.ClassName+"> get"+class.ClassName+"s (")
+	bw.WriteString("\tpublic java.util.List<" + class.ClassName + "> get" + class.ClassName + "s (")
 	bw.WriteString(class.ClassName)
 	bw.WriteString(" s")
 	bw.WriteString(class.ClassName)
@@ -868,13 +826,11 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 	bufSelect := new(bytes.Buffer)
 	bufSelectAll := new(bytes.Buffer)
 
-	tableSelectFileds:=fmt.Sprintf("%sTableFields",class.CamelCaseName)
+	tableSelectFileds := fmt.Sprintf("%sTableFields", class.CamelCaseName)
 
 	bufSelectFields.WriteString("\t<!--table select 字段-->\n\t<sql id=\"")
 	bufSelectFields.WriteString(tableSelectFileds)
 	bufSelectFields.WriteString("\">")
-
-
 
 	bufProperty.WriteString("\n\t<!--属性-->\n\t<parameterMap id=\"")
 	bufProperty.WriteString(class.CamelCaseName)
@@ -927,7 +883,7 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		case FIELD_TYPE_STRING:
 			bufSelect.WriteString("string")
 		default:
-			logger.Error("Unsupport primary key type:", class.PrimaryKey.TypeString)
+			logs.Logger.Error("Unsupport primary key type:", class.PrimaryKey.TypeString)
 			os.Exit(-1)
 		}
 		bufSelect.WriteString("\">\n\t\tselect ")
@@ -941,14 +897,14 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		createSelect = true
 	}
 	bufSelectAll.WriteString("\t<!--根据条件查询-->\n")
-	bufSelectAll.WriteString("\t"+`<select id="get`+class.ClassName+`s" resultMap="`+class.CamelCaseName+`ResultMap" parameterMap="`+class.CamelCaseName+`ParameterMap">`+"\n")
-	bufSelectAll.WriteString("\t\t"+`select <include refid="`+class.CamelCaseName+`TableFields"/> from `+class.TableName+" where 1=1 \n")
+	bufSelectAll.WriteString("\t" + `<select id="get` + class.ClassName + `s" resultMap="` + class.CamelCaseName + `ResultMap" parameterMap="` + class.CamelCaseName + `ParameterMap">` + "\n")
+	bufSelectAll.WriteString("\t\t" + `select <include refid="` + class.CamelCaseName + `TableFields"/> from ` + class.TableName + " where 1=1 \n")
 	bufSelectAll.WriteString("\t\t<choose>\n")
 	for index, fieldKey := range class.Names {
 		field := class.Fields[fieldKey]
 
-		bufSelectAll.WriteString("\t\t\t<when test=\""+field.FieldName+" != null\">\n")
-		bufSelectAll.WriteString("\t\t\t\tAND  `"+field.DbFieldName+"`=#{"+field.FieldName+",jdbcType="+field.JDBCType+"}\n")
+		bufSelectAll.WriteString("\t\t\t<when test=\"" + field.FieldName + " != null\">\n")
+		bufSelectAll.WriteString("\t\t\t\tAND  `" + field.DbFieldName + "`=#{" + field.FieldName + ",jdbcType=" + field.JDBCType + "}\n")
 		bufSelectAll.WriteString("\t\t\t</when>\n")
 
 		bufProperty.WriteString("\t\t<parameter property=\"")
@@ -966,7 +922,7 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 			bufInsertValue.WriteString(",")
 			bufSelectFields.WriteString(",")
 		}
-		bufSelectFields.WriteString("\n\t\t`"+field.DbFieldName+"`")
+		bufSelectFields.WriteString("\n\t\t`" + field.DbFieldName + "`")
 		bufInsert.WriteString("`")
 		bufInsert.WriteString(field.DbFieldName)
 		bufInsert.WriteString("`")
@@ -987,8 +943,8 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 			bufUpdate.WriteString(field.DbFieldName)
 			bufUpdate.WriteString("`=#{")
 			bufUpdate.WriteString(field.FieldName)
-			if len(field.JDBCType) >0{
-				bufUpdate.WriteString(",jdbcType="+field.JDBCType)
+			if len(field.JDBCType) > 0 {
+				bufUpdate.WriteString(",jdbcType=" + field.JDBCType)
 			}
 			bufUpdate.WriteString("},\n\t\t\t</if>\n")
 		}
@@ -1001,13 +957,11 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 	bufProperty.WriteString("\t</parameterMap>\n\n")
 	bufMapping.WriteString("\t</resultMap>\n\n")
 
-
 	bufInsert.WriteString(") values(")
 	bufInsertValue.WriteTo(bufInsert)
 	bufInsert.WriteString(")\n")
 
-
-	if createSelect{
+	if createSelect {
 		bufSelect.WriteString("<include refid=\"")
 		bufSelect.WriteString(tableSelectFileds)
 		bufSelect.WriteString("\"/>")
@@ -1021,8 +975,8 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufUpdate.WriteString(class.PrimaryKey.DbFieldName)
 		bufUpdate.WriteString("`=#{")
 		bufUpdate.WriteString(class.PrimaryKey.FieldName)
-		if len(class.PrimaryKey.JDBCType) >0{
-			bufUpdate.WriteString(",jdbcType="+class.PrimaryKey.JDBCType)
+		if len(class.PrimaryKey.JDBCType) > 0 {
+			bufUpdate.WriteString(",jdbcType=" + class.PrimaryKey.JDBCType)
 		}
 
 		bufUpdate.WriteString("}\n\t</update>\n\n")
@@ -1034,7 +988,7 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		case FIELD_TYPE_STRING:
 			bufDelete.WriteString("string")
 		default:
-			logger.Error("Unsupport primary key type:", class.PrimaryKey.TypeString)
+			logs.Logger.Error("Unsupport primary key type:", class.PrimaryKey.TypeString)
 			os.Exit(-1)
 		}
 		bufDelete.WriteString("\">\n\t\tdelete from ")
@@ -1043,8 +997,8 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufDelete.WriteString(class.PrimaryKey.DbFieldName)
 		bufDelete.WriteString("`=#{")
 		bufDelete.WriteString(class.PrimaryKey.FieldName)
-		if len(class.PrimaryKey.JDBCType)>0{
-			bufDelete.WriteString(",jdbcType="+class.PrimaryKey.JDBCType)
+		if len(class.PrimaryKey.JDBCType) > 0 {
+			bufDelete.WriteString(",jdbcType=" + class.PrimaryKey.JDBCType)
 		}
 		bufDelete.WriteString("}\n\t</delete>\n\n")
 
@@ -1054,8 +1008,8 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufSelect.WriteString(class.PrimaryKey.DbFieldName)
 		bufSelect.WriteString("`=#{")
 		bufSelect.WriteString(class.PrimaryKey.FieldName)
-		if len(class.PrimaryKey.JDBCType)>0{
-			bufSelect.WriteString(",jdbcType="+class.PrimaryKey.JDBCType)
+		if len(class.PrimaryKey.JDBCType) > 0 {
+			bufSelect.WriteString(",jdbcType=" + class.PrimaryKey.JDBCType)
 		}
 		bufSelect.WriteString("}\n\t</select>\n\n")
 	} else if len(class.UnionKeys) > 0 {
@@ -1132,354 +1086,4 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 }
 func writeMappingTailer(bw *bufio.Writer) {
 	bw.WriteString("</mapper>\n")
-}
-
-////////////////////////////////
-// Test file
-func writeTestHeader(bw *bufio.Writer, class *classDefine) {
-	bw.WriteString(`package ` + g_packageName + ";\n\n")
-	bw.WriteString("import " + g_packageName + ".persistence.model." + class.ClassName + ";\n")
-	bw.WriteString("import " + g_packageName + ".persistence.dao." + class.ClassName + "Dao;\n")
-	header := packageName + "." + dbName + ".exception"
-	bw.WriteString("import " + header + ".UnitTestException;\n")
-	bw.WriteString("import org.slf4j.Logger;\n")
-	bw.WriteString("import org.slf4j.LoggerFactory;\n")
-	bw.WriteString("import org.junit.Test;\n")
-	bw.WriteString("import org.springframework.beans.factory.annotation.Autowired;\n\n")
-	bw.WriteString("public class " + class.ClassName + "Test extends AbstractTest {\n")
-	bw.WriteString("\tprivate static final Logger logger = LoggerFactory.getLogger(" + class.ClassName + ".class);\n")
-}
-func writeTestBody(bw *bufio.Writer, class *classDefine) {
-	bw.WriteString("\t@Autowired\n")
-	bw.WriteString("\tprivate " + class.ClassName + "Dao dao;\n")
-
-	// setObjVal function
-	bw.WriteString("\n\tprivate void setObjVal(" + class.ClassName + " sObj) {\n")
-
-	index := 0
-	keyType := "Integer"
-	keyValue := ""
-	var unionKeys []string
-	for _, fieldName := range class.Names {
-		field := class.Fields[fieldName]
-		if field == class.PrimaryKey {
-			if field.AutoIncrement {
-				continue
-			}
-			keyType = field.TypeString
-		}
-
-		if field == class.PrimaryKey {
-			keyValue = field.TestValue
-		}
-		bw.WriteString("\t\tsObj.set" + field.MethodName + "(" + field.TestValue + ");\n")
-		index++
-	}
-	for _, field := range class.UnionKeys {
-		unionKeys = append(unionKeys, field.TestValue)
-	}
-
-	bw.WriteString("\t}\n\n")
-
-	// Test case
-	bw.WriteString("\t@Test\n\tpublic void testCase() throws UnitTestException {\n")
-	new := fmt.Sprintf("\t\t%s  objInsert = new %s();\n", class.ClassName, class.ClassName)
-	//bw.WriteString(class.ClassName+" objInsert = new "+class.ClassName+"")
-	//bw.WriteString(" objInsert = new ")
-	bw.WriteString(new)
-	bw.WriteString("\t\tsetObjVal(objInsert);\n\n")
-	bw.WriteString("\t\tlogger.info(\"insert [")
-	bw.WriteString(class.ClassName)
-	bw.WriteString("]\");\n")
-
-	bw.WriteString("\t\tdao.insert(objInsert);\n")
-
-	if class.PrimaryKey != nil {
-		if class.PrimaryKey.AutoIncrement {
-			bw.WriteString("\t\tInteger key = objInsert.get")
-			bw.WriteString(class.PrimaryKey.MethodName)
-			bw.WriteString("();\n")
-			bw.WriteString("\t\tif (key == null || key == 0) {\n")
-			bw.WriteString("\t\t\tthrow new UnitTestException(\"")
-			bw.WriteString(class.ClassName)
-			bw.WriteString("Test\", \"test of insert is failed\");\n")
-			bw.WriteString("\t\t}\n")
-			bw.WriteString("\t\tlogger.info(\"\tinsert OK\");\n\n")
-
-			bw.WriteString("\t\t")
-			bw.WriteString(class.ClassName)
-			bw.WriteString(" objSelect = dao.get")
-			bw.WriteString(class.ClassName)
-			bw.WriteString("ByKey(key);\n")
-			bw.WriteString("\t\tif (objSelect == null) {\n")
-			bw.WriteString("\t\t\tthrow new UnitTestException(\"")
-			bw.WriteString(class.ClassName)
-			bw.WriteString("Test\", \"test of select is failed\");\n")
-			bw.WriteString("\t\t}\n")
-			bw.WriteString("\t\tlogger.info(\"\tselect OK \"+objSelect.toString());\n\n")
-		} else {
-			bw.WriteString("\t\t")
-			bw.WriteString(keyType)
-			bw.WriteString(" key = ")
-			bw.WriteString(keyValue)
-			bw.WriteString(";\n")
-			bw.WriteString("\t\t")
-			bw.WriteString(class.ClassName)
-			bw.WriteString(" objSelect = dao.get")
-			bw.WriteString(class.ClassName)
-			bw.WriteString("ByKey(key);\n")
-			bw.WriteString("\t\tif (objSelect == null) {\n")
-
-			bw.WriteString("\t\t\tdao.insert(objInsert);\n")
-			bw.WriteString("\t\t\tlogger.info(\"\tinsert OK\");\n\n")
-			bw.WriteString("\t\t\tobjSelect = dao.get")
-			bw.WriteString(class.ClassName)
-			bw.WriteString("ByKey(key);\n")
-			bw.WriteString("\t\t\tif (objSelect == null) {\n")
-			bw.WriteString("\t\t\tthrow new UnitTestException(\"")
-			bw.WriteString(class.ClassName)
-			bw.WriteString("Test\", \"test of select is failed\");\n")
-			bw.WriteString("\t\t\t}\n")
-			bw.WriteString("\t\t\tlogger.info(\"\tselect OK \"+objSelect.toString());\n\n")
-			bw.WriteString("\t\t}\n")
-		}
-
-		bw.WriteString("\t\tjava.util.List<"+class.ClassName+"> list = dao.get"+class.ClassName+"s(objSelect);\n")
-		bw.WriteString("\t\t");
-		bw.WriteString(`if (list !=null){
-            logger.info("	selectAll OK "+list.toString());
-        }else{
-            throw new UnitTestException("EcuserWxUserinfoTest", "test of selectAll is failed");
-        }`+"\n\n")
-
-		bw.WriteString("\t\tInteger res = dao.update(objSelect);\n")
-		bw.WriteString("\t\tif (res == null || res == 0) {\n")
-		bw.WriteString("\t\t\tthrow new UnitTestException(\"")
-		bw.WriteString(class.ClassName)
-		bw.WriteString("Test\", \"test of update is failed\");\n")
-		bw.WriteString("\t\t}\n")
-		bw.WriteString("\t\tlogger.info(\"\tupdate OK\");\n\n")
-
-		bw.WriteString("\t\tInteger del = dao.delete(key);\n")
-		bw.WriteString("\t\tif (del == null || del == 0) {\n")
-		bw.WriteString("\t\t\tthrow new UnitTestException(\"")
-		bw.WriteString(class.ClassName)
-		bw.WriteString("Test\", \"test of delete is failed\");\n")
-		bw.WriteString("\t\t}\n")
-		bw.WriteString("\t\tlogger.info(\"\tdelete OK\");\n\n")
-	} else if len(class.UnionKeys) > 0 {
-		unionKeysString := strings.Join(unionKeys, ", ")
-		bw.WriteString("\t\tlogger.info(\"\tinsert OK\");\n\n")
-
-		bw.WriteString("\t\t")
-		bw.WriteString(class.ClassName)
-		bw.WriteString(" objSelect = dao.get")
-		bw.WriteString(class.ClassName)
-		bw.WriteString("ByKey(")
-		bw.WriteString(unionKeysString)
-		bw.WriteString(");\n")
-		bw.WriteString("\t\tif (objSelect == null) {\n")
-		bw.WriteString("\t\t\tthrow new UnitTestException(\"")
-		bw.WriteString(class.ClassName)
-		bw.WriteString("Test\", \"test of select is failed\");\n")
-		bw.WriteString("\t\t}\n")
-
-		bw.WriteString("\t\tlogger.info(\"\tselect OK \"+objSelect.toString());\n\n")
-
-		bw.WriteString("\t\tInteger res = dao.update(objSelect);\n")
-		bw.WriteString("\t\tif (res == null || res == 0) {\n")
-		bw.WriteString("\t\t\tthrow new UnitTestException(\"")
-		bw.WriteString(class.ClassName)
-		bw.WriteString("Test\", \"test of update is failed\");\n")
-		bw.WriteString("\t\t}\n")
-		bw.WriteString("\t\tlogger.info(\"\tupdate OK\");\n\n")
-
-		bw.WriteString("\t\tInteger del = dao.delete(")
-		bw.WriteString(unionKeysString)
-		bw.WriteString(");\n")
-		bw.WriteString("\t\tif (del == null || del == 0) {\n")
-		bw.WriteString("\t\t\tthrow new UnitTestException(\"")
-		bw.WriteString(class.ClassName)
-		bw.WriteString("Test\", \"test of delete is failed\");\n")
-		bw.WriteString("\t\t}\n")
-		bw.WriteString("\t\tlogger.info(\"\tdelete OK\");\n\n")
-	} else {
-		bw.WriteString("\t\tdao.insert(objInsert);\n")
-		bw.WriteString("\t\tlogger.info(\"\tinsert OK\");\n\n")
-
-	}
-	bw.WriteString("\t}\n\n")
-}
-func writeTestTailer(bw *bufio.Writer) {
-	bw.WriteString("}\n")
-}
-
-////////////////////////////////////////////////////
-// Resource files
-func (res *resources) init() {
-
-	var err error
-
-	if createPom {
-		if res.pomFile, err = os.Create(filepath.Join(outputPath, "pom.xml")); err != nil {
-			logger.Error("Create pom file error %s", err.Error())
-			return
-		}
-		res.pomWriter = bufio.NewWriter(res.pomFile)
-		pomxml := strings.Replace(POM_XML, "$(groupId)$", packageName, -1)
-		pomxml = strings.Replace(pomxml, "$(artifactId)$", dbName, -1)
-		pomxml = strings.Replace(pomxml, "$(name)$", dbName+"-persistence", -1)
-		pomxml = strings.Replace(pomxml, "$(description)$", "description for this project", -1)
-		pomxml = strings.Replace(pomxml, "$(jdk)$", jdk, -1)
-		pomxml = strings.Replace(pomxml, "$(version)$", pomVersion, -1)
-
-		res.pomWriter.WriteString(pomxml)
-
-	}
-
-	if res.daoConfigFile, err = os.Create(filepath.Join(g_testResourcesPath, (dbName)+"-daoConfig.xml")); err != nil {
-		logger.Error("Create file", filepath.Join(g_testResourcesPath, (dbName)+"-daoConfig.xml"), ", error:", err.Error())
-		return
-	}
-	res.daoConfigWriter = bufio.NewWriter(res.daoConfigFile)
-	daoConfigXml := strings.Replace(daoConfigXML, "$(packageName)$", g_packageName, -1)
-
-	daoConfigXml = strings.Replace(daoConfigXml, "$(classPath)$", strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/*.xml", -1)
-	daoConfigXml = strings.Replace(daoConfigXml, "$(classPathExt)$", strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/ext/*.xml", -1)
-
-	switch dbDriver {
-	case "c3p0":
-		daoConfigXml = strings.Replace(daoConfigXml, "$(driverExtR)$", c3p0_r, -1)
-		daoConfigXml = strings.Replace(daoConfigXml, "$(driverExtW)$", c3p0_w, -1)
-		daoConfigXml = strings.Replace(daoConfigXml, "$(init)$", "", -1)
-
-		daoConfigXml = strings.Replace(daoConfigXml, "$(driver)$", "com.mchange.v2.c3p0.ComboPooledDataSource", -1)
-	case "druid":
-		daoConfigXml = strings.Replace(daoConfigXml, "$(driverExtR)$", druid_r, -1)
-		daoConfigXml = strings.Replace(daoConfigXml, "$(driverExtW)$", druid_w, -1)
-		daoConfigXml = strings.Replace(daoConfigXml, "$(init)$", `init-method="init"`, -1)
-		daoConfigXml = strings.Replace(daoConfigXml, "$(driver)$", "com.alibaba.druid.pool.DruidDataSource", -1)
-	}
-	daoConfigXml = strings.Replace(daoConfigXml, "$(properties)$", dbName+"-db.properties", -1)
-	daoConfigXml = strings.Replace(daoConfigXml, "$(dbName)$", dbName, -1)
-
-	res.daoConfigWriter.WriteString(daoConfigXml)
-
-}
-func (res *resources) writeLine(class *classDefine) {
-}
-func (res *resources) close() {
-	//res.daoConfigWriter.WriteString("\n</beans>")
-	res.daoConfigWriter.Flush()
-	res.daoConfigFile.Close()
-	res.pomWriter.Flush()
-	res.pomFile.Close()
-}
-
-////////////////////////////////////////////////////
-// Write files
-func writeFiles() {
-	writeLog4j()
-	writeConfigProperties()
-	writeAbstractTest()
-	writeConstants()
-}
-
-func writeLog4j() {
-	var err error
-	var file *os.File
-	if file, err = os.Create(filepath.Join(g_testResourcesPath, "log4j.xml")); err != nil {
-		logger.Error("Create file", filepath.Join(g_testResourcesPath, "log4j.xml"), ", error:", err.Error())
-		return
-	}
-	defer file.Close()
-	bw := bufio.NewWriter(file)
-	log4jxml := strings.Replace(log4jXML, "$(packageName)$", g_packageName, -1)
-	bw.WriteString(log4jxml)
-	bw.Flush()
-}
-
-func writeConfigProperties() {
-	var err error
-	var file *os.File
-	if file, err = os.Create(filepath.Join(g_testResourcesPath, (dbName)+"-db.properties")); err != nil {
-		logger.Error("Create file", filepath.Join(g_testResourcesPath, (dbName)+"-db.properties"), ", error:", err.Error())
-		return
-	}
-	defer file.Close()
-	bw := bufio.NewWriter(file)
-
-	mysql_properties := strings.Replace(ProPerties_Mysql, "$(dbAddr)$", dbAddr, -1)
-	mysql_properties = strings.Replace(mysql_properties, "$(dbUser)$", dbUser, -1)
-	mysql_properties = strings.Replace(mysql_properties, "$(dbPassword)$", dbPassword, -1)
-	mysql_properties = strings.Replace(mysql_properties, "$(dbName)$", dbName, -1)
-	bw.WriteString(mysql_properties)
-	bw.Flush()
-}
-
-func writeAbstractTest() {
-	var err error
-	var file *os.File
-	if file, err = os.Create(filepath.Join(g_testPath, "AbstractTest.java")); err != nil {
-		logger.Error("Create file", filepath.Join(g_testPath, "AbstractTest.java"), ", error:", err.Error())
-		return
-	}
-	defer file.Close()
-	bw := bufio.NewWriter(file)
-
-	bw.WriteString("package ")
-	bw.WriteString(g_packageName)
-	bw.WriteString(";\n")
-	bw.WriteString(`
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-/**
- * 描述：测试基类，所有的Dao测试类都必须继承此类
- * @Transactional 引入事务控制
- * @TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true) 引入事务控制管理器
- * AbstractTransactionalDataSourceSpringContextTests 继承事务测试基类，避免测试框架带来脏数据，取消事务控制时修改为false
- *
- */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:`)
-	bw.WriteString(dbName)
-	bw.WriteString(`-daoConfig.xml"})
-public abstract class AbstractTest {
-    
-}`)
-	bw.Flush()
-}
-
-func writeConstants() {
-	var err error
-	var file *os.File
-	if file, err = os.Create(filepath.Join(g_daoPath, "DataSourceConstants.java")); err != nil {
-		logger.Error("Create file", filepath.Join(g_daoPath, "DataSourceConstants.java"), ", error:", err.Error())
-		return
-	}
-	defer file.Close()
-	bw := bufio.NewWriter(file)
-
-	bw.WriteString(`package `)
-	bw.WriteString(g_packageName)
-	bw.WriteString(".persistence.dao;\n\n")
-
-	bw.WriteString("public class DataSourceConstants {\n")
-
-	bw.WriteString("\tpublic static final String DATASOURCE_R_")
-	bw.WriteString(g_upperDbName)
-	bw.WriteString(" = \"dataSource_R_")
-	bw.WriteString(dbName)
-	bw.WriteString("\";\n")
-
-	bw.WriteString("\tpublic static final String DATASOURCE_W_")
-	bw.WriteString(g_upperDbName)
-	bw.WriteString(" = \"dataSource_W_")
-	bw.WriteString(dbName)
-	bw.WriteString("\";\n")
-
-	bw.WriteString("}\n")
-	bw.Flush()
 }

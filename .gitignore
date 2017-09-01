@@ -1,3 +1,4 @@
+*.log
 release
 javaPlugin*
 .DS_Store

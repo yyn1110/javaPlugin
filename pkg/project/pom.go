@@ -1,6 +1,6 @@
-package db
+package project
 
-const POM_XML  =`<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+const POM_XML = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>$(groupId)$</groupId>
@@ -54,7 +54,7 @@ const POM_XML  =`<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 	</build>
 	<!-- 版本控制 -->
 	<properties>
-		<spring_version>4.0.2.RELEASE</spring_version>
+		<spring_version>4.3.4.RELEASE</spring_version>
 		<mysql-connector-java_version>5.1.38</mysql-connector-java_version>
 		<junit_version>4.12</junit_version>
 		<aspectjweaver_version>1.6.12</aspectjweaver_version>
@@ -147,10 +147,19 @@ const POM_XML  =`<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 		</dependency>
 
 		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-redis</artifactId>
+			<version>1.7.5.RELEASE</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.7.20</version>
 		</dependency>
+
+		$(redisDependency)$
+
 	</dependencies>
 	<distributionManagement>
 		<repository>

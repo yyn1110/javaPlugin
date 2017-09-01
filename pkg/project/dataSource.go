@@ -1,4 +1,4 @@
-package db
+package project
 const dataSourceJava=`package $(package)$.dataSource;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

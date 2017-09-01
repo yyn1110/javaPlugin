@@ -16,22 +16,20 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
-
+	"javaPlugin/pkg/logs"
+	"javaPlugin/pkg/project"
+	"os"
 )
-
-var cfgFile string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "javaPlugin",
 	Short: "spring and mybatis project",
-	Long: `一键生成项目和mapping`,
+	Long:  `一键生成项目和mapping`,
 	Run: func(cmd *cobra.Command, args []string) {
+		logs.LogRun()
+		project.Run()
 
 	},
 }
@@ -46,29 +44,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	logs.InitLogConfig(RootCmd)
+	project.InitConfig(RootCmd)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports Persistent Flags, which, if defined here,
-	// will be global for your application.
-
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.javaPlugin.yaml)")
-
-
-}
-
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" { // enable ability to specify config file via flag
-		viper.SetConfigFile(cfgFile)
-	}
-
-	viper.SetConfigName(".javaPlugin") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")  // adding home directory as first search path
-	viper.AutomaticEnv()          // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
 }

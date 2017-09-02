@@ -4,7 +4,7 @@
 
 ## 捐助
 ![微信支付](https://github.com/yyn1110/javaPlugin/blob/master/weixin_pay.jpg)
-![支付宝](https://github.com/yyn1110/javaPlugingit /blob/master/alipay.jpg)
+![支付宝](https://github.com/yyn1110/javaPlugingit/blob/master/alipay.jpg)
 
 ## 授权(LICENSE)
 [wechat is licensed under the Apache Licence, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)

@@ -165,7 +165,9 @@ const druid_r = `           <!-- 基本属性 url、user、password -->
                   value="${datasource_$(dbName)$_r.maxPoolPreparedStatementPerConnectionSize}"/>
 
         	<!-- 配置监控统计拦截的filters -->
-        	<property name="filters" value="stat"/>`
+        	<property name="filters" value="stat"/>
+        	<property name="connectionProperties" value="config.decrypt=true;config.decrypt.key=${datasource_kubauser_r.key}" />
+        	`
 
 const druid_w = `<!-- 基本属性 url、user、password -->
 		<property name="driverClassName" value="${datasource_$(dbName)$_w.driverClassName}" />
@@ -196,4 +198,7 @@ const druid_w = `<!-- 基本属性 url、user、password -->
 			  value="${datasource_$(dbName)$_w.maxPoolPreparedStatementPerConnectionSize}"/>
 
 		<!-- 配置监控统计拦截的filters -->
-		<property name="filters" value="stat"/>`
+		<property name="filters" value="stat"/>
+		<!--加密串-->
+		<property name="connectionProperties" value="config.decrypt=true;config.decrypt.key=${datasource_kubauser_w.key}" />
+		`

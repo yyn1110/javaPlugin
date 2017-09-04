@@ -40,7 +40,7 @@ const redis_config = `
 
 `
 const redis_class = `
-package $(package)$.dataSource;
+package $(package)$.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -92,7 +92,7 @@ public class RedisUtils {
 
 const redis_test_class = `
 package $(package)$;
-import $(package)$.dataSource.RedisUtils;
+import $(package)$.utils.RedisUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -40,6 +40,7 @@ var (
 	redisPort     string
 	redisPassWord string
 	useRedis      bool
+	projectName   string
 )
 
 type resources struct {
@@ -49,14 +50,37 @@ type resources struct {
 	pomFile   *os.File
 	pomWriter *bufio.Writer
 }
+type project_resources struct {
+	pomFile   *os.File
+	pomWriter *bufio.Writer
+}
+type project struct {
+	g_persistencePath string
+	g_servicePath     string
+	g_apiPath         string
 
+	g_packageName string
+	g_projectPath string
+
+	g_persistence      *project_persistence
+	g_service          *project_service
+	g_api              *project_api
+	g_project_resource *project_resources
+}
+
+//db project
 var (
-	g_resources         *resources
-	g_packageName       string
-	g_packageNamePath   string
+	g_project *project
+)
+
+type project_persistence struct {
+	g_packageDBName     string
+	g_packageDBPath     string
 	g_modelPath         string
 	g_daoPath           string
 	g_dataSourcePath    string
+	g_utilPath          string
+	g_loggerPath        string
 	g_myBatisPath       string
 	g_testPath          string
 	g_testExceptionPath string
@@ -64,7 +88,25 @@ var (
 	g_testResourcesPath string
 	g_upperDbName       string
 	g_excludeNames      []string
-)
+	g_resources         *resources
+}
+
+// service project
+type project_service struct {
+	g_packageServiceName string
+	g_packageServicePath string
+	g_servicesPath       string
+	g_servicesImplPath   string
+}
+
+//api project
+type project_api struct {
+	g_packageApiName string
+	g_packageApiPath string
+	g_apiPath        string
+}
+
+//project
 
 func InitConfig(cmd *cobra.Command) {
 
@@ -84,6 +126,7 @@ func InitConfig(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&redisHost, "redisHost", "127.0.0.1", "redis host")
 	cmd.Flags().StringVar(&redisPort, "redisPort", "6379", "redis port")
 	cmd.Flags().StringVar(&redisPassWord, "redisPassWord", "", "redis password")
+	cmd.Flags().StringVar(&projectName, "projectName", "demo", "project name")
 
 }
 
@@ -99,9 +142,7 @@ type tableDefine struct {
 	CharacterSetName []byte
 	Schema           []byte
 	TableName        []byte
-
 }
-
 
 type tableDefineString struct {
 	DbFieldName      string
@@ -120,7 +161,7 @@ type tableDefineString struct {
 	DBType           string
 	AutoIncrement    bool
 	TestValue        string
-	FieldLen 		int
+	FieldLen         int
 }
 
 type classDefine struct {
@@ -136,6 +177,10 @@ type classDefine struct {
 
 func Run() {
 	initEnviroment()
+	initPersistenceProject()
+	initServiceProject()
+	initApiProject()
+
 	dbURL := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8", (dbUser), (dbPassword), (dbAddr), (dbName))
 	logs.Logger.Info(dbURL)
 	var dbConn *sql.DB
@@ -176,64 +221,137 @@ func initEnviroment() {
 	if cpu > 1 && currentcpu != cpu {
 		runtime.GOMAXPROCS(cpu)
 	}
-	g_upperDbName = strings.ToUpper(dbName)
-	g_packageName = packageName + "." + dbName
-	g_packageNamePath = strings.Replace(g_packageName, ".", string(filepath.Separator), -1)
 
-	os.RemoveAll(filepath.Join(outputPath, "src"))
+	os.RemoveAll(filepath.Join(outputPath))
 
 	var err error
-	g_modelPath = filepath.Join(outputPath, "src", "main", "java", g_packageNamePath, "persistence", "model")
-	if err = os.MkdirAll(g_modelPath, 0777); err != nil {
-		logs.Logger.Error("Create folder", g_modelPath, "error:", err.Error())
+	g_project = new(project)
+	g_project.g_projectPath = filepath.Join(outputPath, projectName)
+	g_project.g_packageName = packageName
+	g_project.g_apiPath = filepath.Join(outputPath, projectName, projectName+"-api")
+	if err = os.MkdirAll(g_project.g_apiPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_apiPath, "error:", err.Error())
 		os.Exit(-1)
 	}
-	g_daoPath = filepath.Join(outputPath, "src", "main", "java", g_packageNamePath, "persistence", "dao")
-	if err = os.MkdirAll(g_daoPath, 0777); err != nil {
-		logs.Logger.Error("Create folder", g_daoPath, "error:", err.Error())
+	g_project.g_servicePath = filepath.Join(outputPath, projectName, projectName+"-service")
+	if err = os.MkdirAll(g_project.g_servicePath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_servicePath, "error:", err.Error())
+		os.Exit(-1)
+	}
+	g_project.g_persistencePath = filepath.Join(outputPath, projectName, projectName+"-persistence")
+	if err = os.MkdirAll(g_project.g_persistencePath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_persistencePath, "error:", err.Error())
+		os.Exit(-1)
+	}
+	g_persistence := new(project_persistence)
+	g_project.g_persistence = g_persistence
+	g_persistence.g_packageDBName = packageName + "." + dbName
+	g_persistence.g_packageDBPath = strings.Replace(g_persistence.g_packageDBName, ".", string(filepath.Separator), -1)
+
+	g_service := new(project_service)
+	g_project.g_service = g_service
+	g_service.g_packageServiceName = packageName + ".services"
+	g_service.g_packageServicePath = strings.Replace(g_service.g_packageServiceName, ".", string(filepath.Separator), -1)
+
+	g_api := new(project_api)
+	g_api.g_packageApiName = packageName + ".api"
+	g_api.g_packageApiPath = strings.Replace(g_api.g_packageApiName, ".", string(filepath.Separator), -1)
+	g_project.g_api = g_api
+	g_persistence.g_upperDbName = strings.ToUpper(dbName)
+
+	pr := new(project_resources)
+	pr.init()
+	g_project.g_project_resource = pr
+
+}
+func initPersistenceProject() {
+
+	var err error
+
+	g_project.g_persistence.g_modelPath = filepath.Join(g_project.g_persistencePath, "src", "main", "java", g_project.g_persistence.g_packageDBPath, "persistence", "model")
+	if err = os.MkdirAll(g_project.g_persistence.g_modelPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_persistence.g_modelPath, "error:", err.Error())
+		os.Exit(-1)
+	}
+	g_project.g_persistence.g_daoPath = filepath.Join(g_project.g_persistencePath, "src", "main", "java", g_project.g_persistence.g_packageDBPath, "persistence", "dao")
+	if err = os.MkdirAll(g_project.g_persistence.g_daoPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_persistence.g_daoPath, "error:", err.Error())
 		os.Exit(-1)
 	}
 
-	g_dataSourcePath = filepath.Join(outputPath, "src", "main", "java", g_packageNamePath, "dataSource")
-	if err = os.MkdirAll(g_dataSourcePath, 0777); err != nil {
-		logs.Logger.Error("Create folder", g_dataSourcePath, "error:", err.Error())
+	g_project.g_persistence.g_dataSourcePath = filepath.Join(g_project.g_persistencePath, "src", "main", "java", g_project.g_persistence.g_packageDBPath, "dataSource")
+	if err = os.MkdirAll(g_project.g_persistence.g_dataSourcePath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_persistence.g_dataSourcePath, "error:", err.Error())
 		os.Exit(-1)
 	}
-	g_myBatisPath = filepath.Join(outputPath, "src", "main", "resources", g_packageNamePath, "persistence", "sqlmap")
-	if err = os.MkdirAll(g_myBatisPath, 0777); err != nil {
-		logs.Logger.Error("Create folder", g_myBatisPath, "error:", err.Error())
+	g_project.g_persistence.g_utilPath = filepath.Join(g_project.g_persistencePath, "src", "main", "java", g_project.g_persistence.g_packageDBPath, "utils")
+	if err = os.MkdirAll(g_project.g_persistence.g_utilPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_persistence.g_utilPath, "error:", err.Error())
+		os.Exit(-1)
+	}
+	g_project.g_persistence.g_loggerPath = filepath.Join(g_project.g_persistencePath, "src", "main", "java", g_project.g_persistence.g_packageDBPath, "logger")
+	if err = os.MkdirAll(g_project.g_persistence.g_loggerPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_persistence.g_loggerPath, "error:", err.Error())
 		os.Exit(-1)
 	}
 
-	//g_myBatisExtPath = filepath.Join(outputPath, "src", "main", "resources", g_packageNamePath, "persistence", "sqlmap", "ext")
-	//if err = os.MkdirAll(g_myBatisExtPath, 0777); err != nil {
-	//	logger.Error("Create folder", g_myBatisExtPath, "error:", err.Error())
-	//	os.Exit(-1)
-	//}
-	g_testPath = filepath.Join(outputPath, "src", "test", "java", g_packageNamePath)
-	if err = os.MkdirAll(g_testPath, 0777); err != nil {
-		logs.Logger.Error("Create folder", g_testPath, "error:", err.Error())
+	g_project.g_persistence.g_myBatisPath = filepath.Join(g_project.g_persistencePath, "src", "main", "resources", g_project.g_persistence.g_packageDBPath, "persistence", "sqlmap")
+	if err = os.MkdirAll(g_project.g_persistence.g_myBatisPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_persistence.g_myBatisPath, "error:", err.Error())
 		os.Exit(-1)
 	}
-	g_testExceptionPath = filepath.Join(outputPath, "src", "test", "java", g_packageNamePath, "exception")
-	if err = os.MkdirAll(g_testExceptionPath, 0777); err != nil {
-		logs.Logger.Error("Create folder", g_testExceptionPath, "error:", err.Error())
+
+	g_project.g_persistence.g_testPath = filepath.Join(g_project.g_persistencePath, "src", "test", "java", g_project.g_persistence.g_packageDBPath)
+	if err = os.MkdirAll(g_project.g_persistence.g_testPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_persistence.g_testPath, "error:", err.Error())
 		os.Exit(-1)
 	}
-	g_mainResourcesPath = filepath.Join(outputPath, "src", "main", "resources")
-	if err = os.MkdirAll(g_mainResourcesPath, 0777); err != nil {
-		logs.Logger.Error("Create folder", g_mainResourcesPath, "error:", err.Error())
+	g_project.g_persistence.g_testExceptionPath = filepath.Join(g_project.g_persistencePath, "src", "test", "java", g_project.g_persistence.g_packageDBPath, "exception")
+	if err = os.MkdirAll(g_project.g_persistence.g_testExceptionPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_persistence.g_testExceptionPath, "error:", err.Error())
 		os.Exit(-1)
 	}
-	g_testResourcesPath = filepath.Join(outputPath, "src", "test", "resources")
-	if err = os.MkdirAll(g_testResourcesPath, 0777); err != nil {
-		logs.Logger.Error("Create folder", g_testResourcesPath, "error:", err.Error())
+	g_project.g_persistence.g_mainResourcesPath = filepath.Join(g_project.g_persistencePath, "src", "main", "resources")
+	if err = os.MkdirAll(g_project.g_persistence.g_mainResourcesPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_persistence.g_mainResourcesPath, "error:", err.Error())
+		os.Exit(-1)
+	}
+	g_project.g_persistence.g_testResourcesPath = filepath.Join(g_project.g_persistencePath, "src", "test", "resources")
+	if err = os.MkdirAll(g_project.g_persistence.g_testResourcesPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_persistence.g_testResourcesPath, "error:", err.Error())
 		os.Exit(-1)
 	}
 
 	excludeStrings := strings.Split(exclude, ",")
 	for _, excludeString := range excludeStrings {
-		g_excludeNames = append(g_excludeNames, excludeString)
+		g_project.g_persistence.g_excludeNames = append(g_project.g_persistence.g_excludeNames, excludeString)
+	}
+
+}
+func initServiceProject() {
+
+	var err error
+
+	g_project.g_service.g_servicesPath = filepath.Join(g_project.g_servicePath, "src", "main", "java", g_project.g_service.g_packageServicePath)
+	if err = os.MkdirAll(g_project.g_service.g_servicesPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_service.g_servicesPath, "error:", err.Error())
+		os.Exit(-1)
+	}
+	g_project.g_service.g_servicesImplPath = filepath.Join(g_project.g_servicePath, "src", "main", "java", g_project.g_service.g_packageServicePath, "impl")
+	if err = os.MkdirAll(g_project.g_service.g_servicesImplPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_service.g_servicesImplPath, "error:", err.Error())
+		os.Exit(-1)
+	}
+
+}
+func initApiProject() {
+
+	var err error
+
+	g_project.g_api.g_apiPath = filepath.Join(g_project.g_apiPath, "src", "main", "java", g_project.g_api.g_packageApiPath)
+	if err = os.MkdirAll(g_project.g_api.g_apiPath, 0777); err != nil {
+		logs.Logger.Error("Create folder", g_project.g_api.g_apiPath, "error:", err.Error())
+		os.Exit(-1)
 	}
 
 }
@@ -245,44 +363,70 @@ func writeFiles() {
 	writeConfigProperties()
 	writeAbstractTest()
 	writeConstants()
+	writeHttpUtil()
 	if useRedis {
 		writeRedisTest()
 	}
 
 }
 
-func writeRedisTest() {
+func writeHttpUtil() {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_testPath, "RedisTest.java")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_testResourcesPath, "RedisTest.java"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_utilPath, "HttpClientUtil.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_utilPath, "HttpClientUtil.java"), ", error:", err.Error())
 		return
 	}
 	defer file.Close()
 	bw := bufio.NewWriter(file)
-	redis_content := strings.Replace(redis_test_class, "$(package)$", g_packageName, -1)
+	redis_content := strings.Replace(http_class, "$(package)$", g_project.g_persistence.g_packageDBName, -1)
+	bw.WriteString(redis_content)
+	bw.Flush()
+}
+func writeRedisTest() {
+	var err error
+	var file *os.File
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_testPath, "RedisTest.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_testResourcesPath, "RedisTest.java"), ", error:", err.Error())
+		return
+	}
+	defer file.Close()
+	bw := bufio.NewWriter(file)
+	redis_content := strings.Replace(redis_test_class, "$(package)$", g_project.g_persistence.g_packageDBName, -1)
 	bw.WriteString(redis_content)
 	bw.Flush()
 }
 func writeLog4j() {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_testResourcesPath, "log4j.xml")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_testResourcesPath, "log4j.xml"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_testResourcesPath, "log4j.xml")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_testResourcesPath, "log4j.xml"), ", error:", err.Error())
 		return
 	}
 	defer file.Close()
 	bw := bufio.NewWriter(file)
-	log4jxml := strings.Replace(log4jXML, "$(packageName)$", g_packageName, -1)
+	log4jxml := strings.Replace(log4jXML, "$(packageName)$", g_project.g_persistence.g_packageDBName, -1)
 	bw.WriteString(log4jxml)
 	bw.Flush()
+
+	var logClassFile *os.File
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_loggerPath, "YzLogger.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_loggerPath, "YzLogger.java"), ", error:", err.Error())
+		return
+	}
+	defer logClassFile.Close()
+	bw = bufio.NewWriter(file)
+	logClass := strings.Replace(logger_class, "$(packageName)$", g_project.g_persistence.g_packageDBName, -1)
+	bw.WriteString(logClass)
+	bw.Flush()
+
 }
 
 func writeConfigProperties() {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_testResourcesPath, (dbName)+"-db.properties")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_testResourcesPath, (dbName)+"-db.properties"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_testResourcesPath, (dbName)+"-db.properties")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_testResourcesPath, (dbName)+"-db.properties"), ", error:", err.Error())
 		return
 	}
 	defer file.Close()
@@ -307,15 +451,15 @@ func writeConfigProperties() {
 func writeAbstractTest() {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_testPath, "AbstractTest.java")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_testPath, "AbstractTest.java"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_testPath, "AbstractTest.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_testPath, "AbstractTest.java"), ", error:", err.Error())
 		return
 	}
 	defer file.Close()
 	bw := bufio.NewWriter(file)
 
 	bw.WriteString("package ")
-	bw.WriteString(g_packageName)
+	bw.WriteString(g_project.g_persistence.g_packageDBName)
 	bw.WriteString(";\n")
 	bw.WriteString(`
 import org.junit.runner.RunWith;
@@ -342,27 +486,27 @@ public abstract class AbstractTest {
 func writeConstants() {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_daoPath, "DataSourceConstants.java")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_daoPath, "DataSourceConstants.java"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_daoPath, "DataSourceConstants.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_daoPath, "DataSourceConstants.java"), ", error:", err.Error())
 		return
 	}
 	defer file.Close()
 	bw := bufio.NewWriter(file)
 
 	bw.WriteString(`package `)
-	bw.WriteString(g_packageName)
+	bw.WriteString(g_project.g_persistence.g_packageDBName)
 	bw.WriteString(".persistence.dao;\n\n")
 
 	bw.WriteString("public class DataSourceConstants {\n")
 
 	bw.WriteString("\tpublic static final String DATASOURCE_R_")
-	bw.WriteString(g_upperDbName)
+	bw.WriteString(g_project.g_persistence.g_upperDbName)
 	bw.WriteString(" = \"dataSource_R_")
 	bw.WriteString(dbName)
 	bw.WriteString("\";\n")
 
 	bw.WriteString("\tpublic static final String DATASOURCE_W_")
-	bw.WriteString(g_upperDbName)
+	bw.WriteString(g_project.g_persistence.g_upperDbName)
 	bw.WriteString(" = \"dataSource_W_")
 	bw.WriteString(dbName)
 	bw.WriteString("\";\n")
@@ -372,19 +516,59 @@ func writeConstants() {
 }
 
 ////////////////////////////////////////////////////
-// Resource files
-func (res *resources) init() {
 
+func projectInit() {
+
+}
+
+////////////////////////////////////////////////////
+
+func (res *project_resources) init() {
 	var err error
 
-	if res.pomFile, err = os.Create(filepath.Join(outputPath, "pom.xml")); err != nil {
+	if res.pomFile, err = os.Create(filepath.Join(g_project.g_projectPath, "pom.xml")); err != nil {
 		logs.Logger.Error("Create pom file error %s", err.Error())
 		return
 	}
 	res.pomWriter = bufio.NewWriter(res.pomFile)
 	pomxml := strings.Replace(POM_XML, "$(groupId)$", packageName, -1)
-	pomxml = strings.Replace(pomxml, "$(artifactId)$", dbName, -1)
-	pomxml = strings.Replace(pomxml, "$(name)$", dbName+"-persistence", -1)
+	pomxml = strings.Replace(pomxml, "$(artifactId)$", projectName, -1)
+	pomxml = strings.Replace(pomxml, "$(name)$", projectName, -1)
+	pomxml = strings.Replace(pomxml, "$(description)$", "description for this project", -1)
+	pomxml = strings.Replace(pomxml, "$(jdk)$", jdk, -1)
+	pomxml = strings.Replace(pomxml, "$(version)$", pomVersion, -1)
+	jedis := `
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>2.7.3</version>
+		</dependency>
+			`
+	if useRedis {
+		pomxml = strings.Replace(pomxml, "$(redisDependency)$", jedis, -1)
+
+	} else {
+		pomxml = strings.Replace(pomxml, "$(redisDependency)$", "", -1)
+	}
+
+	res.pomWriter.WriteString(pomxml)
+	res.pomWriter.Flush()
+}
+
+// Resource files
+func (res *resources) init() {
+
+	var err error
+
+	if res.pomFile, err = os.Create(filepath.Join(g_project.g_persistencePath, "pom.xml")); err != nil {
+		logs.Logger.Error("Create pom file error %s", err.Error())
+		return
+	}
+	res.pomWriter = bufio.NewWriter(res.pomFile)
+	pomxml := strings.Replace(DB_POM_XML, "$(groupId)$", packageName, -1)
+	pomxml = strings.Replace(pomxml, "$(artifactId)$", projectName+"-persistence", -1)
+	pomxml = strings.Replace(pomxml, "$(projectName)$", projectName, -1)
+	pomxml = strings.Replace(pomxml, "$(name)$", projectName+"-persistence", -1)
 	pomxml = strings.Replace(pomxml, "$(description)$", "description for this project", -1)
 	pomxml = strings.Replace(pomxml, "$(jdk)$", jdk, -1)
 	pomxml = strings.Replace(pomxml, "$(version)$", pomVersion, -1)
@@ -405,15 +589,15 @@ func (res *resources) init() {
 
 	res.pomWriter.WriteString(pomxml)
 
-	if res.daoConfigFile, err = os.Create(filepath.Join(g_testResourcesPath, (dbName)+"-daoConfig.xml")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_testResourcesPath, (dbName)+"-daoConfig.xml"), ", error:", err.Error())
+	if res.daoConfigFile, err = os.Create(filepath.Join(g_project.g_persistence.g_testResourcesPath, (dbName)+"-daoConfig.xml")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_testResourcesPath, (dbName)+"-daoConfig.xml"), ", error:", err.Error())
 		return
 	}
 	res.daoConfigWriter = bufio.NewWriter(res.daoConfigFile)
-	daoConfigXml := strings.Replace(daoConfigXML, "$(packageName)$", g_packageName, -1)
+	daoConfigXml := strings.Replace(daoConfigXML, "$(packageName)$", g_project.g_persistence.g_packageDBName, -1)
 
-	daoConfigXml = strings.Replace(daoConfigXml, "$(classPath)$", strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/*.xml", -1)
-	daoConfigXml = strings.Replace(daoConfigXml, "$(classPathExt)$", strings.Replace(g_packageName, ".", "/", -1)+"/persistence/sqlmap/ext/*.xml", -1)
+	daoConfigXml = strings.Replace(daoConfigXml, "$(classPath)$", strings.Replace(g_project.g_persistence.g_packageDBName, ".", "/", -1)+"/persistence/sqlmap/*.xml", -1)
+	daoConfigXml = strings.Replace(daoConfigXml, "$(classPathExt)$", strings.Replace(g_project.g_persistence.g_packageDBName, ".", "/", -1)+"/persistence/sqlmap/ext/*.xml", -1)
 
 	switch dbDriver {
 	case "c3p0":
@@ -453,19 +637,18 @@ func (res *resources) close() {
 ////////////////////////////////
 // Test file
 func writeTestHeader(bw *bufio.Writer, class *classDefine) {
-	bw.WriteString(`package ` + g_packageName + ";\n\n")
-	bw.WriteString("import " + g_packageName + ".persistence.model." + class.ClassName + ";\n")
-	bw.WriteString("import " + g_packageName + ".persistence.dao." + class.ClassName + "Dao;\n")
+	bw.WriteString(`package ` + g_project.g_persistence.g_packageDBName + ";\n\n")
+	bw.WriteString("import " + g_project.g_persistence.g_packageDBName + ".persistence.model." + class.ClassName + ";\n")
+	bw.WriteString("import " + g_project.g_persistence.g_packageDBName + ".persistence.dao." + class.ClassName + "Dao;\n")
+	bw.WriteString("import " + g_project.g_persistence.g_packageDBName + ".logger.YzLogger;\n")
 	header := packageName + "." + dbName + ".exception"
 	bw.WriteString("import " + header + ".UnitTestException;\n")
-	bw.WriteString("import org.slf4j.Logger;\n")
-	bw.WriteString("import org.slf4j.LoggerFactory;\n")
 	bw.WriteString("import org.junit.Test;\n")
 	bw.WriteString("import javax.annotation.Resource;\n")
 	bw.WriteString("import org.springframework.transaction.annotation.Transactional;\n\n")
 
 	bw.WriteString("public class " + class.ClassName + "Test extends AbstractTest {\n")
-	bw.WriteString("\tprivate static final Logger logger = LoggerFactory.getLogger(" + class.ClassName + ".class);\n")
+
 }
 func writeTestBody(bw *bufio.Writer, class *classDefine) {
 	bw.WriteString("\t@Resource\n")
@@ -509,7 +692,7 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 	//bw.WriteString(" objInsert = new ")
 	bw.WriteString(new)
 	bw.WriteString("\t\tsetObjVal(objInsert);\n\n")
-	bw.WriteString("\t\tlogger.info(\"insert [")
+	bw.WriteString("\t\tYzLogger.info(\"insert [")
 	bw.WriteString(class.ClassName)
 	bw.WriteString("]\");\n")
 
@@ -525,7 +708,7 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 			bw.WriteString(class.ClassName)
 			bw.WriteString("Test\", \"test of insert is failed\");\n")
 			bw.WriteString("\t\t}\n")
-			bw.WriteString("\t\tlogger.info(\"\tinsert OK\");\n\n")
+			bw.WriteString("\t\tYzLogger.info(\"\tinsert OK\");\n\n")
 
 			bw.WriteString("\t\t")
 			bw.WriteString(class.ClassName)
@@ -537,7 +720,7 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 			bw.WriteString(class.ClassName)
 			bw.WriteString("Test\", \"test of select is failed\");\n")
 			bw.WriteString("\t\t}\n")
-			bw.WriteString("\t\tlogger.info(\"\tselect OK \"+objSelect.toString());\n\n")
+			bw.WriteString("\t\tYzLogger.info(\"\tselect OK \"+objSelect.toString());\n\n")
 		} else {
 			bw.WriteString("\t\t")
 			bw.WriteString(keyType)
@@ -552,7 +735,7 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 			bw.WriteString("\t\tif (objSelect == null) {\n")
 
 			bw.WriteString("\t\t\tdao.insert(objInsert);\n")
-			bw.WriteString("\t\t\tlogger.info(\"\tinsert OK\");\n\n")
+			bw.WriteString("\t\t\tYzLogger.info(\"\tinsert OK\");\n\n")
 			bw.WriteString("\t\t\tobjSelect = dao.get")
 			bw.WriteString(class.ClassName)
 			bw.WriteString("ByKey(key);\n")
@@ -561,14 +744,14 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 			bw.WriteString(class.ClassName)
 			bw.WriteString("Test\", \"test of select is failed\");\n")
 			bw.WriteString("\t\t\t}\n")
-			bw.WriteString("\t\t\tlogger.info(\"\tselect OK \"+objSelect.toString());\n\n")
+			bw.WriteString("\t\t\tYzLogger.info(\"\tselect OK \"+objSelect.toString());\n\n")
 			bw.WriteString("\t\t}\n")
 		}
 
 		bw.WriteString("\t\tjava.util.List<" + class.ClassName + "> list = dao.get" + class.ClassName + "s(objSelect);\n")
 		bw.WriteString("\t\t")
 		bw.WriteString(`if (list !=null){
-            logger.info("	selectAll OK "+list.toString());
+            YzLogger.info("	selectAll OK "+list.toString());
         }else{
             throw new UnitTestException("EcuserWxUserinfoTest", "test of selectAll is failed");
         }` + "\n\n")
@@ -579,7 +762,7 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 		bw.WriteString(class.ClassName)
 		bw.WriteString("Test\", \"test of update is failed\");\n")
 		bw.WriteString("\t\t}\n")
-		bw.WriteString("\t\tlogger.info(\"\tupdate OK\");\n\n")
+		bw.WriteString("\t\tYzLogger.info(\"\tupdate OK\");\n\n")
 
 		bw.WriteString("\t\tInteger del = dao.delete(key);\n")
 		bw.WriteString("\t\tif (del == null || del == 0) {\n")
@@ -587,10 +770,10 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 		bw.WriteString(class.ClassName)
 		bw.WriteString("Test\", \"test of delete is failed\");\n")
 		bw.WriteString("\t\t}\n")
-		bw.WriteString("\t\tlogger.info(\"\tdelete OK\");\n\n")
+		bw.WriteString("\t\tYzLogger.info(\"\tdelete OK\");\n\n")
 	} else if len(class.UnionKeys) > 0 {
 		unionKeysString := strings.Join(unionKeys, ", ")
-		bw.WriteString("\t\tlogger.info(\"\tinsert OK\");\n\n")
+		bw.WriteString("\t\tYzLogger.info(\"\tinsert OK\");\n\n")
 
 		bw.WriteString("\t\t")
 		bw.WriteString(class.ClassName)
@@ -605,7 +788,7 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 		bw.WriteString("Test\", \"test of select is failed\");\n")
 		bw.WriteString("\t\t}\n")
 
-		bw.WriteString("\t\tlogger.info(\"\tselect OK \"+objSelect.toString());\n\n")
+		bw.WriteString("\t\tYzLogger.info(\"\tselect OK \"+objSelect.toString());\n\n")
 
 		bw.WriteString("\t\tInteger res = dao.update(objSelect);\n")
 		bw.WriteString("\t\tif (res == null || res == 0) {\n")
@@ -613,7 +796,7 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 		bw.WriteString(class.ClassName)
 		bw.WriteString("Test\", \"test of update is failed\");\n")
 		bw.WriteString("\t\t}\n")
-		bw.WriteString("\t\tlogger.info(\"\tupdate OK\");\n\n")
+		bw.WriteString("\t\tYzLogger.info(\"\tupdate OK\");\n\n")
 
 		bw.WriteString("\t\tInteger del = dao.delete(")
 		bw.WriteString(unionKeysString)
@@ -623,10 +806,10 @@ func writeTestBody(bw *bufio.Writer, class *classDefine) {
 		bw.WriteString(class.ClassName)
 		bw.WriteString("Test\", \"test of delete is failed\");\n")
 		bw.WriteString("\t\t}\n")
-		bw.WriteString("\t\tlogger.info(\"\tdelete OK\");\n\n")
+		bw.WriteString("\t\tYzLogger.info(\"\tdelete OK\");\n\n")
 	} else {
 		bw.WriteString("\t\tdao.insert(objInsert);\n")
-		bw.WriteString("\t\tlogger.info(\"\tinsert OK\");\n\n")
+		bw.WriteString("\t\tYzLogger.info(\"\tinsert OK\");\n\n")
 
 	}
 	bw.WriteString("\t}\n\n")

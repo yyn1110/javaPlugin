@@ -5,10 +5,17 @@ const POM_XML = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>$(groupId)$</groupId>
 	<version>$(version)$</version>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 	<artifactId>$(artifactId)$</artifactId>
 	<name>$(name)$</name>
 	<description>$(description)$</description>
+	   <modules>
+
+
+        <module>$(artifactId)$-persistence</module>
+
+
+    </modules>
 	<!-- 构建信息 -->
 	<build>
 		<defaultGoal>install</defaultGoal>
@@ -62,8 +69,9 @@ const POM_XML = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 		<druid_version>1.0.29</druid_version>
 		<mybatis_version>3.3.0</mybatis_version>
 		<mybatis_spring_version>1.2.2</mybatis_spring_version>
+		<http_version>4.5.2</http_version>
 	</properties>
-
+<dependencyManagement>
 	<!-- jar依赖 -->
 	<dependencies>
 		<!-- spring读写分离依赖jar包 -->
@@ -71,6 +79,18 @@ const POM_XML = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
 			<version>${spring_version}</version>
+		</dependency>
+
+		<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${http_version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
 		</dependency>
 
 		<dependency>
@@ -161,14 +181,187 @@ const POM_XML = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 		$(redisDependency)$
 
 	</dependencies>
+	</dependencyManagement>
 	<distributionManagement>
 		<repository>
-			<id>xxx-releases</id>
-			<url>http://maven.xxxx.com/nexus/content/repositories/releases</url>
+			<id>yyw-releases</id>
+			<url>http://maven.yiyaowang.com/nexus/content/repositories/releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>xxx-snapshots</id>
-			<url>http://maven.xxx.com/nexus/content/repositories/snapshots</url>
+			<id>yyw-snapshots</id>
+			<url>http://maven.yiyaowang.com/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 </project>`
+
+const DB_POM_XML = `
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+	</properties>
+	<parent>
+        <groupId>$(groupId)$</groupId>
+        <artifactId>$(projectName)$</artifactId>
+        <version>$(version)$</version>
+    </parent>
+
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>$(groupId)$</groupId>
+
+	<packaging>jar</packaging>
+	<artifactId>$(artifactId)$</artifactId>
+	<name>$(name)$</name>
+	<description>$(description)$</description>
+	<!-- 构建信息 -->
+	<build>
+		<defaultGoal>install</defaultGoal>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.5.1</version>
+				<configuration>
+					<source>$(jdk)$</source>
+					<target>$(jdk)$</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<version>2.5</version>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+			</testResource>
+		</testResources>
+	</build>
+
+
+	<!-- jar依赖 -->
+	<dependencies>
+		<!-- spring读写分离依赖jar包 -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+		</dependency>
+
+		<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+		</dependency>
+
+		<!-- spring单元测试依赖jar包 -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+		</dependency>
+
+		<!-- mybatis整合spring依赖jar包 -->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+		</dependency>
+
+		<!-- mysql数据库驱动包 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>c3p0</groupId>
+			<artifactId>c3p0</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
+		<dependency>
+		    <groupId>com.alibaba</groupId>
+		    <artifactId>druid</artifactId>
+		</dependency>
+
+		<!-- 单元测试依赖jar包 -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+
+		<!-- 自定义注解依赖jar包 -->
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-redis</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+
+		$(redisDependency)$
+
+	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>yyw-releases</id>
+			<url>http://maven.yiyaowang.com/nexus/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>yyw-snapshots</id>
+			<url>http://maven.yiyaowang.com/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+</project>
+`

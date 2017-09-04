@@ -14,10 +14,9 @@ import (
 	"strings"
 	"sync"
 
+	_ "github.com/go-sql-driver/mysql"
 	"time"
 	"unicode"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func wait(wg *sync.WaitGroup, ch chan<- bool) {
@@ -39,9 +38,9 @@ func run(dbConn *sql.DB, wg *sync.WaitGroup) {
 	}
 	defer rows.Close()
 
-	g_resources = &resources{}
-	g_resources.init()
-	defer g_resources.close()
+	g_project.g_persistence.g_resources = &resources{}
+	g_project.g_persistence.g_resources.init()
+	defer g_project.g_persistence.g_resources.close()
 
 	writeFiles()
 
@@ -63,7 +62,7 @@ func tableNameFilter(tableName string) bool {
 	if strings.HasPrefix(tableName, "view_") {
 		return false
 	}
-	for _, excludeString := range g_excludeNames {
+	for _, excludeString := range g_project.g_persistence.g_excludeNames {
 		if strings.Contains(tableName, excludeString) {
 			return false
 		}
@@ -352,7 +351,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 	composeTestFiles(&class)
 	composeDataSourceFiles()
 	composeTestException()
-	g_resources.writeLine(&class)
+	g_project.g_persistence.g_resources.writeLine(&class)
 }
 
 /*
@@ -412,8 +411,8 @@ func getUniqueKeyFrom(createTableSql string) (uniqueKeys []string) {
 func composeClassFile(class *classDefine) {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_modelPath, class.ClassName+".java")); err != nil {
-		logs.Logger.Error(filepath.Join(g_modelPath, class.ClassName+".java"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_modelPath, class.ClassName+".java")); err != nil {
+		logs.Logger.Error(filepath.Join(g_project.g_persistence.g_modelPath, class.ClassName+".java"), ", error:", err.Error())
 		return
 	}
 
@@ -429,8 +428,8 @@ func composeClassFile(class *classDefine) {
 func composeTestException() {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_testExceptionPath, "UnitTestException.java")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"UnitTestException.java"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_testExceptionPath, "UnitTestException.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_dataSourcePath+"UnitTestException.java"), ", error:", err.Error())
 		return
 	}
 
@@ -470,8 +469,8 @@ func composeDataSourceFiles() {
 
 	if useRedis {
 		var redisFile *os.File
-		if redisFile, err = os.Create(filepath.Join(g_dataSourcePath, "RedisUtils.java")); err != nil {
-			logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"RedisUtils.java"), ", error:", err.Error())
+		if redisFile, err = os.Create(filepath.Join(g_project.g_persistence.g_utilPath, "RedisUtils.java")); err != nil {
+			logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_utilPath+"RedisUtils.java"), ", error:", err.Error())
 			return
 		}
 
@@ -483,8 +482,8 @@ func composeDataSourceFiles() {
 	}
 
 	//=====
-	if file, err = os.Create(filepath.Join(g_dataSourcePath, "DataSource.java")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"DataSource.java"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_dataSourcePath, "DataSource.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_dataSourcePath+"DataSource.java"), ", error:", err.Error())
 		return
 	}
 
@@ -494,8 +493,8 @@ func composeDataSourceFiles() {
 	bw.WriteString(text)
 	bw.Flush()
 	//=====
-	if dynamicFile, err = os.Create(filepath.Join(g_dataSourcePath, "DynamicDataSource.java")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSource.java"), ", error:", err.Error())
+	if dynamicFile, err = os.Create(filepath.Join(g_project.g_persistence.g_dataSourcePath, "DynamicDataSource.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_dataSourcePath+"DynamicDataSource.java"), ", error:", err.Error())
 		return
 	}
 
@@ -505,8 +504,8 @@ func composeDataSourceFiles() {
 	dybw.WriteString(text1)
 	dybw.Flush()
 	//=====
-	if dynamicAspectFile, err = os.Create(filepath.Join(g_dataSourcePath, "DynamicDataSourceAspect.java")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSourceAspect.java"), ", error:", err.Error())
+	if dynamicAspectFile, err = os.Create(filepath.Join(g_project.g_persistence.g_dataSourcePath, "DynamicDataSourceAspect.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_dataSourcePath+"DynamicDataSourceAspect.java"), ", error:", err.Error())
 		return
 	}
 
@@ -516,8 +515,8 @@ func composeDataSourceFiles() {
 	dyAsbw.WriteString(text2)
 	dyAsbw.Flush()
 
-	if dynamicAspectHolderFile, err = os.Create(filepath.Join(g_dataSourcePath, "DynamicDataSourceHolder.java")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"DynamicDataSourceHolder.java"), ", error:", err.Error())
+	if dynamicAspectHolderFile, err = os.Create(filepath.Join(g_project.g_persistence.g_dataSourcePath, "DynamicDataSourceHolder.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_dataSourcePath+"DynamicDataSourceHolder.java"), ", error:", err.Error())
 		return
 	}
 
@@ -527,8 +526,8 @@ func composeDataSourceFiles() {
 	holder.WriteString(text3)
 	holder.Flush()
 
-	if interceptorFile, err = os.Create(filepath.Join(g_dataSourcePath, "MybatisInterceptor.java")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_dataSourcePath+"MybatisInterceptor.java"), ", error:", err.Error())
+	if interceptorFile, err = os.Create(filepath.Join(g_project.g_persistence.g_dataSourcePath, "MybatisInterceptor.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_dataSourcePath+"MybatisInterceptor.java"), ", error:", err.Error())
 		return
 	}
 
@@ -543,8 +542,8 @@ func composeDataSourceFiles() {
 func composeDaoFiles(class *classDefine) {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_daoPath, class.ClassName+"Dao.java")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_daoPath, class.ClassName+"Dao.java"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_daoPath, class.ClassName+"Dao.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_daoPath, class.ClassName+"Dao.java"), ", error:", err.Error())
 		return
 	}
 
@@ -558,8 +557,8 @@ func composeDaoFiles(class *classDefine) {
 func composeMappingFiles(class *classDefine) {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_myBatisPath, class.CamelCaseName+"SqlMap.xml")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_myBatisPath, class.CamelCaseName+"SqlMap.xml"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_myBatisPath, class.CamelCaseName+"SqlMap.xml")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_myBatisPath, class.CamelCaseName+"SqlMap.xml"), ", error:", err.Error())
 		return
 	}
 
@@ -573,8 +572,8 @@ func composeMappingFiles(class *classDefine) {
 func composeTestFiles(class *classDefine) {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_testPath, class.ClassName+"Test.java")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_testPath, class.ClassName+"Test.java"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_project.g_persistence.g_testPath, class.ClassName+"Test.java")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_project.g_persistence.g_testPath, class.ClassName+"Test.java"), ", error:", err.Error())
 		return
 	}
 
@@ -647,7 +646,7 @@ func parseName(tableName string, prefixString string) (words []string, hasPrefix
 
 func writeClassHeader(bw *bufio.Writer, class *classDefine) {
 	bw.WriteString(`package `)
-	bw.WriteString(g_packageName)
+	bw.WriteString(g_project.g_persistence.g_packageDBName)
 	bw.WriteString(".persistence.model;\n\n")
 	bw.WriteString("import java.io.Serializable;\n\n")
 	bw.WriteString(`public class `)
@@ -730,11 +729,11 @@ func writeClassTailer(bw *bufio.Writer) {
 func writeDaoHeader(bw *bufio.Writer, class *classDefine) {
 	header := packageName + "." + dbName + ".dataSource"
 	bw.WriteString(`package `)
-	bw.WriteString(g_packageName)
+	bw.WriteString(g_project.g_persistence.g_packageDBName)
 	bw.WriteString(".persistence.dao;\n\n")
 	bw.WriteString("import " + header + ".DataSource;\n")
 	bw.WriteString("import ")
-	bw.WriteString(g_packageName)
+	bw.WriteString(g_project.g_persistence.g_packageDBName)
 	bw.WriteString(".persistence.model.")
 	bw.WriteString(class.ClassName)
 	bw.WriteString(";\n\npublic interface ")
@@ -742,8 +741,8 @@ func writeDaoHeader(bw *bufio.Writer, class *classDefine) {
 	bw.WriteString("Dao {\n")
 }
 func writeDaoBody(bw *bufio.Writer, class *classDefine) {
-	dsw := "\t@DataSource(DataSourceConstants.DATASOURCE_W_" + g_upperDbName + ")\n"
-	dsr := "\t@DataSource(DataSourceConstants.DATASOURCE_R_" + g_upperDbName + ")\n"
+	dsw := "\t@DataSource(DataSourceConstants.DATASOURCE_W_" + g_project.g_persistence.g_upperDbName + ")\n"
+	dsr := "\t@DataSource(DataSourceConstants.DATASOURCE_R_" + g_project.g_persistence.g_upperDbName + ")\n"
 	// insert method
 	bw.WriteString(dsw)
 	bw.WriteString("\tpublic int insert(")
@@ -849,7 +848,7 @@ func writeMappingHeader(bw *bufio.Writer, class *classDefine) {
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 `)
 	bw.WriteString(`<mapper namespace="`)
-	bw.WriteString(g_packageName)
+	bw.WriteString(g_project.g_persistence.g_packageDBName)
 	bw.WriteString(".persistence.dao.")
 	bw.WriteString(class.ClassName)
 	bw.WriteString("Dao\">\n\n")
@@ -875,7 +874,7 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 	bufProperty.WriteString("\n\t<!--属性-->\n\t<parameterMap id=\"")
 	bufProperty.WriteString(class.CamelCaseName)
 	bufProperty.WriteString("ParameterMap\" type=\"")
-	bufProperty.WriteString(g_packageName)
+	bufProperty.WriteString(g_project.g_persistence.g_packageDBName)
 	bufProperty.WriteString(".persistence.model.")
 	bufProperty.WriteString(class.ClassName)
 	bufProperty.WriteString("\">\n")
@@ -883,7 +882,7 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 	bufMapping.WriteString("\t<!--数据库字段与对象属性映射-->\n\t<resultMap id=\"")
 	bufMapping.WriteString(class.CamelCaseName)
 	bufMapping.WriteString("ResultMap\" type=\"")
-	bufMapping.WriteString(g_packageName)
+	bufMapping.WriteString(g_project.g_persistence.g_packageDBName)
 	bufMapping.WriteString(".persistence.model.")
 	bufMapping.WriteString(class.ClassName)
 	bufMapping.WriteString("\">\n")

@@ -13,6 +13,8 @@ datasource_$(dbName)$_r.maxIdleTime=300000
 datasource_$(dbName)$_r.maxWait=60000
 datasource_$(dbName)$_r.timeBetweenEvictionRunsMillis=60000
 datasource_$(dbName)$_r.maxPoolPreparedStatementPerConnectionSize=20
+##druid加密访问数据库密码
+datasource_kubauser_r.key=
 #w-datasource
 datasource_$(dbName)$_w.driverClassName=com.mysql.jdbc.Driver
 datasource_$(dbName)$_w.url=jdbc:mysql://$(dbAddr)$/$(dbName)$?useUnicode=true&amp;characterEncoding=UTF-8&amp;zeroDateTimeBehavior=convertToNull&amp;autoReconnectForPools=true&amp;userSSL=false
@@ -26,7 +28,8 @@ datasource_$(dbName)$_w.maxIdleTime=300000
 datasource_$(dbName)$_w.maxWait=60000
 datasource_$(dbName)$_w.timeBetweenEvictionRunsMillis=60000
 datasource_$(dbName)$_w.maxPoolPreparedStatementPerConnectionSize=20
+##druid加密访问数据库密码
+datasource_kubauser_w.key=
 
 
 `
-

@@ -84,3 +84,99 @@ const log4jXML  = `<?xml version="1.0" encoding="UTF-8"?>
     </root>
 </log4j:configuration>
 `
+const logger_class = `
+package $(packageName)$.logger;
+
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+public class YzLogger {
+
+
+    public static StackTraceElement findCaller() {
+
+        StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
+        if (callStack == null) {
+            return null;
+        }
+
+        StackTraceElement caller = null;
+
+        String logClassName = YzLogger.class.getName();
+
+        boolean isEachLogClass = false;
+
+        for (StackTraceElement stackTraceElement : callStack) {
+
+            if (logClassName.equals(stackTraceElement.getClassName())) {
+                isEachLogClass = true;
+            }
+
+            if (isEachLogClass) {
+                if (!logClassName.equals(stackTraceElement.getClassName())) {
+                    isEachLogClass = false;
+                    caller = stackTraceElement;
+                    break;
+                }
+            }
+        }
+        return caller;
+    }
+
+
+    private static Logger logger() {
+
+        StackTraceElement caller = findCaller();
+        if (null == caller) return LoggerFactory.getLogger(YzLogger.class);
+
+        Logger log = LoggerFactory.getLogger(caller.getClassName() + "." + caller.getMethodName() + "() Line: " + caller.getLineNumber());
+
+        return log;
+    }
+
+    public static void debug(String msg) {
+        debug(msg, null);
+    }
+
+    public static void debug(String msg, Throwable e) {
+        logger().debug(msg, e);
+    }
+
+    public static void info(String msg) {
+        logger().info(msg);
+    }
+
+    public static void info(String msg, Throwable e) {
+        logger().info(msg, e);
+    }
+
+    public  static void info(String format,Object... arguments){
+        logger().info(format,arguments);
+    }
+
+    public static void warn(String msg) {
+        logger().warn(msg);
+    }
+
+    public static void warn(String msg, Throwable e) {
+        logger().warn(msg, e);
+    }
+    public static void warn(String msg, Object ... args) {
+        logger().warn(msg, args);
+    }
+
+    public static void error(String msg) {
+        logger().error(msg);
+    }
+
+    public static void error(String msg, Throwable e) {
+        logger().error(msg, e);
+    }
+    public  static  void error(String msg, Object ...args){
+        logger().error(msg,args);
+    }
+}
+`

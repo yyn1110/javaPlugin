@@ -122,6 +122,9 @@ func getMysqlMapping(mysqlFiled string, valueLen int) (*MysqlTypeMapping, error)
 	case "set":
 		m := newMapping("String", FIELD_TYPE_SET, "", getText(valueLen))
 		return m, nil
+	default:
+		m := newMapping("String", FIELD_TYPE_STRING, "", getText(valueLen))
+		return m, nil
 	}
 
 	return nil, errors.New(fmt.Sprintf("unsupport mysql type mysqlFiled = %s ", mysqlFiled))

@@ -93,7 +93,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 		logs.Logger.Info("tableNameFields: %+v", tableNameFields)
 	}
 	class.CamelCaseName = toFieldName(tableNameFields)
-	index := 0
+	//index := 0
 	for rows.Next() {
 		var tds tableDefineString
 		if err = rows.Scan(&td.Field, &td.Type, &td.Null, &td.Key, &td.Default, &td.Extra, &td.Comment, &td.CharacterSetName, &td.Schema, &td.TableName, &td.DBType); err != nil {
@@ -101,121 +101,161 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			return
 		}
 		tds.DbFieldName = string(td.Field)
+		allType := string(td.DBType)
+		fieldLen := ""
+
+		beginIndex := strings.Index(allType, "(")
+
+		if beginIndex >= 0 {
+			endIndex := strings.Index(allType, ")")
+			if endIndex >= 0 {
+				fieldLen = allType[beginIndex+1 : endIndex]
+			}
+		}
+		logs.Logger.Info("================" + allType + "   " + fieldLen)
+
+		fl := fieldLen
+		if len(fl) > 0 {
+			i, err := strconv.Atoi(fl)
+			if err != nil {
+				tds.FieldLen = 0
+			} else {
+				tds.FieldLen = i
+			}
+
+		} else {
+			tds.FieldLen = 0
+		}
+
 		fieldWords, _ := parseName(tds.DbFieldName, "")
 		tds.FieldName = toFieldName(fieldWords)
 		tds.MethodName = toClassName(fieldWords)
 		keyName := strings.ToLower(tds.FieldName)
 		class.Names = append(class.Names, keyName)
-
 		tds.DbTypeString = string(td.Type)
-		if strings.HasPrefix(tds.DbTypeString, "varchar") {
-			tds.Type = FIELD_TYPE_STRING
-			tds.TypeString = "String"
-			tds.JDBCType = "VARCHAR"
-			tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName) //fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.Contains(tds.DbTypeString, "text") {
-			tds.Type = FIELD_TYPE_STRING
-			tds.JDBCType = "LONGVARCHAR"
-			tds.TypeString = "String"
-			tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName) //fmt.Sprintf("\"%s\"", tds.FieldName)
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "char") {
-			tds.Type = FIELD_TYPE_STRING
-			tds.JDBCType = "CHAR"
-			tds.TypeString = "String"
-			tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName) //fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "int") {
-			tds.Type = FIELD_TYPE_INTEGER
-			tds.JDBCType = "INTEGER"
-			tds.TypeString = "Integer"
-			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "tinyint") {
-			tds.Type = FIELD_TYPE_INTEGER
-			tds.JDBCType = "TINYINT"
-			tds.TypeString = "Integer"
-			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "smallint") {
-			tds.Type = FIELD_TYPE_INTEGER
-			tds.JDBCType = "INTEGER"
-			tds.TypeString = "Integer"
-			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "mediumint") {
-			tds.Type = FIELD_TYPE_INTEGER
-			tds.JDBCType = "INTEGER"
-			tds.TypeString = "Integer"
-			tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "bigint") {
-			tds.Type = FIELD_TYPE_LONG
-			tds.JDBCType = "BIGINT"
-			tds.TypeString = "Long"
-			tds.TestValue = fmt.Sprintf("new Long(%d)", index+1)
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "float") {
-			tds.Type = FIELD_TYPE_FLOAT
-			tds.JDBCType = "FLOAT"
-			tds.TypeString = "Float"
-			tds.TestValue = fmt.Sprintf("new Float(%d.0f)", index+1)
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "double") {
-			tds.Type = FIELD_TYPE_DOUBLE
-			tds.JDBCType = "DOUBLE"
-			tds.TypeString = "Double"
-			tds.TestValue = fmt.Sprintf("new Double(%d.0)", index+1)
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "decimal") {
-			tds.Type = FIELD_TYPE_BID_DECIMAL
-			tds.JDBCType = "DECIMAL"
-			tds.TypeString = "java.math.BigDecimal"
-			tds.TestValue = fmt.Sprintf("new java.math.BigDecimal(%d.0)", index+1)
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "timestamp") {
-			tds.Type = FIELD_TYPE_TIMESTAMP
-			tds.JDBCType = "TIMESTAMP"
-			tds.TypeString = "java.util.Date"
-			tds.TestValue = "new java.util.Date()"
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "date") {
-			tds.Type = FIELD_TYPE_TIMESTAMP
-			tds.JDBCType = "DATE"
-			tds.TypeString = "java.util.Date"
-			tds.TestValue = "new java.util.Date()"
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "time") {
-			tds.Type = FIELD_TYPE_TIMESTAMP
-			tds.JDBCType = "TIME"
-			tds.TypeString = "java.util.Date"
-			tds.TestValue = "new java.util.Date()"
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "set") {
-			tds.Type = FIELD_TYPE_SET
-			tds.JDBCType = ""
-			tds.TypeString = "String"
-			tds.TestValue = fmt.Sprintf("\"%s\"", getFirstItemFromSet(tds.DbTypeString))
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "enum") {
-			tds.Type = FIELD_TYPE_ENUM
-			tds.JDBCType = ""
-			tds.TypeString = "String"
-			tds.TestValue = fmt.Sprintf("\"%s\"", getFirstItemFromSet(tds.DbTypeString))
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else if strings.HasPrefix(tds.DbTypeString, "point") {
-			tds.Type = FIELD_TYPE_POINT
-			tds.JDBCType = ""
-			tds.TypeString = "String"
-			tds.TestValue = `""` //"\"POINT(1 1)\""
-			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
-		} else {
-			logs.Logger.Info("no support Db Type tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
 
+		m, err := getMysqlMapping(tds.DbTypeString, tds.FieldLen)
+		if err == nil {
+			tds.Type = m.FiledType
+			tds.TypeString = m.JavaType
+			tds.JDBCType = m.JDBCType
+			tds.TestValue = m.TestValue
+			logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+
+		} else {
+			logs.Logger.Error(err.Error())
 			continue
 		}
 
+		/*
+			if strings.HasPrefix(tds.DbTypeString, "varchar") {
+				tds.Type = FIELD_TYPE_STRING
+				tds.TypeString = "String"
+				tds.JDBCType = "VARCHAR"
+				tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName) //fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.Contains(tds.DbTypeString, "text") {
+				tds.Type = FIELD_TYPE_STRING
+				tds.JDBCType = "LONGVARCHAR"
+				tds.TypeString = "String"
+				tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName) //fmt.Sprintf("\"%s\"", tds.FieldName)
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "char") {
+				tds.Type = FIELD_TYPE_STRING
+				tds.JDBCType = "CHAR"
+				tds.TypeString = "String"
+				tds.TestValue = fmt.Sprintf("\"%s\"", tds.FieldName) //fmt.Sprintf("\"%s\"", getMaxLength(tds.FieldName, tds.DbTypeString))
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "int") {
+				tds.Type = FIELD_TYPE_INTEGER
+				tds.JDBCType = "INTEGER"
+				tds.TypeString = "Integer"
+				tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "tinyint") {
+				tds.Type = FIELD_TYPE_INTEGER
+				tds.JDBCType = "TINYINT"
+				tds.TypeString = "Integer"
+				tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "smallint") {
+				tds.Type = FIELD_TYPE_INTEGER
+				tds.JDBCType = "INTEGER"
+				tds.TypeString = "Integer"
+				tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "mediumint") {
+				tds.Type = FIELD_TYPE_INTEGER
+				tds.JDBCType = "INTEGER"
+				tds.TypeString = "Integer"
+				tds.TestValue = fmt.Sprintf("new Integer(%d)", index+1)
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "bigint") {
+				tds.Type = FIELD_TYPE_LONG
+				tds.JDBCType = "BIGINT"
+				tds.TypeString = "Long"
+				tds.TestValue = fmt.Sprintf("new Long(%d)", index+1)
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "float") {
+				tds.Type = FIELD_TYPE_FLOAT
+				tds.JDBCType = "FLOAT"
+				tds.TypeString = "Float"
+				tds.TestValue = fmt.Sprintf("new Float(%d.0f)", index+1)
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "double") {
+				tds.Type = FIELD_TYPE_DOUBLE
+				tds.JDBCType = "DOUBLE"
+				tds.TypeString = "Double"
+				tds.TestValue = fmt.Sprintf("new Double(%d.0)", index+1)
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "decimal") {
+				tds.Type = FIELD_TYPE_BID_DECIMAL
+				tds.JDBCType = "DECIMAL"
+				tds.TypeString = "java.math.BigDecimal"
+				tds.TestValue = fmt.Sprintf("new java.math.BigDecimal(%d.0)", index+1)
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "timestamp") {
+				tds.Type = FIELD_TYPE_TIMESTAMP
+				tds.JDBCType = "TIMESTAMP"
+				tds.TypeString = "java.util.Date"
+				tds.TestValue = "new java.util.Date()"
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "date") {
+				tds.Type = FIELD_TYPE_TIMESTAMP
+				tds.JDBCType = "DATE"
+				tds.TypeString = "java.util.Date"
+				tds.TestValue = "new java.util.Date()"
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "time") {
+				tds.Type = FIELD_TYPE_TIMESTAMP
+				tds.JDBCType = "TIME"
+				tds.TypeString = "java.util.Date"
+				tds.TestValue = "new java.util.Date()"
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "set") {
+				tds.Type = FIELD_TYPE_SET
+				tds.JDBCType = ""
+				tds.TypeString = "String"
+				tds.TestValue = fmt.Sprintf("\"%s\"", getFirstItemFromSet(tds.DbTypeString))
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "enum") {
+				tds.Type = FIELD_TYPE_ENUM
+				tds.JDBCType = ""
+				tds.TypeString = "String"
+				tds.TestValue = fmt.Sprintf("\"%s\"", getFirstItemFromSet(tds.DbTypeString))
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else if strings.HasPrefix(tds.DbTypeString, "point") {
+				tds.Type = FIELD_TYPE_POINT
+				tds.JDBCType = ""
+				tds.TypeString = "String"
+				tds.TestValue = `""` //"\"POINT(1 1)\""
+				logs.Logger.Info("tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+			} else {
+				logs.Logger.Info("no support Db Type tableName = %s ClassName = %s FiledName = %s Db Type= %s", tableName, class.ClassName, tds.DbFieldName, tds.DbTypeString)
+
+				continue
+			}
+		*/
 		tds.Null = string(td.Null)
 		tds.Key = string(td.Key)
 		tds.Default = string(td.Default)

@@ -99,20 +99,9 @@ type tableDefine struct {
 	CharacterSetName []byte
 	Schema           []byte
 	TableName        []byte
+
 }
 
-const (
-	FIELD_TYPE_STRING = iota
-	FIELD_TYPE_INTEGER
-	FIELD_TYPE_FLOAT
-	FIELD_TYPE_TIMESTAMP
-	FIELD_TYPE_DOUBLE
-	FIELD_TYPE_LONG
-	FIELD_TYPE_ENUM
-	FIELD_TYPE_SET
-	FIELD_TYPE_POINT
-	FIELD_TYPE_BID_DECIMAL
-)
 
 type tableDefineString struct {
 	DbFieldName      string
@@ -131,6 +120,7 @@ type tableDefineString struct {
 	DBType           string
 	AutoIncrement    bool
 	TestValue        string
+	FieldLen 		int
 }
 
 type classDefine struct {

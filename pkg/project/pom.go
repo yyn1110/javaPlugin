@@ -5,17 +5,11 @@ const POM_XML = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>$(groupId)$</groupId>
 	<version>$(version)$</version>
-	<packaging>pom</packaging>
+	<packaging>$(maven_type)$</packaging>
 	<artifactId>$(artifactId)$</artifactId>
 	<name>$(name)$</name>
 	<description>$(description)$</description>
-	   <modules>
-
-
-        <module>$(artifactId)$-persistence</module>
-
-
-    </modules>
+    $(modules)$
 	<!-- 构建信息 -->
 	<build>
 		<defaultGoal>install</defaultGoal>
@@ -71,7 +65,8 @@ const POM_XML = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 		<mybatis_spring_version>1.2.2</mybatis_spring_version>
 		<http_version>4.5.2</http_version>
 	</properties>
-<dependencyManagement>
+
+$(depend_begin)$
 	<!-- jar依赖 -->
 	<dependencies>
 		<!-- spring读写分离依赖jar包 -->
@@ -181,7 +176,7 @@ const POM_XML = `<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="h
 		$(redisDependency)$
 
 	</dependencies>
-	</dependencyManagement>
+	$(depend_end)$
 	<distributionManagement>
 		<repository>
 			<id>yyw-releases</id>
@@ -365,3 +360,16 @@ const DB_POM_XML = `
 	</distributionManagement>
 </project>
 `
+
+func createModules() string {
+	if currentType == Project_Type_PROJECT {
+		return ` <modules>
+        <module>$(artifactId)$-persistence</module>
+    </modules>`
+	} else if currentType == Project_Type_DB {
+		return ""
+	}
+
+	return ""
+
+}

@@ -175,11 +175,15 @@ type classDefine struct {
 	UnionKeys     []*tableDefineString
 }
 
-func Run() {
+func Run(t int) {
+	currentType = t
 	initEnviroment()
+
 	initPersistenceProject()
-	initServiceProject()
-	initApiProject()
+	if currentType == Project_Type_PROJECT {
+		initServiceProject()
+		initApiProject()
+	}
 
 	dbURL := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8", (dbUser), (dbPassword), (dbAddr), (dbName))
 	logs.Logger.Info(dbURL)
@@ -208,7 +212,7 @@ func Run() {
 }
 func initEnviroment() {
 
-	logs.Logger.Info("%s version[%s]\r\nUsage: %s [OPTIONS]\r\n", programName, version, os.Args[0])
+	logs.Logger.Info("%s version[%s]\r\n\r\n", programName, version)
 
 	numcpu := runtime.NumCPU()
 	currentcpu := runtime.GOMAXPROCS(0)
@@ -228,40 +232,54 @@ func initEnviroment() {
 	g_project = new(project)
 	g_project.g_projectPath = filepath.Join(outputPath, projectName)
 	g_project.g_packageName = packageName
-	g_project.g_apiPath = filepath.Join(outputPath, projectName, projectName+"-api")
-	if err = os.MkdirAll(g_project.g_apiPath, 0777); err != nil {
-		logs.Logger.Error("Create folder", g_project.g_apiPath, "error:", err.Error())
-		os.Exit(-1)
-	}
-	g_project.g_servicePath = filepath.Join(outputPath, projectName, projectName+"-service")
-	if err = os.MkdirAll(g_project.g_servicePath, 0777); err != nil {
-		logs.Logger.Error("Create folder", g_project.g_servicePath, "error:", err.Error())
-		os.Exit(-1)
-	}
-	g_project.g_persistencePath = filepath.Join(outputPath, projectName, projectName+"-persistence")
-	if err = os.MkdirAll(g_project.g_persistencePath, 0777); err != nil {
-		logs.Logger.Error("Create folder", g_project.g_persistencePath, "error:", err.Error())
-		os.Exit(-1)
-	}
-	g_persistence := new(project_persistence)
-	g_project.g_persistence = g_persistence
-	g_persistence.g_packageDBName = packageName + "." + dbName
-	g_persistence.g_packageDBPath = strings.Replace(g_persistence.g_packageDBName, ".", string(filepath.Separator), -1)
+	if currentType == Project_Type_PROJECT {
 
-	g_service := new(project_service)
-	g_project.g_service = g_service
-	g_service.g_packageServiceName = packageName + ".services"
-	g_service.g_packageServicePath = strings.Replace(g_service.g_packageServiceName, ".", string(filepath.Separator), -1)
+		g_project.g_apiPath = filepath.Join(outputPath, projectName, projectName+"-api")
+		if err = os.MkdirAll(g_project.g_apiPath, 0777); err != nil {
+			logs.Logger.Error("Create folder", g_project.g_apiPath, "error:", err.Error())
+			os.Exit(-1)
+		}
+		g_project.g_servicePath = filepath.Join(outputPath, projectName, projectName+"-service")
+		if err = os.MkdirAll(g_project.g_servicePath, 0777); err != nil {
+			logs.Logger.Error("Create folder", g_project.g_servicePath, "error:", err.Error())
+			os.Exit(-1)
+		}
+		g_project.g_persistencePath = filepath.Join(outputPath, projectName, projectName+"-persistence")
+		if err = os.MkdirAll(g_project.g_persistencePath, 0777); err != nil {
+			logs.Logger.Error("Create folder", g_project.g_persistencePath, "error:", err.Error())
+			os.Exit(-1)
+		}
+		g_persistence := new(project_persistence)
+		g_project.g_persistence = g_persistence
+		g_persistence.g_packageDBName = packageName + "." + dbName
+		g_persistence.g_packageDBPath = strings.Replace(g_persistence.g_packageDBName, ".", string(filepath.Separator), -1)
 
-	g_api := new(project_api)
-	g_api.g_packageApiName = packageName + ".api"
-	g_api.g_packageApiPath = strings.Replace(g_api.g_packageApiName, ".", string(filepath.Separator), -1)
-	g_project.g_api = g_api
-	g_persistence.g_upperDbName = strings.ToUpper(dbName)
+		g_service := new(project_service)
+		g_project.g_service = g_service
+		g_service.g_packageServiceName = packageName + ".services"
+		g_service.g_packageServicePath = strings.Replace(g_service.g_packageServiceName, ".", string(filepath.Separator), -1)
 
-	pr := new(project_resources)
-	pr.init()
-	g_project.g_project_resource = pr
+		g_api := new(project_api)
+		g_api.g_packageApiName = packageName + ".api"
+		g_api.g_packageApiPath = strings.Replace(g_api.g_packageApiName, ".", string(filepath.Separator), -1)
+		g_project.g_api = g_api
+		g_persistence.g_upperDbName = strings.ToUpper(dbName)
+
+		pr := new(project_resources)
+		pr.init()
+		g_project.g_project_resource = pr
+	} else {
+		g_project.g_persistencePath = filepath.Join(outputPath, projectName, projectName+"-db")
+		if err = os.MkdirAll(g_project.g_persistencePath, 0777); err != nil {
+			logs.Logger.Error("Create folder", g_project.g_persistencePath, "error:", err.Error())
+			os.Exit(-1)
+		}
+		g_persistence := new(project_persistence)
+		g_project.g_persistence = g_persistence
+		g_persistence.g_packageDBName = packageName + "." + dbName
+		g_persistence.g_packageDBPath = strings.Replace(g_persistence.g_packageDBName, ".", string(filepath.Separator), -1)
+
+	}
 
 }
 func initPersistenceProject() {
@@ -532,6 +550,10 @@ func (res *project_resources) init() {
 	}
 	res.pomWriter = bufio.NewWriter(res.pomFile)
 	pomxml := strings.Replace(POM_XML, "$(groupId)$", packageName, -1)
+	pomxml = strings.Replace(pomxml, "$(maven_type)$", "pom", -1)
+	pomxml = strings.Replace(pomxml, "$(depend_begin)$", "<dependencyManagement>", -1)
+	pomxml = strings.Replace(pomxml, "$(depend_end)$", "</dependencyManagement>", -1)
+	pomxml = strings.Replace(pomxml, "$(modules)$", createModules(), -1)
 	pomxml = strings.Replace(pomxml, "$(artifactId)$", projectName, -1)
 	pomxml = strings.Replace(pomxml, "$(name)$", projectName, -1)
 	pomxml = strings.Replace(pomxml, "$(description)$", "description for this project", -1)
@@ -565,10 +587,28 @@ func (res *resources) init() {
 		return
 	}
 	res.pomWriter = bufio.NewWriter(res.pomFile)
-	pomxml := strings.Replace(DB_POM_XML, "$(groupId)$", packageName, -1)
-	pomxml = strings.Replace(pomxml, "$(artifactId)$", projectName+"-persistence", -1)
+	x := ""
+	if currentType == Project_Type_PROJECT {
+		x = DB_POM_XML
+	} else if currentType == Project_Type_DB {
+		x = POM_XML
+	}
+	pomxml := strings.Replace(x, "$(groupId)$", packageName, -1)
+	pomxml = strings.Replace(pomxml, "$(modules)$", createModules(), -1)
+
+	pomxml = strings.Replace(pomxml, "$(maven_type)$", "jar", -1)
+	if currentType == Project_Type_PROJECT {
+		pomxml = strings.Replace(pomxml, "$(artifactId)$", projectName+"-persistence", -1)
+		pomxml = strings.Replace(pomxml, "$(name)$", projectName+"-persistence", -1)
+	} else if currentType == Project_Type_DB {
+		pomxml = strings.Replace(pomxml, "$(artifactId)$", projectName+"-db", -1)
+		pomxml = strings.Replace(pomxml, "$(name)$", projectName+"-db", -1)
+	}
+
+	pomxml = strings.Replace(pomxml, "$(depend_begin)$", "", -1)
+	pomxml = strings.Replace(pomxml, "$(depend_end)$", "", -1)
 	pomxml = strings.Replace(pomxml, "$(projectName)$", projectName, -1)
-	pomxml = strings.Replace(pomxml, "$(name)$", projectName+"-persistence", -1)
+
 	pomxml = strings.Replace(pomxml, "$(description)$", "description for this project", -1)
 	pomxml = strings.Replace(pomxml, "$(jdk)$", jdk, -1)
 	pomxml = strings.Replace(pomxml, "$(version)$", pomVersion, -1)

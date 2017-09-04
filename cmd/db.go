@@ -15,34 +15,35 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 
-
-	"os"
+	"javaPlugin/pkg/logs"
+	"javaPlugin/pkg/project"
 )
 
-// RootCmd represents the base command when called without any subcommands
-var RootCmd = &cobra.Command{
-	Use:   "javaPlugin",
-	Short: "spring and mybatis project",
-	Long:  `一键生成项目和mapping`,
+// dbCmd represents the db command
+var dbCmd = &cobra.Command{
+	Use:   "db",
+	Short: "create mapper form database",
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-
-
+		logs.LogRun()
+		project.Run(project.Project_Type_DB)
 	},
 }
 
-// Execute adds all child commands to the root command sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
-	}
-}
-
 func init() {
+	RootCmd.AddCommand(dbCmd)
+	logs.InitLogConfig(dbCmd)
+	project.InitConfig(dbCmd)
+	// Here you will define your flags and configuration settings.
 
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// dbCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// dbCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 }

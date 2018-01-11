@@ -53,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisUtils {
 
+
     private static final Logger logger = LoggerFactory.getLogger(RedisUtils.class);
     @Resource(name = "redisTemplate")
     private RedisTemplate<String,String> redisTemplate;
@@ -67,11 +68,16 @@ public class RedisUtils {
         logger.info("redis ping = "+ping);
 
     }
+
+    public static void del(String key) {
+        redisUtils.redisTemplate.delete(key);
+    }
+
     public static  void  set(String key,String value,long timeout){
         redisUtils.redisTemplate.opsForValue().set(key,value,timeout, TimeUnit.SECONDS);
     }
     public static  String  get(String key){
-      return   redisUtils.redisTemplate.opsForValue().get(key);
+        return   redisUtils.redisTemplate.opsForValue().get(key);
     }
 
     public static void expire(String key, long timeout) {
@@ -86,6 +92,34 @@ public class RedisUtils {
 
         return result;
     }
+
+    // list operation
+    public static  void  leftPush(String key,String value){
+        redisUtils.redisTemplate.opsForList().leftPush(key,value);
+    }
+
+    public static  void  leftPop(String key){
+        redisUtils.redisTemplate.opsForList().leftPop(key);
+    }
+
+    public static  void  rightPush(String key,String value){
+        redisUtils.redisTemplate.opsForList().rightPush(key,value);
+    }
+    public static  void  rightPop(String key){
+        redisUtils.redisTemplate.opsForList().rightPop(key);
+    }
+    public static  void  size(String key){
+        redisUtils.redisTemplate.opsForList().size(key);
+    }
+    public static List<String> range(String key, long beginIndex, long endIndex){
+      return   redisUtils.redisTemplate.opsForList().range(key,beginIndex,endIndex);
+    }
+
+    public static  void  rightPopAndLeftPush(String key,String value){
+        redisUtils.redisTemplate.opsForList().rightPopAndLeftPush(key,value);
+    }
+
+
 }
 
 `

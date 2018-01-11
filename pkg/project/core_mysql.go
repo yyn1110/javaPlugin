@@ -922,6 +922,8 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 			bufSelect.WriteString("java.lang.Integer")
 		case FIELD_TYPE_STRING:
 			bufSelect.WriteString("string")
+		case FIELD_TYPE_LONG:
+			bufSelect.WriteString("java.lang.Long")
 		default:
 			logs.Logger.Error("Unsupport primary key type:", class.PrimaryKey.TypeString)
 			os.Exit(-1)
@@ -1027,6 +1029,8 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 			bufDelete.WriteString("java.lang.Integer")
 		case FIELD_TYPE_STRING:
 			bufDelete.WriteString("string")
+		case FIELD_TYPE_LONG:
+			bufDelete.WriteString("java.lang.Long")
 		default:
 			logs.Logger.Error("Unsupport primary key type:", class.PrimaryKey.TypeString)
 			os.Exit(-1)

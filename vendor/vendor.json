@@ -3,6 +3,13 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "mEPx03tDisj6nvPDxzIeb1gt4xg=",
+			"path": "github.com/armon/consul-api",
+			"revision": "dcfedd50ed5334f96adee43fc88518a4f095e15c",
+			"revisionTime": "2015-01-07T20:56:47Z",
+			"tree": true
+		},
+		{
 			"checksumSHA1": "LE7q4aPITU5N090e8Y8RdW0MNJ0=",
 			"path": "github.com/fsnotify/fsnotify",
 			"revision": "4da3e2cfbabc9f751898f250b49f2439785783a1",
@@ -21,6 +28,13 @@
 			"path": "github.com/hashicorp/hcl",
 			"revision": "630949a3c5fa3c613328e1b8256052cbc2327c9b",
 			"revisionTime": "2017-02-17T16:47:38Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "40vJyUB4ezQSn/NSadsKEOrudMc=",
+			"path": "github.com/inconshreveable/mousetrap",
+			"revision": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75",
+			"revisionTime": "2014-10-17T20:07:13Z",
 			"tree": true
 		},
 		{

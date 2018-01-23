@@ -99,13 +99,16 @@ func getMysqlMapping(mysqlFiled string, valueLen int) (*MysqlTypeMapping, error)
 		m := newMapping("java.util.Date", FIELD_TYPE_TIMESTAMP, "", "null")
 		return m, nil
 	case "timestamp":
-		m := newMapping("java.sql.Timestamp", FIELD_TYPE_TIMESTAMP, "TIMESTAMP", "new java.sql.Timestamp(1504493543)")
+		//m := newMapping("java.sql.Timestamp", FIELD_TYPE_TIMESTAMP, "TIMESTAMP", "new java.sql.Timestamp(1504493543)")
+		m := newMapping("java.util.Date", FIELD_TYPE_TIMESTAMP, "DATE", "new java.util.Date()")
 		return m, nil
 	case "datetime":
-		m := newMapping("java.sql.Timestamp", FIELD_TYPE_TIMESTAMP, "TIMESTAMP", "new java.sql.Timestamp(1504493543)")
+		//m := newMapping("java.sql.Timestamp", FIELD_TYPE_TIMESTAMP, "TIMESTAMP", "new java.sql.Timestamp(1504493543)")
+		m := newMapping("java.util.Date", FIELD_TYPE_TIMESTAMP, "DATE", "new java.util.Date()")
 		return m, nil
 	case "time":
-		m := newMapping("java.sql.Time", FIELD_TYPE_TIMESTAMP, "TIME", "new java.sql.Time(1504493543)")
+		//m := newMapping("java.sql.Time", FIELD_TYPE_TIMESTAMP, "TIME", "new java.sql.Time(1504493543)")
+		m := newMapping("java.util.Date", FIELD_TYPE_TIMESTAMP, "DATE", "new java.util.Date()")
 		return m, nil
 	case "enum":
 		m := newMapping("String", FIELD_TYPE_ENUM, "CHAR", getText(valueLen))

@@ -20,7 +20,7 @@ func LogRun() {
 
 	log := logs.NewLogger(10000)
 	log.EnableFuncCallDepth(true)
-	s := `{"filename":"` + filepath.Join(logPath, "wexin.log") + `","perm": "0666"}`
+	s := `{"filename":"` + filepath.Join(logPath, "javaPlugin.log") + `","perm": "0666"}`
 	log.SetLogger("file", s)
 	log.SetLogger("console", "")
 	Logger = log

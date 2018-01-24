@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/md5"
-	"database/sql"
+
 	"fmt"
 	"io"
 	"javaPlugin/pkg/logs"
@@ -14,10 +14,11 @@ import (
 	"strings"
 	"sync"
 
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/xorm"
+	"javaPlugin/pkg/db"
 	"time"
 	"unicode"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func wait(wg *sync.WaitGroup, ch chan<- bool) {
@@ -25,19 +26,20 @@ func wait(wg *sync.WaitGroup, ch chan<- bool) {
 	ch <- true
 }
 
-func run(dbConn *sql.DB, wg *sync.WaitGroup) {
-	var err error
+func run(dbConn *xorm.Engine, wg *sync.WaitGroup) {
+
 	logs.Logger.Info("Begin Enter")
 	wg.Add(1)
 	defer wg.Done()
 
 	// Get tables name
-	var rows *sql.Rows
-	if rows, err = dbConn.Query("SHOW tables;"); err != nil {
+	tableList := make([]string, 0)
+	//var rows *sql.Rows
+	if err := dbConn.SQL("SHOW tables;").Find(&tableList); err != nil {
 		logs.Logger.Error("SHOW tables err:", err.Error())
 		return
 	}
-	defer rows.Close()
+	//defer rows.Close()
 
 	g_resources = &resources{}
 	g_resources.init()
@@ -45,12 +47,8 @@ func run(dbConn *sql.DB, wg *sync.WaitGroup) {
 
 	writeFiles()
 
-	var tableName string
-	for rows.Next() {
-		if err = rows.Scan(&tableName); err != nil {
-			logs.Logger.Error("rows.Scan err:", err.Error())
-			return
-		}
+	for _, tableName := range tableList {
+
 		if tableNameFilter(tableName) {
 			parseTable(dbConn, tableName, wg)
 		}
@@ -71,17 +69,19 @@ func tableNameFilter(tableName string) bool {
 	return true
 }
 
-func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
-	var err error
+func parseTable(dbConn *xorm.Engine, tableName string, wg *sync.WaitGroup) {
+	//var err error
 	// Get tables name
 	wg.Add(1)
 	defer wg.Done()
-	var rows *sql.Rows
-	if rows, err = dbConn.Query("select COLUMN_NAME,DATA_TYPE,IS_NULLABLE,COLUMN_KEY,COLUMN_DEFAULT,EXTRA,COLUMN_COMMENT,CHARACTER_SET_NAME,TABLE_SCHEMA,TABLE_NAME,COLUMN_TYPE from INFORMATION_SCHEMA.Columns where table_name= '" + tableName + "'"); err != nil {
+	//var rows *sql.Rows
+	list := make([]*db.TableSchema, 0)
+	sql := fmt.Sprintf("select COLUMN_NAME,DATA_TYPE,IS_NULLABLE,COLUMN_KEY,COLUMN_DEFAULT,EXTRA,COLUMN_COMMENT,CHARACTER_SET_NAME,TABLE_SCHEMA,TABLE_NAME,COLUMN_TYPE from INFORMATION_SCHEMA.Columns where table_name= '%s' and TABLE_SCHEMA='%s'", tableName, db.DbClient.DBName())
+	if err := dbConn.SQL(sql).Find(&list); err != nil {
 		return
 	}
-	defer rows.Close()
-	var td tableDefine
+	//defer rows.Close()
+	//td:=new(tableDefine)
 	var class classDefine
 	var tableNameFields []string
 	class.Fields = make(map[string]*tableDefineString)
@@ -94,14 +94,11 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 	}
 	class.CamelCaseName = toFieldName(tableNameFields)
 	//index := 0
-	for rows.Next() {
-		var tds tableDefineString
-		if err = rows.Scan(&td.Field, &td.Type, &td.Null, &td.Key, &td.Default, &td.Extra, &td.Comment, &td.CharacterSetName, &td.Schema, &td.TableName, &td.DBType); err != nil {
-			logs.Logger.Error("Error parse")
-			return
-		}
-		tds.DbFieldName = string(td.Field)
-		allType := string(td.DBType)
+
+	for _, value := range list {
+		tds := new(tableDefineString)
+		tds.DbFieldName = value.ColumnName // string(td.Field)
+		allType := value.ColumnType        // string(td.DBType)
 		fieldLen := ""
 
 		beginIndex := strings.Index(allType, "(")
@@ -112,7 +109,6 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 				fieldLen = allType[beginIndex+1 : endIndex]
 			}
 		}
-		logs.Logger.Info("================" + allType + "   " + fieldLen)
 
 		fl := fieldLen
 		if len(fl) > 0 {
@@ -132,7 +128,7 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 		tds.MethodName = toClassName(fieldWords)
 		keyName := strings.ToLower(tds.FieldName)
 		class.Names = append(class.Names, keyName)
-		tds.DbTypeString = string(td.Type)
+		tds.DbTypeString = value.DataType // string(td.Type)
 
 		m, err := getMysqlMapping(tds.DbTypeString, tds.FieldLen)
 		if err == nil {
@@ -147,56 +143,70 @@ func parseTable(dbConn *sql.DB, tableName string, wg *sync.WaitGroup) {
 			continue
 		}
 
-
-		tds.Null = string(td.Null)
-		tds.Key = string(td.Key)
-		tds.Default = string(td.Default)
-		tds.Extra = string(td.Type)
-		tds.DBType = string(td.DBType)
-		tds.Comment = string(td.Comment)
-		tds.CharacterSetName = string(td.CharacterSetName)
+		tds.Null = value.IsNullAble                   // string(td.Null)
+		tds.Key = value.ColumnKey                     // string(td.Key)
+		tds.Default = value.ColumnDefault             // string(td.Default)
+		tds.Extra = value.DataType                    //string(td.Type)
+		tds.DBType = value.ColumnType                 // string(td.DBType)
+		tds.Comment = value.ColumnComment             // string(td.Comment)
+		tds.CharacterSetName = value.CharacterSetName // string(td.CharacterSetName)
 		if tds.Extra == "auto_increment" {
 			tds.AutoIncrement = true
 		}
-		class.Fields[keyName] = &tds
+		class.Fields[keyName] = tds
 
 		switch tds.Key {
 		case "PRI":
-			class.PrimaryKey = &tds
+			class.PrimaryKey = tds
 		case "MUL":
-			class.UnionKeys = append(class.UnionKeys, &tds)
+			class.UnionKeys = append(class.UnionKeys, tds)
 		case "UNI":
-			class.UnionKeys = append(class.UnionKeys, &tds)
+			class.UnionKeys = append(class.UnionKeys, tds)
 		}
 	}
 	if class.PrimaryKey == nil {
 		if len(class.UnionKeys) == 1 {
+
+			type ShowCreate struct {
+				Table       string `xorm:"Table"`
+				CreateTable string `xorm:"Create Table"`
+			}
+			sc := new(ShowCreate)
+
 			// Fix mysql show fields bug.
 			// Get unique key by create table
-			var rowsCreateTable *sql.Rows
-			if rowsCreateTable, err = dbConn.Query("SHOW create table " + tableName); err != nil {
+			//var rowsCreateTable *sql.Rows
+
+			has, err := dbConn.SQL("SHOW create table " + tableName).Get(sc)
+			if !has {
+				logs.Logger.Error("no this table info ")
 				return
 			}
-			defer rowsCreateTable.Close()
-			if rowsCreateTable.Next() {
-				var t1, t2 string
-				if err = rowsCreateTable.Scan(&t1, &t2); err != nil {
-					logs.Logger.Error("Error parse create table")
-					return
-				}
-				uniqueKeys := getUniqueKeyFrom(t2)
-				for _, uniqueKey := range uniqueKeys {
-					keyName := strings.ToLower(uniqueKey)
-					if field, ok := class.Fields[keyName]; ok {
-						if len(field.Key) == 0 {
-							field.Key = "UNI"
-							class.UnionKeys = append(class.UnionKeys, field)
-						}
+			if err != nil {
+				logs.Logger.Error(err.Error())
+				return
+			}
+			//defer rowsCreateTable.Close()
+			//if rowsCreateTable.Next() {
+			//var t1, t2 string
+			//t1 := sc.Table
+			t2 := sc.CreateTable
+			//if err = rowsCreateTable.Scan(&t1, &t2); err != nil {
+			//	logs.Logger.Error("Error parse create table")
+			//	return
+			//}
+			logs.Logger.Info("=====%+v", sc)
+			uniqueKeys := getUniqueKeyFrom(t2)
+			for _, uniqueKey := range uniqueKeys {
+				keyName := strings.ToLower(uniqueKey)
+				if field, ok := class.Fields[keyName]; ok {
+					if len(field.Key) == 0 {
+						field.Key = "UNI"
+						class.UnionKeys = append(class.UnionKeys, field)
 					}
 				}
-			} else {
-				logs.Logger.Error("create table no respones")
 			}
+
 			if len(class.UnionKeys) == 1 {
 				class.PrimaryKey = class.UnionKeys[0]
 				class.UnionKeys = nil
@@ -329,7 +339,7 @@ func composeTestException() {
 	defer file.Close()
 	bw := bufio.NewWriter(file)
 
-	header := packageName + "." + dbName + ".exception"
+	header := packageName + "." + db.DbClient.DBName() + ".exception"
 	bw.WriteString("package " + header + ";")
 	bw.WriteString(`
 	public class UnitTestException extends Exception {
@@ -352,7 +362,7 @@ func composeTestException() {
 	bw.Flush()
 }
 func composeDataSourceFiles() {
-	header := packageName + "." + dbName
+	header := packageName + "." + db.DbClient.DBName()
 	var err error
 	var file *os.File
 	var dynamicFile *os.File
@@ -620,7 +630,7 @@ func writeClassTailer(bw *bufio.Writer) {
 ////////////////////////////////
 // DAO file
 func writeDaoHeader(bw *bufio.Writer, class *classDefine) {
-	header := packageName + "." + dbName + ".dataSource"
+	header := packageName + "." + db.DbClient.DBName() + ".dataSource"
 	bw.WriteString(`package `)
 	bw.WriteString(g_packageName)
 	bw.WriteString(".persistence.dao;\n\n")

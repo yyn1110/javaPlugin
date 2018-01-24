@@ -2,10 +2,11 @@ package project
 
 import (
 	"bufio"
-	"database/sql"
+
 	"fmt"
 	"github.com/spf13/cobra"
 	//"github.com/yyn1110/logs"
+	"javaPlugin/pkg/db"
 	"javaPlugin/pkg/logs"
 	"os"
 	"os/signal"
@@ -23,10 +24,6 @@ const (
 )
 
 var (
-	dbAddr      string
-	dbUser      string
-	dbPassword  string
-	dbName      string
 	dbNameTest  string
 	packageName string
 	maxCore     int
@@ -72,10 +69,6 @@ func InitConfig(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&pomVersion, "version", "0.1", "pom version")
 	cmd.Flags().StringVar(&dbDriver, "dbDriver", "c3p0", "c3p0 or druid")
 	cmd.Flags().StringVar(&jdk, "jdk", "1.7", "jdk version")
-	cmd.Flags().StringVar(&dbAddr, "dbAddr", "10.6.80.97:3306", "The MySQL connect link.")
-	cmd.Flags().StringVar(&dbUser, "dbUser", "root", "The MySQL user name.")
-	cmd.Flags().StringVar(&dbPassword, "dbPassword", "dev123", "The MySQL password.")
-	cmd.Flags().StringVar(&dbName, "dbName", "yzadmin", "The DB name.")
 	cmd.Flags().StringVar(&dbNameTest, "dbNameTest", "", "The empty DB name for unit test.")
 	cmd.Flags().StringVar(&packageName, "packageName", "com.java.demo", "The package name of Java classes.")
 	cmd.Flags().IntVar(&maxCore, "maxCore", 1, "The max core number. (0: Number of CPU - 1)")
@@ -88,20 +81,18 @@ func InitConfig(cmd *cobra.Command) {
 }
 
 type tableDefine struct {
-	Field            []byte
-	Type             []byte
-	DBType           []byte
-	Null             []byte
-	Key              []byte
-	Default          []byte
-	Extra            []byte
-	Comment          []byte
-	CharacterSetName []byte
-	Schema           []byte
-	TableName        []byte
-
+	Field            string
+	Type             string
+	DBType           string
+	Null             bool
+	Key              string
+	Default          string
+	Extra            string
+	Comment          string
+	CharacterSetName string
+	Schema           string
+	TableName        string
 }
-
 
 type tableDefineString struct {
 	DbFieldName      string
@@ -120,7 +111,7 @@ type tableDefineString struct {
 	DBType           string
 	AutoIncrement    bool
 	TestValue        string
-	FieldLen 		int
+	FieldLen         int
 }
 
 type classDefine struct {
@@ -136,18 +127,9 @@ type classDefine struct {
 
 func Run() {
 	initEnviroment()
-	dbURL := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8", (dbUser), (dbPassword), (dbAddr), (dbName))
-	logs.Logger.Info(dbURL)
-	var dbConn *sql.DB
-	dbConn, err := sql.Open("mysql", dbURL)
-	if err != nil {
-		logs.Logger.Error("Connect database:", dbURL, "Error:", err.Error())
-		os.Exit(-1)
-	}
-	defer dbConn.Close()
 
 	var wg sync.WaitGroup
-	go run(dbConn, &wg)
+	go run(db.DbClient.Engine(), &wg)
 	time.Sleep(time.Second)
 	ch := make(chan os.Signal)
 	signal.Notify(ch, syscall.SIGINT)
@@ -176,8 +158,8 @@ func initEnviroment() {
 	if cpu > 1 && currentcpu != cpu {
 		runtime.GOMAXPROCS(cpu)
 	}
-	g_upperDbName = strings.ToUpper(dbName)
-	g_packageName = packageName + "." + dbName
+	g_upperDbName = strings.ToUpper(db.DbClient.DBName())
+	g_packageName = packageName + "." + db.DbClient.DBName()
 	g_packageNamePath = strings.Replace(g_packageName, ".", string(filepath.Separator), -1)
 
 	os.RemoveAll(filepath.Join(outputPath, "src"))
@@ -281,17 +263,17 @@ func writeLog4j() {
 func writeConfigProperties() {
 	var err error
 	var file *os.File
-	if file, err = os.Create(filepath.Join(g_testResourcesPath, (dbName)+"-db.properties")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_testResourcesPath, (dbName)+"-db.properties"), ", error:", err.Error())
+	if file, err = os.Create(filepath.Join(g_testResourcesPath, (db.DbClient.DBName())+"-db.properties")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_testResourcesPath, (db.DbClient.DBName())+"-db.properties"), ", error:", err.Error())
 		return
 	}
 	defer file.Close()
 	bw := bufio.NewWriter(file)
 
-	mysql_properties := strings.Replace(ProPerties_Mysql, "$(dbAddr)$", dbAddr, -1)
-	mysql_properties = strings.Replace(mysql_properties, "$(dbUser)$", dbUser, -1)
-	mysql_properties = strings.Replace(mysql_properties, "$(dbPassword)$", dbPassword, -1)
-	mysql_properties = strings.Replace(mysql_properties, "$(dbName)$", dbName, -1)
+	mysql_properties := strings.Replace(ProPerties_Mysql, "$(dbAddr)$", db.DbClient.DBAddr(), -1)
+	mysql_properties = strings.Replace(mysql_properties, "$(dbUser)$", db.DbClient.DBUser(), -1)
+	mysql_properties = strings.Replace(mysql_properties, "$(dbPassword)$", db.DbClient.DBPassword(), -1)
+	mysql_properties = strings.Replace(mysql_properties, "$(dbName)$", db.DbClient.DBName(), -1)
 
 	bw.WriteString(mysql_properties)
 	if useRedis {
@@ -331,7 +313,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:`)
-	bw.WriteString(dbName)
+	bw.WriteString(db.DbClient.DBName())
 	bw.WriteString(`-daoConfig.xml"})
 public abstract class AbstractTest {
 
@@ -358,13 +340,13 @@ func writeConstants() {
 	bw.WriteString("\tpublic static final String DATASOURCE_R_")
 	bw.WriteString(g_upperDbName)
 	bw.WriteString(" = \"dataSource_R_")
-	bw.WriteString(dbName)
+	bw.WriteString(db.DbClient.DBName())
 	bw.WriteString("\";\n")
 
 	bw.WriteString("\tpublic static final String DATASOURCE_W_")
 	bw.WriteString(g_upperDbName)
 	bw.WriteString(" = \"dataSource_W_")
-	bw.WriteString(dbName)
+	bw.WriteString(db.DbClient.DBName())
 	bw.WriteString("\";\n")
 
 	bw.WriteString("}\n")
@@ -383,8 +365,8 @@ func (res *resources) init() {
 	}
 	res.pomWriter = bufio.NewWriter(res.pomFile)
 	pomxml := strings.Replace(POM_XML, "$(groupId)$", packageName, -1)
-	pomxml = strings.Replace(pomxml, "$(artifactId)$", dbName, -1)
-	pomxml = strings.Replace(pomxml, "$(name)$", dbName+"-persistence", -1)
+	pomxml = strings.Replace(pomxml, "$(artifactId)$", db.DbClient.DBName(), -1)
+	pomxml = strings.Replace(pomxml, "$(name)$", db.DbClient.DBName()+"-persistence", -1)
 	pomxml = strings.Replace(pomxml, "$(description)$", "description for this project", -1)
 	pomxml = strings.Replace(pomxml, "$(jdk)$", jdk, -1)
 	pomxml = strings.Replace(pomxml, "$(version)$", pomVersion, -1)
@@ -405,8 +387,8 @@ func (res *resources) init() {
 
 	res.pomWriter.WriteString(pomxml)
 
-	if res.daoConfigFile, err = os.Create(filepath.Join(g_testResourcesPath, (dbName)+"-daoConfig.xml")); err != nil {
-		logs.Logger.Error("Create file", filepath.Join(g_testResourcesPath, (dbName)+"-daoConfig.xml"), ", error:", err.Error())
+	if res.daoConfigFile, err = os.Create(filepath.Join(g_testResourcesPath, (db.DbClient.DBName())+"-daoConfig.xml")); err != nil {
+		logs.Logger.Error("Create file", filepath.Join(g_testResourcesPath, (db.DbClient.DBName())+"-daoConfig.xml"), ", error:", err.Error())
 		return
 	}
 	res.daoConfigWriter = bufio.NewWriter(res.daoConfigFile)
@@ -428,8 +410,8 @@ func (res *resources) init() {
 		daoConfigXml = strings.Replace(daoConfigXml, "$(init)$", `init-method="init"`, -1)
 		daoConfigXml = strings.Replace(daoConfigXml, "$(driver)$", "com.alibaba.druid.pool.DruidDataSource", -1)
 	}
-	daoConfigXml = strings.Replace(daoConfigXml, "$(properties)$", dbName+"-db.properties", -1)
-	daoConfigXml = strings.Replace(daoConfigXml, "$(dbName)$", dbName, -1)
+	daoConfigXml = strings.Replace(daoConfigXml, "$(properties)$", db.DbClient.DBName()+"-db.properties", -1)
+	daoConfigXml = strings.Replace(daoConfigXml, "$(dbName)$", db.DbClient.DBName(), -1)
 	if useRedis {
 		daoConfigXml = strings.Replace(daoConfigXml, "$(redisConfig)$", redis_config, -1)
 
@@ -456,7 +438,7 @@ func writeTestHeader(bw *bufio.Writer, class *classDefine) {
 	bw.WriteString(`package ` + g_packageName + ";\n\n")
 	bw.WriteString("import " + g_packageName + ".persistence.model." + class.ClassName + ";\n")
 	bw.WriteString("import " + g_packageName + ".persistence.dao." + class.ClassName + "Dao;\n")
-	header := packageName + "." + dbName + ".exception"
+	header := packageName + "." + db.DbClient.DBName() + ".exception"
 	bw.WriteString("import " + header + ".UnitTestException;\n")
 	bw.WriteString("import org.slf4j.Logger;\n")
 	bw.WriteString("import org.slf4j.LoggerFactory;\n")

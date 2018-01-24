@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"javaPlugin/pkg/db"
 	"javaPlugin/pkg/logs"
 	"javaPlugin/pkg/project"
 	"os"
@@ -27,9 +28,15 @@ var RootCmd = &cobra.Command{
 	Use:   "javaPlugin",
 	Short: "spring and mybatis project",
 	Long:  `一键生成项目和mapping`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		logs.LogRun()
+		err := db.Init()
+		if err != nil {
+			return err
+		}
+
 		project.Run()
+		return nil
 
 	},
 }
@@ -45,6 +52,7 @@ func Execute() {
 
 func init() {
 	logs.InitLogConfig(RootCmd)
+	db.InitDBConfig(RootCmd)
 	project.InitConfig(RootCmd)
 
 }

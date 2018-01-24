@@ -43,7 +43,7 @@ func getMysqlMapping(mysqlFiled string, valueLen int) (*MysqlTypeMapping, error)
 		m := newMapping("java.lang.Integer", FIELD_TYPE_INTEGER, "INTEGER", fmt.Sprintf("new java.lang.Integer(%d)", 1))
 		return m, nil
 	case "bigint":
-		m := newMapping("java.lang.Long", FIELD_TYPE_LONG, "BIGINT", fmt.Sprintf("new java.lang.Long(%d)", 1))
+		m := newMapping("java.lang.Integer", FIELD_TYPE_INTEGER, "BIGINT", fmt.Sprintf("new java.lang.Integer(%d)", 1))
 		return m, nil
 	case "bit":
 		if valueLen == 1 {

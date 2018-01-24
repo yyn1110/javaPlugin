@@ -35,11 +35,12 @@ func InitDBConfig(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&verbose, "verbose", "v", true, "print sql log")
 
 }
-func InitVar(dbhost, dbname, username, password string) {
+func InitVar(dbhost, dbname, username, password, driver_name string) {
 	dbHost = dbhost
 	dbName = dbname
 	dbUserName = username
 	dbPassWord = password
+	driverName = driver_name
 
 }
 

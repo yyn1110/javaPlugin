@@ -77,6 +77,7 @@ func parseTable(dbConn *xorm.Engine, tableName string, wg *sync.WaitGroup) {
 	//var rows *sql.Rows
 	list := make([]*db.TableSchema, 0)
 	sql := fmt.Sprintf("select COLUMN_NAME,DATA_TYPE,IS_NULLABLE,COLUMN_KEY,COLUMN_DEFAULT,EXTRA,COLUMN_COMMENT,CHARACTER_SET_NAME,TABLE_SCHEMA,TABLE_NAME,COLUMN_TYPE from INFORMATION_SCHEMA.Columns where table_name= '%s' and TABLE_SCHEMA='%s'", tableName, db.DbClient.DBName())
+
 	if err := dbConn.SQL(sql).Find(&list); err != nil {
 		return
 	}

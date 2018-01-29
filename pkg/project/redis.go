@@ -116,9 +116,7 @@ public class RedisUtils {
       return   redisUtils.redisTemplate.opsForList().range(key,beginIndex,endIndex);
     }
 
-    public static  void  rightPopAndLeftPush(String key,String value){
-        redisUtils.redisTemplate.opsForList().rightPopAndLeftPush(key,value);
-    }
+
 
 
 }

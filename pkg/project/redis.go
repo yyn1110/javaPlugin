@@ -63,10 +63,13 @@ public class RedisUtils {
     private static RedisUtils redisUtils = null;
     @PostConstruct
     public void init() {
-        redisUtils = this;
+         if (redisUtils ==null){
+            redisUtils = this;
 
-        String ping = redisTemplate.getConnectionFactory().getConnection().ping();
-        logger.info("redis ping = "+ping);
+            String ping = redisTemplate.getConnectionFactory().getConnection().ping();
+            logger.info("redis ping = "+ping);
+        }
+
 
     }
 

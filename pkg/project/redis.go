@@ -89,7 +89,7 @@ public class RedisUtils {
         return result;
     }
     public static long incr(String key) {
-        long result = redisUtils.increment(key, 1l);
+        long result = increment(key, 1L);
 
         return result;
     }

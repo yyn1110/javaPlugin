@@ -849,7 +849,7 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		field := class.Fields[fieldKey]
 
 		bufSelectAll.WriteString("\t\t\t<when test=\"" + field.FieldName + " != null\">\n")
-		bufSelectAll.WriteString("\t\t\t\tAND  `" + field.DbFieldName + "`=#{" + field.FieldName + ",jdbcType=" + field.JDBCType + "}\n")
+		bufSelectAll.WriteString("\t\t\t\tAND  `" + field.DbFieldName + "`=#{" + field.FieldName + "}\n")
 		bufSelectAll.WriteString("\t\t\t</when>\n")
 
 		bufProperty.WriteString("\t\t<parameter property=\"")
@@ -888,9 +888,9 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 			bufUpdate.WriteString(field.DbFieldName)
 			bufUpdate.WriteString("`=#{")
 			bufUpdate.WriteString(field.FieldName)
-			if len(field.JDBCType) > 0 {
-				bufUpdate.WriteString(",jdbcType=" + field.JDBCType)
-			}
+			//if len(field.JDBCType) > 0 {
+			//	bufUpdate.WriteString(",jdbcType=" + field.JDBCType)
+			//}
 			bufUpdate.WriteString("},\n\t\t\t</if>\n")
 		}
 
@@ -920,9 +920,9 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufUpdate.WriteString(class.PrimaryKey.DbFieldName)
 		bufUpdate.WriteString("`=#{")
 		bufUpdate.WriteString(class.PrimaryKey.FieldName)
-		if len(class.PrimaryKey.JDBCType) > 0 {
-			bufUpdate.WriteString(",jdbcType=" + class.PrimaryKey.JDBCType)
-		}
+		//if len(class.PrimaryKey.JDBCType) > 0 {
+		//	bufUpdate.WriteString(",jdbcType=" + class.PrimaryKey.JDBCType)
+		//}
 
 		bufUpdate.WriteString("}\n\t</update>\n\n")
 
@@ -944,9 +944,9 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufDelete.WriteString(class.PrimaryKey.DbFieldName)
 		bufDelete.WriteString("`=#{")
 		bufDelete.WriteString(class.PrimaryKey.FieldName)
-		if len(class.PrimaryKey.JDBCType) > 0 {
-			bufDelete.WriteString(",jdbcType=" + class.PrimaryKey.JDBCType)
-		}
+		//if len(class.PrimaryKey.JDBCType) > 0 {
+		//	bufDelete.WriteString(",jdbcType=" + class.PrimaryKey.JDBCType)
+		//}
 		bufDelete.WriteString("}\n\t</delete>\n\n")
 
 		bufSelect.WriteString(" from ")
@@ -955,9 +955,9 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufSelect.WriteString(class.PrimaryKey.DbFieldName)
 		bufSelect.WriteString("`=#{")
 		bufSelect.WriteString(class.PrimaryKey.FieldName)
-		if len(class.PrimaryKey.JDBCType) > 0 {
-			bufSelect.WriteString(",jdbcType=" + class.PrimaryKey.JDBCType)
-		}
+		//if len(class.PrimaryKey.JDBCType) > 0 {
+		//	bufSelect.WriteString(",jdbcType=" + class.PrimaryKey.JDBCType)
+		//}
 		bufSelect.WriteString("}\n\t</select>\n\n")
 	} else if len(class.UnionKeys) > 0 {
 		bufInsert.WriteString("\t\t<!--联合主键-->")

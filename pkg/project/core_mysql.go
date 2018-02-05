@@ -632,56 +632,33 @@ func writeClassTailer(bw *bufio.Writer) {
 // DAO file
 func writeDaoHeader(bw *bufio.Writer, class *classDefine) {
 	header := packageName + "." + db.DbClient.DBName() + ".dataSource"
-	bw.WriteString(`package `)
-	bw.WriteString(g_packageName)
-	bw.WriteString(".persistence.dao;\n\n")
+	bw.WriteString(`package ` + g_packageName + ".persistence.dao;\n\n")
+
 	bw.WriteString("import " + header + ".DataSource;\n")
-	bw.WriteString("import ")
-	bw.WriteString(g_packageName)
-	bw.WriteString(".persistence.model.")
-	bw.WriteString(class.ClassName)
-	bw.WriteString(";\n\npublic interface ")
-	bw.WriteString(class.ClassName)
-	bw.WriteString("Dao {\n")
+	bw.WriteString("import " + g_packageName + ".persistence.model." + class.ClassName + ";\n\n")
+	bw.WriteString("public interface " + class.ClassName + "Dao {\n\n")
 }
 func writeDaoBody(bw *bufio.Writer, class *classDefine) {
 	dsw := "\t@DataSource(DataSourceConstants.DATASOURCE_W_" + g_upperDbName + ")\n"
 	dsr := "\t@DataSource(DataSourceConstants.DATASOURCE_R_" + g_upperDbName + ")\n"
 	// insert method
 	bw.WriteString(dsw)
-	bw.WriteString("\tpublic int insert(")
-	bw.WriteString(class.ClassName)
-	bw.WriteString(" s")
-	bw.WriteString(class.ClassName)
-	bw.WriteString(");\n")
+	bw.WriteString("\tpublic int insert(" + class.ClassName + " s" + class.ClassName + ");\n\n")
 
 	if class.PrimaryKey != nil {
 		keyField := class.PrimaryKey
 		// update method
 		bw.WriteString(dsw)
-		bw.WriteString("\tpublic int update(")
-		bw.WriteString(class.ClassName)
-		bw.WriteString(" s")
-		bw.WriteString(class.ClassName)
-		bw.WriteString(");\n")
+		bw.WriteString("\tpublic int update(" + class.ClassName + " s" + class.ClassName + ");\n\n")
+
 		// delete method
 		bw.WriteString(dsw)
-		bw.WriteString("\tpublic int delete(")
-		bw.WriteString(keyField.TypeString)
-		bw.WriteString(" ")
-		bw.WriteString(keyField.FieldName)
-		bw.WriteString(");\n")
+		bw.WriteString("\tpublic int delete(" + keyField.TypeString + " " + keyField.FieldName + ");\n\n")
+
 		// select method
 		bw.WriteString(dsr)
-		bw.WriteString("\tpublic ")
-		bw.WriteString(class.ClassName)
-		bw.WriteString(" get")
-		bw.WriteString(class.ClassName)
-		bw.WriteString("ByKey(")
-		bw.WriteString(keyField.TypeString)
-		bw.WriteString(" ")
-		bw.WriteString(keyField.FieldName)
-		bw.WriteString(");\n")
+		bw.WriteString("\tpublic " + class.ClassName + " get" + class.ClassName + "ByKey(" + keyField.TypeString + " " + keyField.FieldName + ");\n\n")
+
 	} else if len(class.UnionKeys) > 0 {
 		bw.WriteString("\t/*\n\t * Use union key:\n")
 		for _, keyField := range class.UnionKeys {
@@ -691,14 +668,10 @@ func writeDaoBody(bw *bufio.Writer, class *classDefine) {
 			bw.WriteString(keyField.FieldName)
 			bw.WriteString("\n")
 		}
-		bw.WriteString("\t */\n")
+		bw.WriteString("\t */\n\n")
 		// update method
 		bw.WriteString(dsw)
-		bw.WriteString("\tpublic int update(")
-		bw.WriteString(class.ClassName)
-		bw.WriteString(" s")
-		bw.WriteString(class.ClassName)
-		bw.WriteString(");\n")
+		bw.WriteString("\tpublic int update(" + class.ClassName + " s" + class.ClassName + ");\n\n")
 
 		// delete method
 		bw.WriteString(dsw)
@@ -707,38 +680,29 @@ func writeDaoBody(bw *bufio.Writer, class *classDefine) {
 			if index > 0 {
 				bw.WriteString(", ")
 			}
-			bw.WriteString(keyField.TypeString)
-			bw.WriteString(" ")
-			bw.WriteString(keyField.FieldName)
+			bw.WriteString(keyField.TypeString + " " + keyField.FieldName)
+
 		}
-		bw.WriteString(");\n")
+		bw.WriteString(");\n\n")
 
 		// select method
 		bw.WriteString(dsr)
-		bw.WriteString("\tpublic ")
-		bw.WriteString(class.ClassName)
-		bw.WriteString(" get")
-		bw.WriteString(class.ClassName)
-		bw.WriteString("ByKey(")
+		bw.WriteString("\tpublic " + class.ClassName + " get" + class.ClassName + "ByKey(")
+
 		for index, keyField := range class.UnionKeys {
 			if index > 0 {
 				bw.WriteString(", ")
 			}
-			bw.WriteString(keyField.TypeString)
-			bw.WriteString(" ")
-			bw.WriteString(keyField.FieldName)
+			bw.WriteString(keyField.TypeString + " " + keyField.FieldName)
 		}
-		bw.WriteString(");\n")
+		bw.WriteString(");\n\n")
 
 	} else {
-		bw.WriteString("\t/*\n\t * No primary key defined in DB table!\n\t */\n")
+		bw.WriteString("\t/*\n\t * No primary key defined in DB table!\n\t */\n\n")
 	}
-	bw.WriteString(dsw)
-	bw.WriteString("\tpublic java.util.List<" + class.ClassName + "> get" + class.ClassName + "s (")
-	bw.WriteString(class.ClassName)
-	bw.WriteString(" s")
-	bw.WriteString(class.ClassName)
-	bw.WriteString(");\n")
+	bw.WriteString(dsr)
+	bw.WriteString("\tpublic java.util.List<" + class.ClassName + "> get" + class.ClassName + "s (" + class.ClassName + " s" + class.ClassName + ");\n")
+
 }
 func writeDaoTailer(bw *bufio.Writer) {
 	bw.WriteString("}\n")
@@ -751,11 +715,8 @@ func writeMappingHeader(bw *bufio.Writer, class *classDefine) {
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 `)
-	bw.WriteString(`<mapper namespace="`)
-	bw.WriteString(g_packageName)
-	bw.WriteString(".persistence.dao.")
-	bw.WriteString(class.ClassName)
-	bw.WriteString("Dao\">\n\n")
+	bw.WriteString(`<mapper namespace="` + g_packageName + ".persistence.dao." + class.ClassName + "Dao\">\n\n")
+
 }
 func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 	bufSelectFields := new(bytes.Buffer)
@@ -771,44 +732,26 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 
 	tableSelectFileds := fmt.Sprintf("%sTableFields", class.CamelCaseName)
 
-	bufSelectFields.WriteString("\t<!--table select 字段-->\n\t<sql id=\"")
-	bufSelectFields.WriteString(tableSelectFileds)
-	bufSelectFields.WriteString("\">")
+	bufSelectFields.WriteString("\t<!--table select 字段-->\n")
+	bufSelectFields.WriteString("\t<sql id=\"" + tableSelectFileds + "\">")
+	bufProperty.WriteString("\n\t<!--属性-->\n")
+	bufProperty.WriteString("\t<parameterMap id=\"" + class.CamelCaseName + "ParameterMap\" type=\"" + g_packageName + ".persistence.model." + class.ClassName + "\">\n")
 
-	bufProperty.WriteString("\n\t<!--属性-->\n\t<parameterMap id=\"")
-	bufProperty.WriteString(class.CamelCaseName)
-	bufProperty.WriteString("ParameterMap\" type=\"")
-	bufProperty.WriteString(g_packageName)
-	bufProperty.WriteString(".persistence.model.")
-	bufProperty.WriteString(class.ClassName)
-	bufProperty.WriteString("\">\n")
+	bufMapping.WriteString("\t<!--数据库字段与对象属性映射-->\n")
+	bufMapping.WriteString("\t<resultMap id=\"" + class.CamelCaseName + "ResultMap\" type=\"" + g_packageName + ".persistence.model." + class.ClassName + "\">\n")
 
-	bufMapping.WriteString("\t<!--数据库字段与对象属性映射-->\n\t<resultMap id=\"")
-	bufMapping.WriteString(class.CamelCaseName)
-	bufMapping.WriteString("ResultMap\" type=\"")
-	bufMapping.WriteString(g_packageName)
-	bufMapping.WriteString(".persistence.model.")
-	bufMapping.WriteString(class.ClassName)
-	bufMapping.WriteString("\">\n")
+	bufInsert.WriteString("\t<!--新增-->\n")
+	bufInsert.WriteString("\t<insert id=\"insert\" parameterMap=\"" + class.CamelCaseName + "ParameterMap\"")
 
-	bufInsert.WriteString("\t<!--新增-->\n\t<insert id=\"insert\" parameterMap=\"")
-	bufInsert.WriteString(class.CamelCaseName)
-	bufInsert.WriteString("ParameterMap\"")
 	if class.PrimaryKey != nil {
-		bufInsert.WriteString(" keyProperty=\"")
-		bufInsert.WriteString(class.PrimaryKey.FieldName)
-		bufInsert.WriteString("\" useGeneratedKeys=\"true\"")
+		bufInsert.WriteString(" keyProperty=\"" + class.PrimaryKey.FieldName + "\" useGeneratedKeys=\"true\"")
+
 	}
 	bufInsert.WriteString(">\n")
-	bufInsert.WriteString("\t\tinsert into ")
-	bufInsert.WriteString(class.TableName)
-	bufInsert.WriteString("(")
+	bufInsert.WriteString("\t\tinsert into " + class.TableName + "(")
 
-	bufUpdate.WriteString("\t<!--更新-->\n\t<update id=\"update\" parameterMap=\"")
-	bufUpdate.WriteString(class.CamelCaseName)
-	bufUpdate.WriteString("ParameterMap\">\n\t\tupdate ")
-	bufUpdate.WriteString(class.TableName)
-	bufUpdate.WriteString(" set\n\t\t<trim suffixOverrides=\",\">\n")
+	bufUpdate.WriteString("\t<!--更新-->\n")
+	bufUpdate.WriteString("\t<update id=\"update\" parameterMap=\"" + class.CamelCaseName + "ParameterMap\">\n\t\tupdate " + class.TableName + " set\n\t\t<trim suffixOverrides=\",\">\n")
 
 	bufDelete.WriteString("\t<!--删除-->\n")
 
@@ -842,14 +785,14 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		createSelect = true
 	}
 	bufSelectAll.WriteString("\t<!--根据条件查询-->\n")
-	bufSelectAll.WriteString("\t" + `<select id="get` + class.ClassName + `s" resultMap="` + class.CamelCaseName + `ResultMap" parameterMap="` + class.CamelCaseName + `ParameterMap">` + "\n")
+	bufSelectAll.WriteString("\t" + `<select id="get` + class.ClassName + `s" resultMap="` + class.CamelCaseName + `ResultMap" >` + "\n")
 	bufSelectAll.WriteString("\t\t" + `select <include refid="` + class.CamelCaseName + `TableFields"/> from ` + class.TableName + "\n")
-	bufSelectAll.WriteString("\t\t<where>\n")
+	bufSelectAll.WriteString("\t\t" + `<trim prefix="where" prefixOverrides="and|or">` + "\n")
 	for index, fieldKey := range class.Names {
 		field := class.Fields[fieldKey]
 
 		bufSelectAll.WriteString("\t\t\t<if test=\"" + field.FieldName + " != null\">\n")
-		bufSelectAll.WriteString("\t\t\t\tAND  `" + field.DbFieldName + "`=#{" + field.FieldName + "}\n")
+		bufSelectAll.WriteString("\t\t\t\t and  `" + field.DbFieldName + "`=#{" + field.FieldName + "}\n")
 		bufSelectAll.WriteString("\t\t\t</if>\n")
 
 		bufProperty.WriteString("\t\t<parameter property=\"")
@@ -871,7 +814,8 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 		bufInsert.WriteString("`")
 		bufInsert.WriteString(field.DbFieldName)
 		bufInsert.WriteString("`")
-		bufInsertValue.WriteString("?")
+		//bufInsertValue.WriteString("?")
+		bufInsertValue.WriteString("#{" + field.FieldName + "}")
 		//if createSelect {
 		//	if index > 0 {
 		//		bufSelect.WriteString(",")
@@ -896,7 +840,7 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 
 		index++
 	}
-	bufSelectAll.WriteString("\t\t</where>\n\t</select>\n")
+	bufSelectAll.WriteString("\t\t</trim>\n\t</select>\n")
 	bufSelectFields.WriteString("\n\t</sql>")
 
 	bufProperty.WriteString("\t</parameterMap>\n\n")

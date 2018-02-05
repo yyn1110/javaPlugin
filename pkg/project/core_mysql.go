@@ -843,7 +843,7 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 	}
 	bufSelectAll.WriteString("\t<!--根据条件查询-->\n")
 	bufSelectAll.WriteString("\t" + `<select id="get` + class.ClassName + `s" resultMap="` + class.CamelCaseName + `ResultMap" parameterMap="` + class.CamelCaseName + `ParameterMap">` + "\n")
-	bufSelectAll.WriteString("\t\t" + `select <include refid="` + class.CamelCaseName + `TableFields"/> from ` + class.TableName + " where 1=1 \n")
+	bufSelectAll.WriteString("\t\t" + `select <include refid="` + class.CamelCaseName + `TableFields"/> from ` + class.TableName + "\n")
 	bufSelectAll.WriteString("\t\t<where>\n")
 	for index, fieldKey := range class.Names {
 		field := class.Fields[fieldKey]

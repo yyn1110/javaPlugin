@@ -844,13 +844,13 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 	bufSelectAll.WriteString("\t<!--根据条件查询-->\n")
 	bufSelectAll.WriteString("\t" + `<select id="get` + class.ClassName + `s" resultMap="` + class.CamelCaseName + `ResultMap" parameterMap="` + class.CamelCaseName + `ParameterMap">` + "\n")
 	bufSelectAll.WriteString("\t\t" + `select <include refid="` + class.CamelCaseName + `TableFields"/> from ` + class.TableName + " where 1=1 \n")
-	bufSelectAll.WriteString("\t\t<choose>\n")
+	bufSelectAll.WriteString("\t\t<where>\n")
 	for index, fieldKey := range class.Names {
 		field := class.Fields[fieldKey]
 
-		bufSelectAll.WriteString("\t\t\t<when test=\"" + field.FieldName + " != null\">\n")
+		bufSelectAll.WriteString("\t\t\t<if test=\"" + field.FieldName + " != null\">\n")
 		bufSelectAll.WriteString("\t\t\t\tAND  `" + field.DbFieldName + "`=#{" + field.FieldName + "}\n")
-		bufSelectAll.WriteString("\t\t\t</when>\n")
+		bufSelectAll.WriteString("\t\t\t</if>\n")
 
 		bufProperty.WriteString("\t\t<parameter property=\"")
 		bufProperty.WriteString(field.FieldName)
@@ -896,7 +896,7 @@ func writeMappingBody(bw *bufio.Writer, class *classDefine) {
 
 		index++
 	}
-	bufSelectAll.WriteString("\t\t</choose>\n\t</select>\n")
+	bufSelectAll.WriteString("\t\t</where>\n\t</select>\n")
 	bufSelectFields.WriteString("\n\t</sql>")
 
 	bufProperty.WriteString("\t</parameterMap>\n\n")
